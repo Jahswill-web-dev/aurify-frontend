@@ -1,9 +1,9 @@
 "use client";
 import { InterLoader, RobotoLoader } from "../fonts/fontloader";
 import { RingSpinner } from "@/components/ui/ui";
-
 import check from "../../../public/icons/check.png";
 import Image from "next/image";
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -13,10 +13,12 @@ const schema = yup.object({
 });
 
 function Form() {
+  // console.log(apiKey);
+
   // 1. get data using react hook form -done
   // 2. validate data -done
-  // 4.add loading effect -done
-  // 4. pass data to mailchimp api 
+  // 4. add loading effect -done
+  // 4. pass data to mailchimp api
   // 5. display success modal
 
   const {
@@ -29,9 +31,15 @@ function Form() {
 
   const onSubmit = async (data) => {
     // sending code to api...
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(data.email);
-    
+    await axios
+      .post("/api", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => console.log(response))
+      .catch((error) => console.log(error));
+
     reset();
   };
   return (
@@ -41,9 +49,7 @@ function Form() {
     >
       {/* loading effect */}
       {isSubmitting && (
-        <div className="absolute top-0 bottom-0 left-0 right-0 bg-white opacity-50">
-
-        </div>
+        <div className="absolute top-0 bottom-0 left-0 right-0 bg-white opacity-50"></div>
       )}
 
       {isSubmitting && (
