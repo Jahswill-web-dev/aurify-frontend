@@ -7,14 +7,14 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useState } from "react";
 
 const schema = yup.object({
   email: yup.string().email("Invalid email").required("Email is required"),
 });
 
 function Form() {
-  // console.log(apiKey);
-
+const [success, setSuccess] = useState(false)
   // 1. get data using react hook form -done
   // 2. validate data -done
   // 4. add loading effect -done
@@ -37,9 +37,19 @@ function Form() {
           "Content-Type": "application/json",
         },
       })
-      .then((response) => console.log(response))
-      .catch((error) => console.log(error));
-
+      .then((response) =>{ 
+        console.log(response.status)
+        if(response.status === 200){
+          setSuccess(true)
+        }
+  })
+      .catch((error) => {
+        console.log(error)
+        if(error){
+          setSuccess(false)
+        }
+      });
+      
     reset();
   };
   return (
@@ -62,7 +72,7 @@ function Form() {
       {/* loading effect */}
 
       {/* success message */}
-      <div className="hidden flex-col h-[226px] items-center justify-center">
+      <div className={`${success ? 'flex':'hidden'} flex-col h-[226px] items-center justify-center`}>
         <Image
           src={check}
           alt="checkmark"
@@ -78,7 +88,7 @@ function Form() {
         </RobotoLoader>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className={`${success ? 'hidden' : 'flex'} flex-col gap-2`}>
         <RobotoLoader>
           <h3 className="text-primary text-x-sub-head md:text-l-sub-head font-semibold">
             Join the wait list
