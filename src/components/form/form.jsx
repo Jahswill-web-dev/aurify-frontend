@@ -102,7 +102,7 @@ function Form() {
         />
         <RobotoLoader>
           <p className="text-[16px] md:text-l-description text-p-text-darker">
-            Thanks for joining We'll notify you at launch. <br />
+            {`Thanks for joining We'll notify you at launch.`} <br />
             {/* P.S-check your email */}
           </p>
         </RobotoLoader>
