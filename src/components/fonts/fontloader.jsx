@@ -1,19 +1,19 @@
-import { Roboto, Inter } from "next/font/google";
+// import { Roboto, Inter } from "next/font/google";
 
-const roboto = Roboto({
-    weight: '400',
-    subsets:['latin']
-  });
+// const roboto = Roboto({
+//     weight: '400',
+//     subsets:['latin']
+//   });
 
-  const inter = Inter({
-    weight:'400',
-    subsets:['latin']
-  });
+//   const inter = Inter({
+//     weight:'400',
+//     subsets:['latin']
+//   });
 
 
 const RobotoLoader = ({ children })=> {
     return ( 
-        <div className={roboto.className}>
+        <div className="roboto-font">
             {children}
         </div>
      );
@@ -21,7 +21,7 @@ const RobotoLoader = ({ children })=> {
 
 const InterLoader = ({ children })=> {
     return ( 
-        <div className={inter.className}>
+        <div className="roboto-font">
             {children}
         </div>
      );

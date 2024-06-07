@@ -1,5 +1,5 @@
 import Image from "next/image";
-import hero from "../../../public/images/hero-img.png";
+// import hero from "../../../public/images/hero-img.png";
 import hero2 from "../../../public/images/hero-2.png";
 import { InterLoader, RobotoLoader } from "../fonts/fontloader";
 import Form from "../form/form";
