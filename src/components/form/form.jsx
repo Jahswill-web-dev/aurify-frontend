@@ -161,7 +161,7 @@ function Form() {
             ></input>
 
             <button
-              className="text-[14px] md:text-[20px] text-white cursor-pointer bg-primary p-1 w-full"
+              className="text-[14px] md:text-[20px] text-white cursor-pointer bg-primary p-1 w-24"
               type="submit"
             >
               Join
