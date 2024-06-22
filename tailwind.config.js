@@ -14,9 +14,11 @@ module.exports = {
         "p-text-darker": "#5D4D4D",
       },
       fontSize:{
+        "xl-head":"40px",
         "l-head":"35px",
         "l-sub-head":"28px",
         "l-description":"20px",
+        "xx-head":"30px",
         "x-head":"24px",
         "x-sub-head":"20px",
         "x-description":"12px"
