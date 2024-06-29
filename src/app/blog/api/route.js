@@ -6,7 +6,7 @@ export async function GET(request) {
     const response = await axios.get("http://localhost:1337/api/aurify-blogs?populate=*", {
       headers: {
         "Content-Type": "application/json",
-        // 'API-Key': process.env.DATA_API_KEY,
+        "Authorization": `Bearer ${process.env.BLOG_TOKEN}`,
       },
     });
     

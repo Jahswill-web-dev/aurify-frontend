@@ -2,13 +2,13 @@ import config from "@/app/config";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 
-export default function Post({ title, description, content, imgUrl, altText }) {
+export default function Post({ title, description, content, imgUrl, altText, date }) {
   return (
     <div>
       {/* thumbnail and title */}
       <div className="flex flex-col md:flex-row md:items-center gap-8 my-5">
         <Image
-          alt={imgUrl}
+          alt={altText}
           width={500}
           height={500}
           src={`${config.strapi}${imgUrl}`}
@@ -16,7 +16,7 @@ export default function Post({ title, description, content, imgUrl, altText }) {
         />
 
         <div className="flex gap-2 flex-col">
-          <p className="text-p-text inter-font">Published June 6 2024</p>
+          <p className="text-p-text inter-font">{date}</p>
           <h1 className="text-x-head md:text-l-head text-primary font-bold roboto-font leading-10">
             {title}
           </h1>

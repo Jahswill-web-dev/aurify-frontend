@@ -3,7 +3,6 @@ import axios from "axios";
 
 export async function POST(request) {
   const data = await request.json()
-    console.log(data)
   try {
     const response = await axios.post(
       "https://connect.mailerlite.com/api/subscribers/",

@@ -1,50 +1,86 @@
 import Post from "../_components/post";
 import axios from "axios";
-import config from "@/app/config";
+import moment from "moment";
 import Link from "next/link";
-async function getBlogPost() {
-  try {
-    const response = await axios.get("http://localhost:3000/blog/api/");
-    return response;
-  } catch (error) {
-    console.error(error);
-    return { data: { data: [] } };
+import config from "@/app/config";
+import PageNotFound from "../_components/notfound";
+// or Dynamic metadata
+export async function generateMetadata({ params }) {
+  const response = await axios.get(`${config.root}/blog/api`);
+  const posts = response.data.data;
+  const post = posts.find((post) => post.attributes.urlSlug === params.slug);
+
+  if (!post) {
+    return {
+      notFound: true,
+    };
   }
+  return {
+    title: post.attributes.title,
+    description: post.attributes.description,
+  };
+}
+
+// Fetch data for a single blog post based on the slug
+export async function generateStaticParams() {
+  const response = await axios.get(`${config.root}/blog/api`);
+  const posts = response.data.data;
+
+  if (!posts) {
+    return {
+      notFound: true,
+    };
+  }
+
+  return posts.map((post) => ({
+    slug: post.attributes.urlSlug,
+  }));
 }
 
 export default async function Page({ params }) {
-  const data = await getBlogPost();
-
-  const blogArray = data?.data?.data;
-  const filterdPost = blogArray?.filter(
-    (blog) => blog.attributes.urlSlug === params.slug
+  const response = await axios.get(`${config.root}/blog/api`);
+  const posts = response.data.data;
+  const filteredPost = posts.find(
+    (post) => post.attributes.urlSlug === params.slug
   );
-  
-  if (!filterdPost || filterdPost.length === 0) {
-    return (
-      <div
-        className="text-x-head md:text-l-head text-primary flex h-[100vh]
-      items-center justify-center flex-col"
-      >
-        Post not found
-        <div>
-          <Link
-            href="/blog"
-            className="text-x-sub-head md:text-l-sub-head underline"
-          >
-            Go back to blog page
-          </Link>
-        </div>
-      </div>
-    );
+
+  if (!filteredPost) {
+    return(
+      <PageNotFound/>
+    )
   }
-  const blogContent = filterdPost[0];
-  const title = blogContent?.attributes?.title;
-  const description = blogContent?.attributes?.description;
-  const content = blogContent?.attributes?.content;
-  const img = blogContent?.attributes?.image?.data?.attributes?.url;
-  const altText =
-    blogContent?.attributes?.image?.data?.attributes?.alternativeText;
+  const getOrdinalSuffix = (day) => {
+    if (day > 3 && day < 21) return `${day}th`;
+    switch (day % 10) {
+      case 1:
+        return `${day}st`;
+      case 2:
+        return `${day}nd`;
+      case 3:
+        return `${day}rd`;
+      default:
+        return `${day}th`;
+    }
+  };
+  const formatDate = (dateString) => {
+    const date = moment(dateString);
+    const day = date.date();
+    const dayWithSuffix = getOrdinalSuffix(day);
+    const month = date.format("MMMM");
+    const year = date.format("YYYY");
+
+    return `Published ${dayWithSuffix} ${month} ${year}`;
+  };
+
+  const { attributes } = filteredPost;
+  const title = attributes?.title;
+  const description = attributes?.description;
+  const content = attributes?.content;
+  const img = attributes?.image?.data?.attributes?.url;
+  const altText = attributes?.image?.data?.attributes?.alternativeText;
+
+  const formattedDate = formatDate(attributes?.publishedAt);
+  // console.log(formattedDate);
 
   return (
     <div className="container">
@@ -54,6 +90,7 @@ export default async function Page({ params }) {
         content={content}
         imgUrl={img}
         altText={altText}
+        date={formattedDate}
       />
     </div>
   );
