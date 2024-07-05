@@ -26,7 +26,6 @@ export default function Post({ title, description, content, imgUrl, altText, dat
       {/* Content */}
       <ReactMarkdown
         className="markdown"
-        children={content}
         components={{
           p: ({ node, ...props }) => <p {...props} />,
           h1: ({ node, ...props }) => <h1 {...props} />,

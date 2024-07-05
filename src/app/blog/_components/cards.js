@@ -39,7 +39,7 @@ function MainCard({ title, description, image, urlSlug }) {
 function Card({ title, description, urlSlug, thumbnail }) {
   return (
     <Link href={`/blog/${urlSlug}`}>
-      <div className="zoom-in transition-all">
+      <div className="zoom-in">
         {/* Images */}
         <Image
           alt="blog image"

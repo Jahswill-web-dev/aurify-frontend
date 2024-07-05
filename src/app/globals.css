@@ -20,7 +20,7 @@
         @apply max-w-[1200px] mx-auto px-4
     }
     .zoom-in{
-      @apply hover:scale-105 cursor-pointer;
+      @apply hover:scale-105 cursor-pointer transition-all;
     }
 }
 

@@ -6,7 +6,12 @@ import config from "@/app/config";
 import PageNotFound from "../_components/notfound";
 // or Dynamic metadata
 export async function generateMetadata({ params }) {
-  const response = await axios.get(`${config.root}/blog/api`);
+  const response = await axios.get("http://localhost:1337/api/aurify-blogs?populate=*", {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.BLOG_TOKEN}`,
+      },
+    });
   const posts = response.data.data;
   const post = posts.find((post) => post.attributes.urlSlug === params.slug);
 
@@ -23,7 +28,12 @@ export async function generateMetadata({ params }) {
 
 // Fetch data for a single blog post based on the slug
 export async function generateStaticParams() {
-  const response = await axios.get(`${config.root}/blog/api`);
+  const response = await axios.get("http://localhost:1337/api/aurify-blogs?populate=*", {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.BLOG_TOKEN}`,
+      },
+    });
   const posts = response.data.data;
 
   if (!posts) {
@@ -38,7 +48,12 @@ export async function generateStaticParams() {
 }
 
 export default async function Page({ params }) {
-  const response = await axios.get(`${config.root}/blog/api`);
+  const response = await axios.get("http://localhost:1337/api/aurify-blogs?populate=*", {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.BLOG_TOKEN}`,
+      },
+    });
   const posts = response.data.data;
   const filteredPost = posts.find(
     (post) => post.attributes.urlSlug === params.slug
@@ -80,7 +95,6 @@ export default async function Page({ params }) {
   const altText = attributes?.image?.data?.attributes?.alternativeText;
 
   const formattedDate = formatDate(attributes?.publishedAt);
-  // console.log(formattedDate);
 
   return (
     <div className="container">
