@@ -11,7 +11,7 @@ export default function Post({ title, description, content, imgUrl, altText, dat
           alt={altText}
           width={500}
           height={500}
-          src={`${config.strapi}${imgUrl}`}
+          src={imgUrl}
           className="w-full md:w-1/2"
         />
 

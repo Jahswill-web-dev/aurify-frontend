@@ -20,7 +20,7 @@ function MainCard({ title, description, image, urlSlug }) {
       >
         <Image
           alt=""
-          src={`${config.strapi}${image}`}
+          src={image}
           className="w-full md:w-1/2 h-[304px] object-cover"
           width={700}
           height={700}
@@ -43,7 +43,7 @@ function Card({ title, description, urlSlug, thumbnail }) {
         {/* Images */}
         <Image
           alt="blog image"
-          src={`${config.strapi}${thumbnail}`}
+          src={thumbnail}
           className="w-full h-[304px] object-cover"
           width={800}
           height={800}
