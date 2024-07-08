@@ -144,9 +144,9 @@ function Form() {
           </h3>
         </RobotoLoader>
         <InterLoader>
-          <p className="text-p-text text-x-description md:text-l-description font-semibold">
+          {/* <p className="text-p-text text-x-description md:text-l-description font-semibold">
             get early bird access to our launch and a 20% discount
-          </p>
+          </p> */}
         </InterLoader>
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
