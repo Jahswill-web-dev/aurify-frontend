@@ -7,7 +7,13 @@ import axios from "axios";
 
 async function getBlogs() {
   try {
-    const res = await axios.get(`${process.env.STRAPI_API}api/aurify-blogs?populate=*`
+    const res = await axios.get(`${process.env.STRAPI_API}api/aurify-blogs?populate=*`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.BLOG_TOKEN}`,
+        },
+      }
     );
     return res;
   } catch (error) {
