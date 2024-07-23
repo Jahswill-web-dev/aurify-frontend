@@ -6,7 +6,7 @@ function SignUpPage() {
       {/* title */}
       <div className="text-center mb-5">
         <h2 className="text-x-head md:text-l-head text-center text-primary roboto-font font-semibold">Welcome To Aurify</h2>
-        <p className="text-p-text-darker font-medium roboto-font">please enter you email or sign in with google facebook or twitter</p>
+        <p className="text-p-text-darker font-medium roboto-font">Enter your email or sign in with google, facebook or twitter</p>
       </div>
       {/* form and illustration */}
       <div>

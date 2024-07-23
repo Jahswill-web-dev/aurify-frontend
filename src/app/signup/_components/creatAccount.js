@@ -2,36 +2,38 @@ function CreateAccount() {
   return (
     <div>
       <form>
-        <div>
-          <p>User Name</p>
-          <input
-            type="email"
-            id="email"
-            placeholder="Johndoe@gmail.com"
-            className="focus:outline-none"
-          ></input>
+        <div className="flex flex-col items-center justify-center">
+          <div>
+            <p>User Name</p>
+            <input
+              type="email"
+              id="email"
+              placeholder="Johndoe@gmail.com"
+              className="focus:outline-none"
+            ></input>
+          </div>
+          <div>
+            <p>Email</p>
+            <input
+              type="password"
+              id="password"
+              placeholder=""
+              className="focus:outline-none"
+            ></input>
+          </div>
+          <div>
+            <p>Password</p>
+            <input
+              type="password"
+              id="confirm password"
+              placeholder=""
+              className="focus:outline-none"
+            ></input>
+          </div>
         </div>
-        <div>
-        <p>Email</p>
-        <input
-            type="password"
-            id="password"
-            placeholder=""
-            className="focus:outline-none"
-          ></input> 
-        </div>
-        <div>
-        <p>Password</p>
-        <input
-            type="password"
-            id="confirm password"
-            placeholder=""
-            className="focus:outline-none"
-          ></input> 
-        </div>
-        <button type="submit">Create account</button>
+        <button type="submit" className="my-4">Create account</button>
       </form>
-      <div>
+      <div className="flex flex-col items-center justify-center">
         <div>Login with Google</div>
         <div>Login with Facebook</div>
         <div>Login with Twitter</div>
