@@ -6,7 +6,7 @@ function DashboardPage() {
   return (
     <div className="">
       <DashboardNav />
-      <div className="flex flex-col md:flex-row p-5 mt-5 gap-5">
+      <div className="flex flex-col md:flex-row py-5 mt-5 gap-5">
         <SideNav />
         <Main />
       </div>
