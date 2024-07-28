@@ -9,7 +9,7 @@ import closeIcon from "../../../../public/icons/closeicon.svg";
 
 function SideNav() {
   return (
-    <div className="w-[20%]">
+    <div className="w-[30%] lg:w-[20%]">
       {/* Mobile nav */}
       <div className="md:hidden roboto-font ">
         <div className="pl-4">
@@ -32,10 +32,11 @@ function SideNav() {
             <p className="roboto-font">Upload</p>
           </div>
         </div>
-        <div>
+        {/* mobile responsive nav */}
+        <div className="hidden">
           <div
             className="absolute bg-white h-[90%] w-4/5 top-[13%] rounded-md
-            border-[3px] border-p-text py-5 roboto-font"
+            border-[3px] border-p-text py-5 roboto-font z-10"
           >
             <div className="flex justify-between items-center px-3 ">
               <div></div>
@@ -43,7 +44,7 @@ function SideNav() {
                 free plan
               </div>
               <div>
-                <Image alt="" src={closeIcon} width={35} height={35}/>
+                <Image alt="" src={closeIcon} width={35} height={35} />
               </div>
             </div>
 
@@ -83,7 +84,26 @@ function SideNav() {
             </div>
           </div>
         </div>
-        <div className="hidden">Upgrade to Premium</div>
+        <div className="pl-4 roboto-font">
+          <div
+            className="absolute bottom-0 bg-p-text w-[205px] h-[244px] text-white flex
+          flex-col gap-3 pt-5 pb-2 px-2 rounded-md border-2 border-p-text-darker
+          bg-gradient-to-b from-p-text via-p-text via-60% to-white z-10"
+          >
+            <p className="text-xl">Upgrade to Premium</p>
+            <p className="text-[12px]">
+              Experience the true power of Aurify by upgrading to Premium,
+              limitless practice question and much more{" "}
+            </p>
+            <div
+              className="flex gap-8 items-center justify-center bg-gradient-to-r from-p-text
+             to-secondary rounded-md border-2 border-white mt-11"
+            >
+              <p className="lg:text-xl">Upgrade</p>
+              <Image alt="crown icon" src={crown} width={39} height={39} />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Desktop Nav */}
@@ -137,7 +157,7 @@ function SideNav() {
         {/* upgrade */}
         <div className="pl-4 roboto-font">
           <div
-            className="absolute bottom-0 bg-p-text w-[205px] h-[244px] text-white flex
+            className="absolute bottom-0 bg-p-text w-[205px] h-[244px] text-white hidden md:flex
           flex-col gap-3 pt-5 pb-2 px-2 rounded-md border-2 border-p-text-darker
           bg-gradient-to-b from-p-text via-p-text via-60% to-white"
           >
@@ -155,6 +175,9 @@ function SideNav() {
             </div>
           </div>
         </div>
+      </div>
+      {/* dark overlay */}
+      <div className="hidden bg-black absolute top-0 bottom-0 left-0 right-0 opacity-30">
       </div>
     </div>
   );
