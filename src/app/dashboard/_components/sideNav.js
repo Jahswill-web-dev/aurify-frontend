@@ -84,7 +84,7 @@ function SideNav() {
             </div>
           </div>
         </div>
-        <div className="pl-4 roboto-font">
+        <div className="pl-4 roboto-font hidden">
           <div
             className="absolute bottom-0 bg-p-text w-[205px] h-[244px] text-white flex
           flex-col gap-3 pt-5 pb-2 px-2 rounded-md border-2 border-p-text-darker
