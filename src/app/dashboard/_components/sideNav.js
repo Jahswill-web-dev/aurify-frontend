@@ -112,7 +112,7 @@ function SideNav() {
         <div className="pl-4">
           <div
             className=" bg-secondary text-primary rounded-xl border-2 border-p-text
-          flex gap-2 items-center w-[122px] h-[60px] drop-shadow-xl"
+          flex gap-2 items-center w-[122px] h-[60px] shadow-lg"
           >
             <svg
               width="44"
