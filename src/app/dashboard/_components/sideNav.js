@@ -107,7 +107,8 @@ function SideNav() {
       </div>
 
       {/* Desktop Nav */}
-      <div className="hidden roboto-font relative md:flex flex-col items-start h-[80vh]">
+      <div className="hidden roboto-font relative md:flex flex-col items-start  md:justify-between h-full">
+        <div>
         {/* Upload button */}
         <div className="pl-4">
           <div
@@ -131,7 +132,7 @@ function SideNav() {
         </div>
         {/* Nav Links */}
         <div className="mt-12 flex flex-col gap-5">
-          <div className="flex items-center gap-3 pl-4 text-p-text">
+          <div className="flex items-center gap-3 pl-4 text-p-text bg-white p-2 rounded-r-3xl">
             <Image alt="home icon" src={homeIcon} width={20} height={20} />
             <p>Home</p>
           </div>
@@ -154,10 +155,11 @@ function SideNav() {
             <p>practice Questions</p>
           </div>
         </div>
+        </div>
         {/* upgrade */}
         <div className="pl-4 roboto-font">
           <div
-            className="absolute bottom-0 bg-p-text w-[205px] h-[244px] text-white hidden md:flex
+            className=" bg-p-text w-[205px] h-[244px] text-white hidden md:flex
           flex-col gap-3 pt-5 pb-2 px-2 rounded-md border-2 border-p-text-darker
           bg-gradient-to-b from-p-text via-p-text via-60% to-white"
           >
