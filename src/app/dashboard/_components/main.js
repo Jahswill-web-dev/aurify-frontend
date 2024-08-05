@@ -10,6 +10,8 @@ import summaryIcon from "../../../../public/icons/summary.svg";
 import shareIcon from "../../../../public/icons/share.svg";
 import deleteIcon from "../../../../public/icons/delete.svg";
 
+import { Details } from "./details";
+
 function Block({ first, selected }) {
   return (
     <div>
@@ -43,55 +45,6 @@ function Block({ first, selected }) {
   );
 }
 
-function Details() {
-  return (
-    <div className="inter-font overflow-hidden hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-primary font-semibold text-xl">
-          Fullstack webdevelopment
-        </h1>
-        {/* options */}
-        <div className="flex flex-col gap-5 items-start mt-3">
-          <div className="flex  gap-3 items-center hover:text-primary">
-            <Image
-              src={questionIcon}
-              alt="question icon"
-              width={30}
-              height={30}
-            />
-            <p>Take Test questions</p>
-          </div>
-          <div className="flex  gap-3 items-center hover:text-primary">
-            <Image
-              src={headphoneIcon}
-              alt="audio icon"
-              width={30}
-              height={30}
-            />
-            <p>listen to audio</p>
-          </div>
-          <div className="flex  gap-3 items-center hover:text-primary">
-            <Image
-              src={summaryIcon}
-              alt="summary icon"
-              width={30}
-              height={30}
-            />
-            <p>Read summary</p>
-          </div>
-          <div className="flex  gap-3 items-center hover:text-primary">
-            <Image src={shareIcon} alt="share icon" width={30} height={30} />
-            <p>listen to audio</p>
-          </div>
-          <div className="flex  gap-3 items-center hover:text-primary">
-            <Image src={deleteIcon} alt="delete icon" width={30} height={30} />
-            <p>listen to audio</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Main() {
   return (
@@ -99,7 +52,6 @@ function Main() {
       <div className="w-full flex h-full gap-2">
         {/* Main */}
         <div className="bg-white text-p-text-darker px-3 py-5 rounded-md border-2 border-p-text h-full w-[100%] lg:w-[70%] min-h-[600px]">
-          {/* <div className=""> */}
           <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
             Summarized PDF's
           </p>
@@ -120,7 +72,6 @@ function Main() {
               <Block />
             </div>
           </div>
-          {/* </div> */}
         </div>
         {/* Details */}
         <Details />

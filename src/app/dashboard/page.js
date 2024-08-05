@@ -1,6 +1,7 @@
 import DashboardNav from "./_components/dashboardNav";
 import SideNav from "./_components/sideNav";
 import Main from "./_components/main";
+import { MobileDetails } from "../dashboard/_components/details";
 
 function DashboardPage() {
   return (
@@ -10,6 +11,7 @@ function DashboardPage() {
         <SideNav />
         <Main />
       </div>
+      <MobileDetails/>
     </div>
   );
 }
