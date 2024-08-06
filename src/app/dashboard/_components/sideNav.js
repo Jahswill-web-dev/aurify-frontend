@@ -11,7 +11,7 @@ function SideNav() {
   return (
     <div className="w-[30%] lg:w-[20%]">
       {/* Mobile nav */}
-      <div className="md:hidden roboto-font">
+      <div className="md:hidden roboto-font hidden">
         <div className="pl-4">
           <div
             className="bg-secondary text-primary rounded-xl border-2 border-p-text

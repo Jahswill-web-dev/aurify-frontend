@@ -2,6 +2,7 @@ import DashboardNav from "./_components/dashboardNav";
 import SideNav from "./_components/sideNav";
 import Main from "./_components/main";
 import { MobileDetails } from "../dashboard/_components/details";
+import Upload from "./_components/upload";
 
 function DashboardPage() {
   return (
@@ -12,6 +13,7 @@ function DashboardPage() {
         <Main />
       </div>
       <MobileDetails/>
+      <Upload/>
     </div>
   );
 }
