@@ -45,7 +45,7 @@ function Block({ first, selected }) {
 
 function Pdfs() {
   return (
-    <div className="bg-white text-p-text-darker px-3 py-5 rounded-md border-2 border-p-text h-full w-[100%] lg:w-[70%] min-h-[600px]">
+    <div className="dashboard-main">
       <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
         Summarized PDF's
       </p>

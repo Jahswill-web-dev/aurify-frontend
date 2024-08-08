@@ -3,6 +3,7 @@ import SideNav from "./_components/sideNav";
 import Main from "./_components/main";
 import { MobileDetails } from "../dashboard/_components/details";
 import Upload from "./_components/upload";
+import DeleteBox from "./_components/deletebox";
 
 function DashboardPage() {
   return (
@@ -14,6 +15,7 @@ function DashboardPage() {
       </div>
       <MobileDetails/>
       <Upload/>
+      <DeleteBox/>
     </div>
   );
 }

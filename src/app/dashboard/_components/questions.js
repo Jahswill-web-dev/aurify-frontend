@@ -48,7 +48,7 @@ function MultipleChoiceQuestions() {
         <Option value="Markup Language" />
         <Option value="None of the above" />
       </div>
-      <div className="flex justify-between items-center w-[300px]">
+      <div className="flex justify-between items-center max-w-[300px]">
         {/* previous button */}
         <div
           className="flex gap-1 items-center bg-primary text-white w-24 justify-center
@@ -71,12 +71,26 @@ function MultipleChoiceQuestions() {
 }
 // open-ended questions
 function OpenEndedQuestions() {
-  return <div></div>;
+  return (
+    <div className="flex flex-col gap-5">
+      <p className="text-xl text-primary">2. Explain Hoisting in Javascript</p>
+      <div className="flex flex-col gap-2 max-w-[500px]">
+        <label>Answer</label>
+        <textarea
+          cols={20}
+          row={20}
+          name="answer"
+          className="border-2 border-p-text 
+          outline-primary p-2 rounded-md resize-none"
+        />
+      </div>
+    </div>
+  );
 }
 
 function Questions() {
   return (
-    <div className="inter-font bg-white text-p-text px-3 py-5 rounded-md border-2 border-p-text h-full w-[100%] lg:w-[70%] min-h-[600px]">
+    <div className="inter-font dashbaord-main">
       <div className="flex flex-col gap-2 my-2">
         <h2 className="text-2xl text-primary">Practice Questions</h2>
         <p className="text-p-text text-sm sm:text-xl">
@@ -96,7 +110,8 @@ function Questions() {
       {/* questions */}
       <div>
         {/* <IntroQuestions/> */}
-        <MultipleChoiceQuestions />
+        {/* <MultipleChoiceQuestions /> */}
+        <OpenEndedQuestions />
       </div>
     </div>
   );
