@@ -13,11 +13,11 @@ function DashboardPage() {
         <SideNav />
         <Main />
       </div>
-      <MobileDetails/>
-      <Upload/>
-      <DeleteBox/>
+      {/* <MobileDetails/> */}
+      {/* <Upload/> */}
+      {/* <DeleteBox/> */}
       {/* dark overlay */}
-      <div className="absolute top-0 bottom-0 right-0 left-0 bg-black opacity-20">
+      <div className="h-screen hidden absolute top-0 bottom-0 right-0 left-0 bg-black opacity-20">
 
       </div>
     </div>

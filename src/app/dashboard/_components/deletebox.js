@@ -3,12 +3,12 @@ import Image from "next/image";
 
 function DeleteBox() {
   return (
-    <div className="fixed z-10 top-0 bottom-0 left-0 right-0 flex items-center justify-center">
+    <div className="p-2 fixed z-10 top-0 bottom-0 left-0 right-0 flex items-center justify-center">
       <div
-        className="bg-white text-p-text pb-5 h-[350px] w-[700px]
-        flex flex-col px-4"
+        className="bg-white text-p-text pb-5 h-[400px] w-[700px]
+        flex flex-col px-4 gap-4"
       >
-        <p className="text-red-600 font-bold p-2 text-2xl">Delete</p>
+        <p className="text-red-600 font-bold p-2 text-xl md:text-2xl">Delete</p>
         <div className="flex gap-2 mt-5 items-center">
           <Image
             alt="delete Icon"
@@ -17,7 +17,7 @@ function DeleteBox() {
             height={78}
             className="p-2 w-[20%]"
           />
-          <p className="w-[80%] text-xl">
+          <p className="w-[80%] text-lg md:text-xl">
             Are You sure want to delete Full Stack web development? By doing
             this you Permantely delete the Practice question and summaries{" "}
           </p>

@@ -12,7 +12,7 @@ import cheveronDown from "../../../../public/icons/chevron-down.svg";
 
 function Details() {
   return (
-    <div className="inter-font overflow-hidden hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
+    <div className="hidden inter-font overflow-hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
       <div className="flex flex-col gap-2">
         <h1 className="text-primary font-semibold text-xl">
           Fullstack webdevelopment
@@ -62,7 +62,7 @@ function Details() {
 
 function MobileDetails() {
   return (
-    <div className="hidden md:hidden">
+    <div className="md:hidden">
       <div className="inter-font fixed bottom-0  w-full bg-white rounded-lg border-2 border-p-text py-4 px-4">
         <div className="flex w-full items-center mb-4 justify-center">
           <Image src={cheveronDown} alt="icon" width={40} height={40} />

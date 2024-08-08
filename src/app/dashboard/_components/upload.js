@@ -4,7 +4,7 @@ import fileImage from "../../../../public/icons/upload-file.svg";
 
 function Upload() {
   return (
-    <div className="hidden inter-font text-p-text fixed top-[6rem] h-[529px] left-0 right-0
+    <div className="inter-font text-p-text fixed top-[6rem] h-[529px] left-0 right-0
     px-2 max-w-[826px] mx-auto">
       <div
         className="bg-white border-2 rounded-md relative h-full
