@@ -3,6 +3,7 @@ import CreateAccount from "./_components/creatAccount";
 import signImage from "../../../public/images/signin-image.svg";
 import Navbar from "@/components/navbar/nav";
 function SignUpPage() {
+      // Todo: ask chatgpt how to practice connecting to backend
   return (
     <div>
       <div className="container">
