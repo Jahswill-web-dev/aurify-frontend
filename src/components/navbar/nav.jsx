@@ -12,7 +12,7 @@ function Navbar() {
             src={logo}
             alt="aurify logo"
             width={100}
-            height={logo}
+            height={100}
           />
         </Link>
       </div>

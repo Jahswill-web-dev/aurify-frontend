@@ -5,9 +5,25 @@ import chevron from "../../../../public/icons/chevron-right.svg";
 import facebookIcon from "../../../../public/icons/facebook-icon.svg";
 import xIcon from "../../../../public/icons/x-icon.svg";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import axios from "axios";
+import { RingSpinner } from "@/components/ui/ui";
+import Swal from "sweetalert2";
+import Link from "next/link";
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  },
+});
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -32,7 +48,7 @@ function InputForm({ type, title, name, id, register, errors }) {
         className="focus:border-primary border-p-text-darker w-64 md:w-[400px] h-[35px] text-x-sub-head border-2
               p-2"
       ></input>
-      <p className="text-red-600 m-0 p-0 text-left">{errorMessage}</p>
+      <p className="text-red-600 m-0 p-0 text-left text-xs">{errorMessage}</p>
     </div>
   );
 }
@@ -46,9 +62,8 @@ function SocialSignIn({ name, logo }) {
   );
 }
 
-
-
 function CreateAccount() {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -57,74 +72,87 @@ function CreateAccount() {
     resolver: yupResolver(schema),
   });
 
-const onSubmit = async (data) => {
- await axios.post("https://reqres.in/api/users", data)
-  .then((response)=>{
-    console.log(response);
-    console.log("data sent successfully")
-  })
-  .catch((error)=>{
-    console.log(error)
-  })
-  
-  // console.log(data);
-};
+  const onSubmit = async (data) => {
+    await axios
+      .post("https://reqres.in/api/users", data)
+      .then((response) => {
+        console.log(response);
 
+        Toast.fire({
+          icon: "success",
+          title: "Signed in successfully",
+        });
+        router.push("/dashboard");
+      })
+      .catch((error) => {
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "Login in Failed",
+        });
+      });
+
+    // console.log(data);
+  };
 
   return (
     <div>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        noValidate
-        className="flex flex-col items-center"
-      >
-        <div className="flex flex-col items-center justify-center gap-4 mt-4">
-          <InputForm
-            type="text"
-            name="name"
-            title="User name"
-            id="user-name"
-            register={register("name")}
-            errors={errors}
-          />
-          {/* {errors.name && (
-            <p className="text-red-600 m-0 p-0 text-left">
-              {errors.name.message}
-            </p>
-          )} */}
-          <InputForm
-            type="email"
-            name="email"
-            title="Email"
-            id="email"
-            register={register("email")}
-            errors={errors}
-          />
-          {/* {errors.email && (
-            <p className="text-red-600">{errors.email.message}</p>
-          )} */}
-          <InputForm
-            type="password"
-            name="password"
-            title="Password"
-            id="password"
-            register={register("password")}
-            errors={errors}
-          />
-          {/* {errors.password && (
-            <p className="text-red-600">{errors.password.message}</p>
-          )} */}
-        </div>
+      <div className="relative">
+        {isSubmitting && (
+          <div
+            className="absolute h-full w-full flex items-center
+        justify-center"
+          >
+            <div className="bg-white opacity-50 absolute h-full w-full"></div>
+            <div className="absolute z-20">
+              <RingSpinner />
+            </div>
+          </div>
+        )}
 
-        <button
-          type="submit"
-          className="my-4 bg-primary text-white py-2 px-6 rounded-md font-semibold roboto-font
-          lg:text-xl lg:font-semibold lg:my-6 w-[256px]"
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className="flex flex-col items-center"
         >
-          Create account
-        </button>
-        {isSubmitting && <p className="text-xl text-primary">Loading...</p>}
-      </form>
+          <div className="flex flex-col items-center justify-center gap-4 mt-4">
+            <InputForm
+              type="text"
+              name="name"
+              title="User name"
+              id="user-name"
+              register={register("name")}
+              errors={errors}
+            />
+
+            <InputForm
+              type="email"
+              name="email"
+              title="Email"
+              id="email"
+              register={register("email")}
+              errors={errors}
+            />
+
+            <InputForm
+              type="password"
+              name="password"
+              title="Password"
+              id="password"
+              register={register("password")}
+              errors={errors}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="my-4 bg-primary text-white py-2 px-6 rounded-md font-semibold roboto-font
+          lg:text-xl lg:font-semibold lg:my-6 w-[256px]"
+          >
+            Create account
+          </button>
+        </form>
+      </div>
       {/*  */}
       <div className="flex items-center gap-2 w-full justify-center">
         <div className="w-[200px] h-[2px] bg-p-text-darker"></div>
@@ -139,7 +167,9 @@ const onSubmit = async (data) => {
       </div>
       <p className="text-center my-7">
         Already have an account?{" "}
-        <span className="text-primary underline">Log In</span>
+        <Link href="/login">
+          <span className="text-primary underline">Log In</span>
+        </Link>
       </p>
     </div>
   );

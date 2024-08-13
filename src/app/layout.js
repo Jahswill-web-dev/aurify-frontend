@@ -1,5 +1,6 @@
 import "./globals.css";
 import Footer from "@/components/footer/footer";
+import StoreProvider from "./lib/StoreProvider";
 
 export const metadata = {
   title: "Aurify",
@@ -9,11 +10,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="bg-secondary">
-        {children}
-        <Footer />
-      </body>
-    </html>
+    <StoreProvider>
+      <html lang="en">
+        <body className="bg-secondary">
+          {children}
+          <Footer />
+        </body>
+      </html>
+    </StoreProvider>
   );
 }
