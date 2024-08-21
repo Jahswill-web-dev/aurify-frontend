@@ -24,7 +24,7 @@ function Option({ value }) {
 // Intro questions
 function IntroQuestions() {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 max-h-[700px] overflow-scroll min-h-[600px]">
       <p className="text-primary text-base sm:text-xl">
         How many practice questions would you like?
       </p>
@@ -40,7 +40,7 @@ function IntroQuestions() {
 // multiple-choice questions
 function MultipleChoiceQuestions() {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 min-h-[600px] max-h-[700px] overflow-scroll">
       <p className="text-primary text-base sm:text-xl">What is Javascript? </p>
       <div className="flex flex-col gap-5">
         <Option value="Programming Language" />
@@ -72,7 +72,7 @@ function MultipleChoiceQuestions() {
 // open-ended questions
 function OpenEndedQuestions() {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 min-h-[600px] max-h-[700px] overflow-scroll">
       <p className="text-xl text-primary">2. Explain Hoisting in Javascript</p>
       <div className="flex flex-col gap-2 max-w-[500px]">
         <label>Answer</label>
@@ -90,7 +90,7 @@ function OpenEndedQuestions() {
 
 function Questions() {
   return (
-    <div className="inter-font dashbaord-main">
+    <div className="inter-font dashboard-main bg-white px-5 rounded-md border-2 border-p-text">
       <div className="flex flex-col gap-2 my-2">
         <h2 className="text-2xl text-primary">Practice Questions</h2>
         <p className="text-p-text text-sm sm:text-xl">
@@ -111,7 +111,7 @@ function Questions() {
       <div>
         {/* <IntroQuestions/> */}
         {/* <MultipleChoiceQuestions /> */}
-        <OpenEndedQuestions />
+        {/* <OpenEndedQuestions /> */}
       </div>
     </div>
   );

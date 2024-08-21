@@ -1,17 +1,22 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  cartItems: [],
-  amount: 0,
-  total: 0,
-  isLoading: true,
+  isNavOpen: false,
 };
 
-const NavSlice = createSlice({
-  name: 'cart',
+const navSlice = createSlice({
+  name: "nav",
   initialState,
+  reducers: {
+    toggleNav: (state, action) => {
+      state.isNavOpen = !state.isNavOpen;
+    },
+    closeNav: (state, action) => {
+      state.isNavOpen = false;
+    },
+  },
 });
 
-console.log(NavSlice);
-
-export default NavSlice.reducer;
+// console.log(NavSlice);
+export const { toggleNav, closeNav } = navSlice.actions;
+export default navSlice.reducer;

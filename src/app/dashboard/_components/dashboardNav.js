@@ -1,13 +1,30 @@
+"use client";
 import Image from "next/image";
 import avatar from "../../../../public/icons/avatar.svg";
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { toggleNav } from "../../lib/features/nav/navSlice.js";
+
+// logSomething()
 
 function DashboardNav() {
+  const { isNavOpen } = useSelector((store) => store.nav);
+  const dispatch = useDispatch();
+
+  function navToggle() {
+    dispatch(toggleNav());
+  }
+  
+
   return (
     <div className="w-full roboto-font">
       {/* Mobile Nav */}
       <div className="md:hidden border-2 border-p-text-darker p-2 w-[95%] mx-auto rounded-lg my-2">
-        <div className="flex justify-between items-center">
-          <div>
+        <div
+          className="flex justify-between items-center+"
+          >
+          {/* bar Icon */}
+          <div onClick={navToggle} className="cursor-pointer">
             <svg
               width="32"
               height="32"
@@ -23,8 +40,10 @@ function DashboardNav() {
               />
             </svg>
           </div>
-          <div className="flex items-center gap-2">
-            <p className="text-xs text-primary">Good Morning, Williams</p>
+          <div className="flex items-center gap-2 cursor-pointer">
+            <p className="text-lg sm:text-xl text-primary">
+              Good Morning, Williams
+            </p>
             <Image
               alt="user Profile Image"
               src={avatar}
@@ -33,6 +52,7 @@ function DashboardNav() {
             />
           </div>
         </div>
+        {/*  */}
         <div className="hidden">dropDown</div>
       </div>
       {/* desktop Nav */}
@@ -42,7 +62,6 @@ function DashboardNav() {
           <Image alt="user Profile Image" src={avatar} width={65} height={65} />
         </div>
         <div className="bg-white border-2 border-primary rounded-md p-1">
-          
           Free plan
         </div>
         {/* Settings */}

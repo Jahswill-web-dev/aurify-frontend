@@ -1,24 +1,29 @@
+"use client";
 import Image from "next/image";
 import moreIcon from "../../../../public/icons/more-icon.svg";
 import bookmarkIcon from "../../../../public/icons/transparent-bookmark.svg";
-import coloredBookMarkIcon from "../../../../public/icons/colored-bookmark.svg";
 import playIcon from "../../../../public/icons/play-icon.svg";
-import pauseIcon from "../../../../public/icons/pause-icon.svg";
-import questionIcon from "../../../../public/icons/questiion-icon.svg";
-import headphoneIcon from "../../../../public/icons/headphone.svg";
-import summaryIcon from "../../../../public/icons/summary.svg";
-import shareIcon from "../../../../public/icons/share.svg";
-import deleteIcon from "../../../../public/icons/delete.svg";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  toggleDetails,
+  setPdfName,
+} from "@/app/lib/features/dashboard/dashboardSlice";
 
-function Block({ first, selected }) {
+function Block({ first, selected, name }) {
+  const dispatch = useDispatch();
+  function detail() {
+    dispatch(setPdfName(name));
+    dispatch(toggleDetails());
+  }
+
   return (
     <div>
       <div
         className={`flex justify-between w-11/12 mx-auto py-2 border-2 border-primary border-x-0 ${
           first ? "border-t-2" : "border-t-0"
-        } ${selected ? "bg-secondary" : "bg-white"} text-p-text`}
+        } ${selected ? "bg-secondary" : "bg-white"} text-p-text roboto-font`}
       >
-        <p>Fullstack Web Development</p>
+        <p className="w-[130px]">{name}</p>
         <div className="hidden md:block">
           <Image
             alt="bookmark icon"
@@ -30,7 +35,7 @@ function Block({ first, selected }) {
         <div className="hidden md:block">
           <Image alt="play Icon" src={playIcon} width={20} height={20} />
         </div>
-        <div className="">
+        <div onClick={detail} className="cursor-pointer">
           <Image
             alt="more details icons"
             src={moreIcon}
@@ -60,10 +65,11 @@ function Pdfs() {
         {/* Blocks container */}
         <div className="flex flex-col gap-2">
           {/* Single Blocks */}
-          <Block first={true} selected={true} />
-          <Block />
-          <Block />
-          <Block />
+          <Block first={true} selected={true} name="Web development" />
+          <Block name="Math Notes" />
+          <Block name="Biology Notes" />
+          <Block name="English Essay" />
+          <Block name="English Essays" />
         </div>
       </div>
     </div>

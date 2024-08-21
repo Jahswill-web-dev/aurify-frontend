@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import bookmarkIcon from "../../../../public/icons/transparent-bookmark.svg";
 import coloredBookMarkIcon from "../../../../public/icons/colored-bookmark.svg";
@@ -9,7 +10,8 @@ import summaryIcon from "../../../../public/icons/summary.svg";
 import shareIcon from "../../../../public/icons/share.svg";
 import deleteIcon from "../../../../public/icons/delete.svg";
 import cheveronDown from "../../../../public/icons/chevron-down.svg";
-
+import { useSelector, useDispatch } from "react-redux";
+import { closeDetails } from "@/app/lib/features/dashboard/dashboardSlice";
 function Details() {
   return (
     <div className="hidden inter-font overflow-hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
@@ -61,16 +63,31 @@ function Details() {
 }
 
 function MobileDetails() {
+  const dispatch = useDispatch();
+  const { isdetailsOpen, pdfName } = useSelector((store) => store.dashboard);
+
+  function close() {
+    dispatch(closeDetails());
+  }
   return (
     <div className="md:hidden">
-      <div className="inter-font fixed bottom-0  w-full bg-white rounded-lg border-2 border-p-text py-4 px-4">
-        <div className="flex w-full items-center mb-4 justify-center">
-          <Image src={cheveronDown} alt="icon" width={40} height={40} />
+      <div
+        className={`transition-all duration-500 inter-font mb-1 fixed ${
+          isdetailsOpen ? "top-[140px]" : "top-full"
+        } bottom-0 right-[1px] 
+      w-[99%] bg-white rounded-xl border-4 border-p-text py-4 px-4`}
+      >
+        <div
+          onClick={close}
+          className="flex w-full items-center mb-4 justify-center  cursor-pointer
+          mt-5"
+        >
+          <Image src={cheveronDown} alt="icon" width={40} height={40} className="" />
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-primary font-semibold text-xl roboto-font">
-            Fullstack web development
+          <h1 className="text-primary font-medium text-xl roboto-font">
+            {pdfName}
           </h1>
           {/* options */}
           <div className="flex flex-col gap-5 items-start mt-3 text-p-text inter-font">
@@ -78,8 +95,8 @@ function MobileDetails() {
               <Image
                 src={questionIcon}
                 alt="question icon"
-                width={40}
-                height={40}
+                width={30}
+                height={30}
               />
               <p>Take Test questions</p>
             </div>
@@ -87,8 +104,8 @@ function MobileDetails() {
               <Image
                 src={headphoneIcon}
                 alt="audio icon"
-                width={40}
-                height={40}
+                width={30}
+                height={30}
               />
               <p>Listen to audio</p>
             </div>
@@ -96,24 +113,35 @@ function MobileDetails() {
               <Image
                 src={summaryIcon}
                 alt="summary icon"
-                width={40}
-                height={40}
+                width={30}
+                height={30}
               />
               <p>Read summary</p>
             </div>
             <div className="flex  gap-4 items-center hover:text-primary">
-              <Image src={shareIcon} alt="share icon" width={40} height={40} />
+              <Image
+                src={bookmarkIcon}
+                alt="delete icon"
+                width={25}
+                height={25}
+              />
+              <p>Bookmark</p>
+            </div>
+            <div className="flex  gap-4 items-center hover:text-primary">
+              <Image src={shareIcon} alt="share icon" width={30} height={30} />
               <p>Share</p>
             </div>
             <div className="flex  gap-4 items-center hover:text-primary">
               <Image
                 src={deleteIcon}
                 alt="delete icon"
-                width={40}
-                height={40}
+                width={30}
+                height={30}
               />
               <p>Delete</p>
             </div>
+         
+
           </div>
         </div>
       </div>
