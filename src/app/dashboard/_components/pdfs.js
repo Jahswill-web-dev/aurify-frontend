@@ -52,7 +52,7 @@ function Pdfs() {
   return (
     <div className="dashboard-main">
       <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
-        Summarized PDF's
+        {`Summarized PDF's`}
       </p>
       <div>
         {/* <div className="text-primary mb-3 md:flex items-center  md:w-11/12 md:mx-auto
