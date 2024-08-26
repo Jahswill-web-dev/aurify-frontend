@@ -70,12 +70,12 @@ function MobileDetails() {
     dispatch(closeDetails());
   }
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <div
         className={`transition-all duration-500 inter-font mb-1 fixed ${
           isdetailsOpen ? "top-[140px]" : "top-full"
-        } bottom-0 right-[1px] 
-      w-[99%] bg-white rounded-xl border-4 border-p-text py-4 px-4`}
+        } bottom-0 right-[1px] z-20
+      w-[99%] bg-white rounded-xl border-4 border-p-text py-4 px-4 overflow-scroll`}
       >
         <div
           onClick={close}

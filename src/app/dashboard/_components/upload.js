@@ -14,7 +14,7 @@ function Upload() {
 
   return (
     <div
-      className={`inter-font text-p-text absolute top-[6rem] h-[529px] left-0 right-0
+      className={`inter-font text-p-text absolute z-20 top-[6rem] h-[529px] left-0 right-0
     px-2 max-w-[826px] mx-auto transition-all duration-500 ${isUploadOpen ? 'scale-95':'scale-0'}`}
     >
       <div

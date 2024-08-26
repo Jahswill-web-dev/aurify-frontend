@@ -51,7 +51,7 @@ function MobileNav() {
       <div className="">
         <div
           className={`transition-all duration-500 absolute ${isNavOpen ? 'right-14':'right-full'} bg-white h-[700px] w-4/5 top-[13%] rounded-md
-        border-[3px] border-p-text py-5 roboto-font z-10`}
+        border-[3px] border-p-text py-5 roboto-font z-20`}
         >
           <div className="h-full flex flex-col justify-between">
             <div>
