@@ -8,17 +8,27 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   toggleDetails,
   setPdfName,
+  setFirstPdfName,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 
 function Block({ first, selected, name, playing }) {
+  const { pdfName } = useSelector((store) => store.dashboard);
   const dispatch = useDispatch();
+  // {
+  //   pdfName ? pdfName : selected && name;
+  // }
+ 
+    if (selected) {
+      dispatch(setFirstPdfName(name))
+    }
+  
   function detail() {
     dispatch(setPdfName(name));
-    dispatch(toggleDetails());
+    // dispatch(toggleDetails());
   }
 
   return (
-    <div>
+    <div onClick={detail}>
       <div
         className={`flex justify-between w-11/12 mx-auto py-2 px-2 border-2 border-primary border-x-0 ${
           first ? "border-t-2" : "border-t-0"
@@ -34,9 +44,14 @@ function Block({ first, selected, name, playing }) {
           />
         </div>
         <div className="hidden md:block">
-          <Image alt="play Icon" src={playing ? pauseIcon : playIcon} width={20} height={20} />
+          <Image
+            alt="play Icon"
+            src={playing ? pauseIcon : playIcon}
+            width={20}
+            height={20}
+          />
         </div>
-        <div onClick={detail} className="cursor-pointer lg:hidden">
+        <div className="cursor-pointer lg:hidden">
           <Image
             alt="more details icons"
             src={moreIcon}
@@ -66,11 +81,16 @@ function Pdfs() {
         {/* Blocks container */}
         <div className="flex flex-col gap-2">
           {/* Single Blocks */}
-          <Block first={true} selected={true} name="Web development" playing={true}/>
-          <Block name="Math Notes" playing={false}/>
-          <Block name="Biology Notes" playing={false}/>
-          <Block name="English Essay" playing={false}/>
-          <Block name="English Essays" playing={false}/>
+          <Block
+            first={true}
+            selected={true}
+            name="Web development"
+            playing={true}
+          />
+          <Block name="Math Notes" playing={false} />
+          <Block name="Biology Notes" playing={false} />
+          <Block name="English Essay" playing={false} />
+          <Block name="English Essays" playing={false} />
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   isdetailsOpen: false,
   pdfName:'',
+  firstPdfName:'',
   isUploadOpen:false,
   showOverlay:false,
 };
@@ -13,6 +14,9 @@ const dashboardSlice = createSlice({
   reducers: {
     setPdfName:(state, action)=>{
         state.pdfName = action.payload;
+    },
+    setFirstPdfName:(state, action)=>{
+        state.firstPdfName = action.payload;
     },
     toggleDetails: (state, action) => {
       state.isdetailsOpen = !state.isdetailsOpen;
@@ -30,5 +34,5 @@ const dashboardSlice = createSlice({
 });
 
 // console.log(NavSlice);
-export const { toggleDetails, closeDetails, setPdfName, toggleUpload } = dashboardSlice.actions;
+export const { toggleDetails, closeDetails, setPdfName, toggleUpload, setFirstPdfName } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
