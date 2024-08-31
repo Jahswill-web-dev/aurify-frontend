@@ -17,20 +17,22 @@ function Block({ first, selected, name, playing }) {
   // {
   //   pdfName ? pdfName : selected && name;
   // }
- 
-    if (selected) {
-      dispatch(setFirstPdfName(name))
-    }
-  
+
+  if (selected) {
+    dispatch(setFirstPdfName(name));
+  }
+
   function detail() {
+    if (window.matchMedia("(max-width:1023px)").matches) {
+      dispatch(toggleDetails());
+    }
     dispatch(setPdfName(name));
-    // dispatch(toggleDetails());
   }
 
   return (
     <div onClick={detail}>
       <div
-        className={`flex justify-between w-11/12 mx-auto py-2 px-2 border-2 border-primary border-x-0 ${
+        className={`cursor-pointer flex justify-between w-11/12 mx-auto py-2 px-2 border-2 border-primary border-x-0 ${
           first ? "border-t-2" : "border-t-0"
         } ${selected ? "bg-secondary" : "bg-white"} text-p-text roboto-font`}
       >
@@ -84,13 +86,13 @@ function Pdfs() {
           <Block
             first={true}
             selected={true}
-            name="Web development"
+            name="Web-development"
             playing={true}
           />
-          <Block name="Math Notes" playing={false} />
-          <Block name="Biology Notes" playing={false} />
-          <Block name="English Essay" playing={false} />
-          <Block name="English Essays" playing={false} />
+          <Block name="Math-Notes" playing={false} />
+          <Block name="Biology-Notes" playing={false} />
+          <Block name="English-Essay" playing={false} />
+          <Block name="English-Essays" playing={false} />
         </div>
       </div>
     </div>

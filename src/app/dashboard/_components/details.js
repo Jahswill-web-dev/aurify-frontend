@@ -11,21 +11,19 @@ import shareIcon from "../../../../public/icons/share.svg";
 import deleteIcon from "../../../../public/icons/delete.svg";
 import cheveronDown from "../../../../public/icons/chevron-down.svg";
 import { useSelector, useDispatch } from "react-redux";
-import { setPdfName } from "@/app/lib/features/dashboard/dashboardSlice";
+import { closeDetails } from "@/app/lib/features/dashboard/dashboardSlice";
 import Link from "next/link";
 function Details() {
   const dispatch = useDispatch();
   const { pdfName, firstPdfName } = useSelector((store) => store.dashboard);
-  // function pdfNameFunction() {
-  //   dispatch(setPdfName());
-  // }
+  
   return (
     <div className="hidden inter-font overflow-hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
       <div className="flex flex-col gap-2">
         <h1 className="text-primary font-semibold text-xl">{pdfName === "" ? firstPdfName : pdfName}</h1>
         {/* options */}
         <div className="flex flex-col gap-5 items-start mt-3">
-          <Link href="/dashboard/summary">
+          <Link href="/dashboard/questions">
             <div className="flex  gap-3 items-center hover:text-primary">
               <Image
                 src={questionIcon}
@@ -36,7 +34,7 @@ function Details() {
               <p>Take Test questions</p>
             </div>
           </Link>
-          <div className="flex  gap-3 items-center hover:text-primary">
+          <div className="flex cursor-pointer gap-3 items-center hover:text-primary">
             <Image
               src={headphoneIcon}
               alt="audio icon"
@@ -45,7 +43,7 @@ function Details() {
             />
             <p>listen to audio</p>
           </div>
-          <Link href="/dashboard/summary">
+          <Link href={`/dashboard/summary/${pdfName === "" ? firstPdfName : pdfName}`}>
             <div className="flex  gap-3 items-center hover:text-primary">
               <Image
                 src={summaryIcon}
@@ -73,7 +71,7 @@ function Details() {
 
 function MobileDetails() {
   const dispatch = useDispatch();
-  const { isdetailsOpen, pdfName } = useSelector((store) => store.dashboard);
+  const { isdetailsOpen, pdfName, firstPdfName } = useSelector((store) => store.dashboard);
 
   function close() {
     dispatch(closeDetails());
@@ -117,7 +115,7 @@ function MobileDetails() {
                 <p>Take Test questions</p>
               </div>
             </Link>
-            <div className="flex  gap-4 items-center hover:text-primary">
+            <div className="flex cursor-pointer gap-4 items-center hover:text-primary">
               <Image
                 src={headphoneIcon}
                 alt="audio icon"
@@ -126,7 +124,7 @@ function MobileDetails() {
               />
               <p>Listen to audio</p>
             </div>
-            <Link href="/dashboard/summary" onClick={close}>
+            <Link href={`/dashboard/summary/${pdfName === "" ? firstPdfName : pdfName}`} onClick={close}>
               <div className="flex  gap-4 items-center hover:text-primary">
                 <Image
                   src={summaryIcon}
