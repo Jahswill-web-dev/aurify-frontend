@@ -26,13 +26,13 @@ const Toast = Swal.mixin({
 });
 
 const schema = yup.object().shape({
-  name: yup.string().required("Name is required"),
+  username: yup.string().required("Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   password: yup
     .string()
     .required("Password is required")
-    .min(8, "Password must be at least 8 characters long")
-    .max(20, "Password cannot be more than 20 characters long"),
+    .min(5, "Password must be at least 5 characters long")
+    .max(24, "Password cannot be more than 24 characters long"),
 });
 
 function InputForm({ type, title, name, id, register, errors }) {
@@ -74,7 +74,7 @@ function CreateAccount() {
 
   const onSubmit = async (data) => {
     await axios
-      .post("https://reqres.in/api/users", data)
+      .post(`${process.env.NEXT_PUBLIC_BASE_URL}/signup`, data)
       .then((response) => {
         console.log(response);
 
@@ -103,7 +103,7 @@ function CreateAccount() {
             className="absolute h-full w-full flex items-center
         justify-center"
           >
-            <div className="bg-white opacity-50 absolute h-full w-full"></div>
+            <div className="bg-white opacity-50 absolute h-full w-72 md:w-[408px]"></div>
             <div className="absolute z-20">
               <RingSpinner />
             </div>

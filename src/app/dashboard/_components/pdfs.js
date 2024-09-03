@@ -5,12 +5,13 @@ import bookmarkIcon from "../../../../public/icons/transparent-bookmark.svg";
 import playIcon from "../../../../public/icons/play-icon.svg";
 import pauseIcon from "../../../../public/icons/pause-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 import {
   toggleDetails,
   setPdfName,
   setFirstPdfName,
 } from "@/app/lib/features/dashboard/dashboardSlice";
-
+import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 function Block({ first, selected, name, playing }) {
   const { pdfName } = useSelector((store) => store.dashboard);
   const dispatch = useDispatch();
@@ -18,9 +19,12 @@ function Block({ first, selected, name, playing }) {
   //   pdfName ? pdfName : selected && name;
   // }
 
-  if (selected) {
-    dispatch(setFirstPdfName(name));
-  }
+  useEffect(() => {
+    if (selected) {
+      dispatch(setFirstPdfName(name));
+    }
+  }, [selected, name, dispatch]);
+
 
   function detail() {
     if (window.matchMedia("(max-width:1023px)").matches) {
@@ -66,20 +70,28 @@ function Block({ first, selected, name, playing }) {
   );
 }
 
+
+
+
+
 function Pdfs() {
+const {data, error, loading} = useFetchWithToken(`${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`)
+
+  useEffect(()=>{
+    if(data && !error && !loading){
+      console.log(data.data)
+    }
+  },[data, loading, error]);
+
+  // if(data?.data.length === 0) return <div>Upload a pdf file</div>
+    
+  
   return (
     <div className="dashboard-main">
       <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
         {`Summarized PDF's`}
       </p>
       <div>
-        {/* <div className="text-primary mb-3 md:flex items-center  md:w-11/12 md:mx-auto
-      ">
-        <p className="pl-4 w-[50%]">Name</p>
-        <p className="hidden md:block w-[20%]">Bookmark</p>
-        <p className="hidden md:block w-[30%]">audio</p>
-        <p className="hidden md:block w-[20%]">Details</p>
-      </div> */}
         {/* Blocks container */}
         <div className="flex flex-col gap-2">
           {/* Single Blocks */}

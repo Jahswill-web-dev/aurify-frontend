@@ -30,7 +30,7 @@ function MobileNav() {
         <div
         onClick={openUpload}
           className="bg-secondary cursor-pointer text-primary rounded-xl border-2 border-p-text
-      flex gap-2 items-center w-[122px] drop-shadow-xl"
+      flex gap-0 items-center w-[132px] drop-shadow-xl px-2"
         >
           <svg
             width="44"
@@ -44,7 +44,7 @@ function MobileNav() {
               fill="#F7931A"
             />
           </svg>
-          <p className="roboto-font">Upload</p>
+          <p className="roboto-font">Summarize</p>
         </div>
       </div>
       {/* mobile respon1sive nav */}
@@ -152,7 +152,7 @@ function SideNav() {
             <div
             onClick={openUpload}
               className="cursor-pointer bg-secondary text-primary rounded-xl border-2 border-p-text
-          flex gap-2 items-center w-[122px] h-[60px] shadow-lg"
+          flex gap-2 items-center h-[60px] shadow-lg w-[132px] drop-shadow-xl px-2"
             >
               <svg
                 width="44"
@@ -166,7 +166,7 @@ function SideNav() {
                   fill="#F7931A"
                 />
               </svg>
-              <p className="roboto-font">Upload</p>
+              <p className="roboto-font">Summarize</p>
             </div>
           </div>
           {/* Nav Links */}

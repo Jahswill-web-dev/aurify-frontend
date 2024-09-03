@@ -5,14 +5,15 @@ import chevron from "../../../../public/icons/chevron-right.svg";
 import facebookIcon from "../../../../public/icons/facebook-icon.svg";
 import xIcon from "../../../../public/icons/x-icon.svg";
 import { useForm } from "react-hook-form";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
-import Swal from 'sweetalert2'
-
+import Swal from "sweetalert2";
+import { useDispatch } from "react-redux";
+import { setAccessToken } from "@/app/lib/features/auth/authSlice";
 
 const Toast = Swal.mixin({
   toast: true,
@@ -23,17 +24,17 @@ const Toast = Swal.mixin({
   didOpen: (toast) => {
     toast.onmouseenter = Swal.stopTimer;
     toast.onmouseleave = Swal.resumeTimer;
-  }
+  },
 });
 
 const schema = yup.object().shape({
   // name: yup.string().required("Name is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
+  email: yup.string().required("username is required"),
   password: yup
     .string()
     .required("Password is required")
-    .min(8, "Password must be at least 8 characters long")
-    .max(20, "Password cannot be more than 20 characters long"),
+    .min(5, "Password must be at least 5 characters long")
+    .max(24, "Password cannot be more than 24 characters long"),
 });
 
 function InputForm({ type, title, name, id, register, errors }) {
@@ -72,25 +73,30 @@ function Login() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
-    console.log(data)
+    console.log(data);
     await axios
-      .post("https://reqres.in/api/users", data)
+      .post(`${process.env.NEXT_PUBLIC_BASE_URL}/token`, data)
       .then((response) => {
         console.log(response);
-        console.log('Token:', response.data.token);
+
+        const { access_token } = response.data;
+        sessionStorage.setItem("accessToken", access_token);
+        dispatch(setAccessToken(access_token));
+
         Toast.fire({
           icon: "success",
-          title: "Login in successfull"
+          title: "Login in successfull",
         });
-        router.push("/dashboard")
+        router.push("/dashboard");
       })
       .catch((error) => {
         console.log(error);
         Toast.fire({
           icon: "error",
-          title: "Login in Failed"
+          title: "Login in Failed",
         });
       });
 
@@ -105,7 +111,7 @@ function Login() {
             className="absolute h-full w-full flex items-center
         justify-center"
           >
-            <div className="bg-white opacity-50 absolute h-full w-full"></div>
+            <div className="bg-white opacity-50 absolute h-full w-72 md:w-[408px]"></div>
             <div className="absolute z-20">
               <RingSpinner />
             </div>
@@ -113,14 +119,15 @@ function Login() {
         )}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          noValidate className="flex flex-col items-center justify-center"
+          noValidate
+          className="flex flex-col items-center justify-center"
         >
           <div className="flex flex-col items-center justify-center gap-4 mt-4">
             <InputForm
               type="email"
               name="email"
               title="Email"
-              id="user-name"
+              id="email"
               register={register("email")}
               errors={errors}
             />
@@ -157,7 +164,7 @@ function Login() {
       <p className="text-center my-7">
         dont have an account?{" "}
         <Link href="/signup">
-        <span className="text-primary underline">Signup</span>
+          <span className="text-primary underline">Signup</span>
         </Link>
       </p>
     </div>
