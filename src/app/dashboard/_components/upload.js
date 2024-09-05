@@ -4,6 +4,7 @@ import cancelIcon from "../../../../public/icons/cancel.svg";
 import fileImage from "../../../../public/icons/upload-file.svg";
 import { toggleUpload } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
 
 function Upload() {
   const dispatch = useDispatch();
@@ -11,11 +12,32 @@ function Upload() {
   function close() {
     dispatch(toggleUpload());
   }
+  const [files, setFiles] = useState([]);
+  
+  const handleDragOver = (event)=>{
+    event.preventDefault()
+  }
+  // capture the file when dropped in the dropZone Lol
+  const handleDrop = (event) => {
+    event.preventDefault();
+    const droppedFiles = Array.from(event.dataTransfer.files);
+    setFiles((prevFiles) => [...prevFiles, ...droppedFiles]);
+  };
+  const handleFileSelect = (event) => {
+    const selectedFiles = Array.from(event.target.files);
+    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+  };
+  // prevents the browser from opening the file in another tab which is the default behaviour
+  const onDragOver = (event) => {
+    event.preventDefault();
+  };
 
   return (
     <div
       className={`inter-font text-p-text absolute z-20 top-[6rem] h-[529px] left-0 right-0
-    px-2 max-w-[826px] mx-auto transition-all duration-500 ${isUploadOpen ? 'scale-95':'scale-0'}`}
+    px-2 max-w-[826px] mx-auto transition-all duration-500 ${
+      isUploadOpen ? "scale-95" : "scale-0"
+    }`}
     >
       <div
         className="bg-white border-2 rounded-md relative h-full
@@ -33,6 +55,8 @@ function Upload() {
           <div
             className="flex flex-col items-center justify-center gap-3 border-dashed border-2 border-p-text rounded-md px-3
           text-xl text-p-text h-[357px] text-center"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
           >
             <Image
               src={fileImage}
@@ -43,8 +67,21 @@ function Upload() {
             />
             <p>
               Drag and Drop or{" "}
-              <span className="text-primary">Click to Upload</span>
+              <label
+                htmlFor="file-upload"
+                className="text-primary cursor-pointer"
+              >
+                Click to Uploads
+              </label>
             </p>
+            <input
+              id="file-upload"
+              type="file"
+              multiple
+              onChange={handleFileSelect}
+              style
+              ={{ display: "none" }}
+            />
           </div>
         </div>
         {/* Progress bar */}

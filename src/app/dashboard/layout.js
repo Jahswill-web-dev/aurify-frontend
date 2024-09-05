@@ -3,15 +3,34 @@ import DashboardNav from "./_components/dashboardNav";
 import SideNav from "./_components/sideNav";
 import { MobileDetails } from "../dashboard/_components/details";
 import Upload from "./_components/upload";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { LoginPopUp } from "./_components/loginPopUp";
+import { useFetchWithToken } from "../hooks/useCustomHook";
+import { useEffect } from "react";
 
 function DashboardLayout({ children }) {
   const { showOverlay } = useSelector((store) => store.dashboard);
   const { navOverlay } = useSelector((store) => store.nav);
+  const isOverlayVisible = showOverlay || navOverlay;
   // console.log(navOverlay);
-  // if(loading){
+  const dispatch = useDispatch();
+  const { data, error, loading } = useFetchWithToken(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/me`
+  );
+  useEffect(() => {
+    if (data && !error && !loading) {
+      console.log(data.data);
+      dispatch(setUserName(data.data.username));
+      dispatch(setUserEmail(data.data.email));
+      dispatch(setUserLimit(data.data.limit));
+      dispatch(setUserSubscription(data.data.is_pro));
+    }
+  }, [data, error, loading]);
+  console.log(error?.response?.status);
+  if (error?.response?.status === 403) return <LoginPopUp/>;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
 
-  // }
   return (
     <div className="max-w-[1557px] mx-auto">
       <DashboardNav />
@@ -23,14 +42,9 @@ function DashboardLayout({ children }) {
       <Upload />
       {/* <DeleteBox/> */}
       {/* dark overlay */}
-      <div
-        className={`${showOverlay ? "block" : "hidden"} ${
-          navOverlay ? "block" : "hidden"
-        } h-screen fixed top-0 bottom-0 right-0 left-0 bg-black opacity-20 z-10`}
-      ></div>
-      {showOverlay || navOverlay ? <div
-        className={`h-screen fixed top-0 bottom-0 right-0 left-0 bg-black opacity-20 z-10`}
-      ></div>:"" }
+      {isOverlayVisible && (
+        <div className="h-screen fixed top-0 bottom-0 right-0 left-0 bg-black opacity-20 z-10"></div>
+      )}
       
     </div>
   );
