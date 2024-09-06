@@ -63,7 +63,7 @@ function DashboardNav() {
           <Image alt="user Profile Image" src={avatar} width={65} height={65} />
         </div>
         <div className="bg-white border-2 border-primary rounded-md p-1">
-          Free plan
+          {userSubscription ? "Pro":"Free"}
         </div>
         {/* Settings */}
         <div>

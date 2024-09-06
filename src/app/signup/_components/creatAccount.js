@@ -121,7 +121,7 @@ function CreateAccount() {
               name="name"
               title="User name"
               id="user-name"
-              register={register("name")}
+              register={register("username")}
               errors={errors}
             />
 
@@ -147,7 +147,8 @@ function CreateAccount() {
           <button
             type="submit"
             className="my-4 bg-primary text-white py-2 px-6 rounded-md font-semibold roboto-font
-          lg:text-xl lg:font-semibold lg:my-6 w-[256px]"
+          lg:text-xl lg:font-semibold lg:my-6 w-[256px] hover:bg-[#f19d37] 
+          active:scale-95"
           >
             Create account
           </button>

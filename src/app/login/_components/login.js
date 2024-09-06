@@ -144,7 +144,8 @@ function Login() {
           <button
             type="submit"
             className="text-xl font-bold my-4 bg-primary text-white py-2 px-6 rounded-md roboto-font
-          lg:text-xl lg:font-semibold lg:my-6 w-[256px]"
+          lg:text-xl lg:font-semibold lg:my-6 w-[256px] hover:bg-[#f19d37] 
+          active:scale-95"
           >
             Login
           </button>

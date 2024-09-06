@@ -9,8 +9,8 @@ export function LoginPopUp() {
       >
         <div className="flex flex-col items-center gap-2">
           {/* <Image src={expired} alt="" height={50} width={50}/> */}
-          <h3 className="text-2xl">Whoops!! your session has expired</h3>
-          <p>Simply Login again to continue using aurify</p>
+          <h3 className="text-2xl">Whoops!! your not Logged In</h3>
+          <p>Simply Login to continue using aurify</p>
           <Link href="/login" className="py-2 px-4 bg-primary rounded text-secondary
           cursor-pointer">Login</Link>
         </div>

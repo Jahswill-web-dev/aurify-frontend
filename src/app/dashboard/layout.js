@@ -7,6 +7,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { LoginPopUp } from "./_components/loginPopUp";
 import { useFetchWithToken } from "../hooks/useCustomHook";
 import { useEffect } from "react";
+import {
+  setUserEmail,
+  setUserLimit,
+  setUserName,
+  setUserSubscription,
+} from "../lib/features/dashboard/dashboardSlice";
+import Loading from "./_components/loading";
 
 function DashboardLayout({ children }) {
   const { showOverlay } = useSelector((store) => store.dashboard);
@@ -19,16 +26,16 @@ function DashboardLayout({ children }) {
   );
   useEffect(() => {
     if (data && !error && !loading) {
-      console.log(data.data);
+      // console.log(data.data);
       dispatch(setUserName(data.data.username));
       dispatch(setUserEmail(data.data.email));
       dispatch(setUserLimit(data.data.limit));
       dispatch(setUserSubscription(data.data.is_pro));
     }
   }, [data, error, loading]);
-  console.log(error?.response?.status);
-  if (error?.response?.status === 403) return <LoginPopUp/>;
-  if (loading) return <p>Loading...</p>;
+  // console.log(error?.response?.status);
+  if (error?.response?.status === 403) return <LoginPopUp />;
+  if (loading) return <Loading/>;
   if (error) return <p>Error: {error.message}</p>;
 
   return (
@@ -45,7 +52,6 @@ function DashboardLayout({ children }) {
       {isOverlayVisible && (
         <div className="h-screen fixed top-0 bottom-0 right-0 left-0 bg-black opacity-20 z-10"></div>
       )}
-      
     </div>
   );
 }

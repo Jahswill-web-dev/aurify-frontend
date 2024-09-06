@@ -11,26 +11,14 @@ import {
   setUserEmail,
   setUserSubscription,
 } from "../lib/features/dashboard/dashboardSlice";
+import Loading from "./_components/loading";
 
 function DashboardPage() {
-  const dispatch = useDispatch();
-  const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/me`
+  return <Main centerComp={<Pdfs />} /> ? (
+    <Main centerComp={<Pdfs />} />
+  ) : (
+    <Loading />
   );
-  useEffect(() => {
-    if (data && !error && !loading) {
-      console.log(data.data);
-      dispatch(setUserName(data.data.username));
-      dispatch(setUserEmail(data.data.email));
-      dispatch(setUserLimit(data.data.limit));
-      dispatch(setUserSubscription(data.data.is_pro));
-    }
-  }, [data, error, loading]);
-  console.log(error?.response?.status);
-  if (error?.response?.status === 403) return <LoginPopUp/>;
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
-  return <Main centerComp={<Pdfs />} />;
 }
 
 export default DashboardPage;
