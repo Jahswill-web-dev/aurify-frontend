@@ -4,33 +4,85 @@ import cancelIcon from "../../../../public/icons/cancel.svg";
 import fileImage from "../../../../public/icons/upload-file.svg";
 import { toggleUpload } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { use, useState } from "react";
+import { usePostWithToken } from "@/app/hooks/useCustomHook";
+import axios from "axios";
+import { RingSpinner } from "@/components/ui/ui";
+
+function truncateText(text, maxLength) {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return text.substring(0, maxLength) + "...";
+}
 
 function Upload() {
   const dispatch = useDispatch();
   const { isUploadOpen } = useSelector((store) => store.dashboard);
+  const { accessToken } = useSelector((store) => store.auth);
   function close() {
     dispatch(toggleUpload());
   }
   const [files, setFiles] = useState([]);
-  
-  const handleDragOver = (event)=>{
-    event.preventDefault()
-  }
+  const [fileName, setFileName] = useState();
+  const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  // prevents the browser from opening the file in another tab which is the default behaviour
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
   // capture the file when dropped in the dropZone Lol
   const handleDrop = (event) => {
     event.preventDefault();
     const droppedFiles = Array.from(event.dataTransfer.files);
     setFiles((prevFiles) => [...prevFiles, ...droppedFiles]);
+    console.log(files);
   };
   const handleFileSelect = (event) => {
     const selectedFiles = Array.from(event.target.files);
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+    console.log(files);
   };
-  // prevents the browser from opening the file in another tab which is the default behaviour
-  const onDragOver = (event) => {
-    event.preventDefault();
+  // Upload to the server
+  const handleUpload = async () => {
+    if (files.length === 0) {
+      console.log("No files to upload");
+      return;
+    }
+    setUploading(true);
+
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append("file", file); // "files" should match the key expected by your backend
+    });
+
+    try {
+      const token = sessionStorage.getItem("accessToken");
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/pdf2ai`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Files uploaded successfully", response.data);
+      // Handle success (e.g., show success message, reset state, etc.)
+      setUploadSuccess(true)
+    } catch (error) {
+      console.error("Error uploading files", error);
+      // Handle error (e.g., show error message)
+    } finally {
+      setUploading(false);
+      setFiles([]);
+      dispatch(toggleUpload())
+    }
   };
+  // console.log(uploading);
 
   return (
     <div
@@ -45,7 +97,7 @@ function Upload() {
       >
         {/* title and closeicon */}
         <div className="text-2xl text-primary flex justify-between items-center">
-          <p>Upload PDF</p>{" "}
+          <p>Upload File</p>{" "}
           <div onClick={close} className="cursor-pointer">
             <Image alt="cancel icon" src={cancelIcon} width={40} height={40} />
           </div>
@@ -61,8 +113,8 @@ function Upload() {
             <Image
               src={fileImage}
               alt="file icon"
-              width={115}
-              height={115}
+              width={80}
+              height={80}
               className="mx-auto"
             />
             <p>
@@ -71,24 +123,54 @@ function Upload() {
                 htmlFor="file-upload"
                 className="text-primary cursor-pointer"
               >
-                Click to Uploads
+                Click to Upload
               </label>
             </p>
+            <div>
+              File:
+              {files.map((file, index) => (
+                <p key={index}>
+                  {index + 1}. {truncateText(file.name, 20)}
+                </p>
+              ))}
+            </div>
+
+            <button
+              className="text-white bg-primary inter-font px-4 py-2 rounded active:scale-95"
+              onClick={() => handleUpload()}
+            >
+              Submit
+            </button>
             <input
               id="file-upload"
               type="file"
-              multiple
               onChange={handleFileSelect}
-              style
-              ={{ display: "none" }}
+              style={{ display: "none" }}
             />
           </div>
         </div>
+        {/*.......  */}
+
         {/* Progress bar */}
-        <div>
-          <p className="text-xl text-p-text">Uploading...</p>
-          <div></div>
-        </div>
+        {uploading && (
+          <div className="bg-white opacity-80 top-0 left-0 right-0 bottom-0 absolute 
+          flex flex-col gap-2 items-center justify-center">
+            <div>
+              <RingSpinner />
+            </div>
+            <p className="text-xl text-p-text-darker font-semibold">Summarizing PDF's...</p>
+          </div>
+        )}
+        {/* Success Message */}
+        {uploadSuccess && (
+          <div className="bg-white opacity-80 top-0 left-0 right-0 bottom-0 absolute 
+          flex flex-col gap-2 items-center justify-center">
+            <div>
+              <RingSpinner />
+            </div>
+            <p className="text-xl text-p-text-darker font-semibold">Summarizing PDF's...</p>
+          </div>
+        )}
       </div>
     </div>
   );

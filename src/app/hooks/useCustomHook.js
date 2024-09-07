@@ -23,10 +23,36 @@ export function useFetchWithToken(url) {
         setLoading(false);
       }
     }
-    if(url){
-        fetchData()
+    if (url) {
+      fetchData();
     }
   }, [url]);
 
   return { data, error, loading };
+}
+export function usePostWithToken(url, data) {
+  const [dataRes, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function getData() {
+      try {
+        const response = axios.post(url, data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setData(response);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (url) {
+      getData();
+    }
+  }, [url]);
+  return { dataRes, error, loading };
 }

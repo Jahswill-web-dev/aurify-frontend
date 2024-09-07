@@ -27,7 +27,7 @@
     }
     .dashboard-main{
       @apply bg-white text-p-text-darker px-3 py-5 rounded-md border-2 border-p-text h-full w-[100%] lg:w-[70%] min-h-[600px]
-      max-h-[700px] overflow-scroll
+      max-h-[700px] overflow-y-scroll
     }
 }
 

@@ -30,7 +30,7 @@ function MobileNav() {
         <div
         onClick={openUpload}
           className="bg-secondary cursor-pointer text-primary rounded-xl border-2 border-p-text
-      flex gap-0 items-center w-[132px] drop-shadow-xl px-2"
+      flex gap-0 items-center w-[132px] drop-shadow-xl px-2 active:scale-95"
         >
           <svg
             width="44"
@@ -151,7 +151,7 @@ function SideNav() {
           <div className="pl-4">
             <div
             onClick={openUpload}
-              className="cursor-pointer bg-secondary text-primary rounded-xl border-2 border-p-text
+              className="active:scale-95 cursor-pointer bg-secondary text-primary rounded-xl border-2 border-p-text
           flex gap-2 items-center h-[60px] shadow-lg w-[132px] drop-shadow-xl px-2"
             >
               <svg

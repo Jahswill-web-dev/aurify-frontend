@@ -14,6 +14,9 @@ import {
 import Loading from "./_components/loading";
 
 function DashboardPage() {
+  // const n = 0;
+  // if(n === 0) return <div>Upload a pdf file</div>
+
   return <Main centerComp={<Pdfs />} /> ? (
     <Main centerComp={<Pdfs />} />
   ) : (

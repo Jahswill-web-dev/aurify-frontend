@@ -5,11 +5,12 @@ import bookmarkIcon from "../../../../public/icons/transparent-bookmark.svg";
 import playIcon from "../../../../public/icons/play-icon.svg";
 import pauseIcon from "../../../../public/icons/pause-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   toggleDetails,
   setPdfName,
   setFirstPdfName,
+  toggleUpload,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 function Block({ first, selected, name, playing }) {
@@ -24,7 +25,6 @@ function Block({ first, selected, name, playing }) {
       dispatch(setFirstPdfName(name));
     }
   }, [selected, name, dispatch]);
-
 
   function detail() {
     if (window.matchMedia("(max-width:1023px)").matches) {
@@ -70,22 +70,34 @@ function Block({ first, selected, name, playing }) {
   );
 }
 
-
-
-
-
 function Pdfs() {
-const {data, error, loading} = useFetchWithToken(`${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`)
+  const [summaries, setSummaries] = useState();
+  const dispatch = useDispatch();
+  const { data, error, loading } = useFetchWithToken(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`
+  );
 
-  useEffect(()=>{
-    if(data && !error && !loading){
-      console.log(data.data)
+  useEffect(() => {
+    if (data && !error && !loading) {
+      console.log(data.data);
+      setSummaries(data.data)
     }
-  },[data, loading, error]);
+  }, [data, loading, error]);
 
-  // if(data?.data.length === 0) return <div>Upload a pdf file</div>
-    
-  
+
+
+  if (data?.data?.length === 0)
+    return (
+      <div className="dashboard-main flex items-center justify-center">
+        <div
+          className="text-white bg-primary rounded py-2 px-4 inter-font cursor-pointer active:scale-95"
+          onClick={() => dispatch(toggleUpload())}
+        >
+          Upload a file
+        </div>
+      </div>
+    );
+
   return (
     <div className="dashboard-main">
       <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
