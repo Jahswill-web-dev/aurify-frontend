@@ -8,6 +8,9 @@ const initialState = {
   isdetailsOpen: false,
   pdfName: "",
   firstPdfName: "",
+  pdfSlug: "",
+  firstPdfSlug: "",
+  pdfSummary: "",
   isUploadOpen: false,
   showOverlay: false,
 };
@@ -31,8 +34,17 @@ const dashboardSlice = createSlice({
     setPdfName: (state, action) => {
       state.pdfName = action.payload;
     },
+    setPdfSlug: (state, action) => {
+      state.pdfSlug = action.payload;
+    },
+    setFirstPdfSlug: (state, action) => {
+      state.firstPdfSlug = action.payload;
+    },
     setFirstPdfName: (state, action) => {
       state.firstPdfName = action.payload;
+    },
+    setPdfSummary: (state, action) => {
+      state.pdfSummary = action.payload;
     },
     toggleDetails: (state, action) => {
       state.isdetailsOpen = !state.isdetailsOpen;
@@ -56,9 +68,12 @@ export const {
   setPdfName,
   toggleUpload,
   setFirstPdfName,
+  setPdfSlug,
+  setFirstPdfSlug,
+  setPdfSummary,
   setUserName,
   setUserEmail,
   setUserLimit,
-  setUserSubscription
+  setUserSubscription,
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

@@ -88,7 +88,7 @@ function CreateAccount() {
         console.log(error);
         Toast.fire({
           icon: "error",
-          title: "Login in Failed",
+          title: "Failed to create account try again",
         });
       });
 

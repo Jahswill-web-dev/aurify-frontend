@@ -5,24 +5,38 @@ import bookmarkIcon from "../../../../public/icons/transparent-bookmark.svg";
 import playIcon from "../../../../public/icons/play-icon.svg";
 import pauseIcon from "../../../../public/icons/pause-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   toggleDetails,
   setPdfName,
   setFirstPdfName,
   toggleUpload,
+  setFirstPdfSlug,
+  setPdfSlug,
+  setPdfSummary,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
-function Block({ first, selected, name, playing }) {
+import Loading from "./loading";
+function truncateText(text, maxLength) {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  return text.substring(0, maxLength) + "...";
+}
+function Block({ first, selected, name, playing, slug, summary }) {
   const { pdfName } = useSelector((store) => store.dashboard);
   const dispatch = useDispatch();
   // {
   //   pdfName ? pdfName : selected && name;
   // }
-
   useEffect(() => {
     if (selected) {
       dispatch(setFirstPdfName(name));
+      dispatch(setFirstPdfSlug(slug));
+    }
+    if (first) {
+      dispatch(setPdfName(name));
+      dispatch(setPdfSlug(slug));
     }
   }, [selected, name, dispatch]);
 
@@ -31,8 +45,10 @@ function Block({ first, selected, name, playing }) {
       dispatch(toggleDetails());
     }
     dispatch(setPdfName(name));
+    dispatch(setPdfSlug(slug));
   }
 
+  console.log("first", first);
   return (
     <div onClick={detail}>
       <div
@@ -40,7 +56,7 @@ function Block({ first, selected, name, playing }) {
           first ? "border-t-2" : "border-t-0"
         } ${selected ? "bg-secondary" : "bg-white"} text-p-text roboto-font`}
       >
-        <p className="w-[130px]">{name}</p>
+        <p className="w-[250px]">{truncateText(name, 30)}</p>
         <div className="hidden md:block">
           <Image
             alt="bookmark icon"
@@ -72,6 +88,7 @@ function Block({ first, selected, name, playing }) {
 
 function Pdfs() {
   const [summaries, setSummaries] = useState();
+  const [selectedPdfId, setSelectedPdfId] = useState();
   const dispatch = useDispatch();
   const { data, error, loading } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`
@@ -80,25 +97,41 @@ function Pdfs() {
   useEffect(() => {
     if (data && !error && !loading) {
       console.log(data.data);
-      setSummaries(data.data)
+      setSummaries(data.data);
     }
   }, [data, loading, error]);
 
+  // if (data?.data?.length === 0)
+  //   return (
+  //     <div className="dashboard-main flex items-center justify-center">
+  //       <div
+  //         className="text-white bg-primary rounded py-2 px-4 inter-font cursor-pointer active:scale-95"
+  //         onClick={() => dispatch(toggleUpload())}
+  //       >
+  //         Upload a file
+  //       </div>
+  //     </div>
+  //   );
 
+  // if (loading) {
+  //   return <Loading/>;
+  // }
 
-  if (data?.data?.length === 0)
-    return (
-      <div className="dashboard-main flex items-center justify-center">
-        <div
-          className="text-white bg-primary rounded py-2 px-4 inter-font cursor-pointer active:scale-95"
-          onClick={() => dispatch(toggleUpload())}
-        >
-          Upload a file
-        </div>
+  if (error) {
+    console.log("could not fetch pdf");
+    return <p>There was an error fetching PDFs. Please try again later.</p>;
+  }
+
+  return data?.data?.length === 0 ? (
+    <div className="dashboard-main flex items-center justify-center">
+      <div
+        className="text-white bg-primary rounded py-2 px-4 inter-font cursor-pointer active:scale-95"
+        onClick={() => dispatch(toggleUpload())}
+      >
+        Upload a file
       </div>
-    );
-
-  return (
+    </div>
+  ) : (
     <div className="dashboard-main">
       <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
         {`Summarized PDF's`}
@@ -107,7 +140,15 @@ function Pdfs() {
         {/* Blocks container */}
         <div className="flex flex-col gap-2">
           {/* Single Blocks */}
-          <Block
+          {summaries?.map((summary, index) => (
+            <Block
+              first={index + 1 === 1}
+              key={summary.id}
+              name={summary.title}
+              slug={summary.slug}
+            />
+          ))}
+          {/* <Block
             first={true}
             selected={true}
             name="Web-development"
@@ -116,7 +157,7 @@ function Pdfs() {
           <Block name="Math-Notes" playing={false} />
           <Block name="Biology-Notes" playing={false} />
           <Block name="English-Essay" playing={false} />
-          <Block name="English-Essays" playing={false} />
+          <Block name="English-Essays" playing={false} /> */}
         </div>
       </div>
     </div>

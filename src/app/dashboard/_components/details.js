@@ -15,7 +15,7 @@ import { closeDetails } from "@/app/lib/features/dashboard/dashboardSlice";
 import Link from "next/link";
 function Details() {
   const dispatch = useDispatch();
-  const { pdfName, firstPdfName } = useSelector((store) => store.dashboard);
+  const { pdfName, firstPdfName, pdfSlug, firstPdfSlug } = useSelector((store) => store.dashboard);
   
   return (
     <div className="hidden inter-font overflow-hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
@@ -43,7 +43,7 @@ function Details() {
             />
             <p>listen to audio</p>
           </div>
-          <Link href={`/dashboard/summary/${pdfName === "" ? firstPdfName : pdfName}`}>
+          <Link href={`/dashboard/summary/${pdfName === "" ? firstPdfSlug : pdfSlug}`}>
             <div className="flex  gap-3 items-center hover:text-primary">
               <Image
                 src={summaryIcon}
