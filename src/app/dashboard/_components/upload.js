@@ -2,12 +2,13 @@
 import Image from "next/image";
 import cancelIcon from "../../../../public/icons/cancel.svg";
 import fileImage from "../../../../public/icons/upload-file.svg";
-import { toggleUpload } from "@/app/lib/features/dashboard/dashboardSlice";
+import { toggleUpload, toggleUploadSuccess } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { use, useState } from "react";
+import { useState } from "react";
 import { usePostWithToken } from "@/app/hooks/useCustomHook";
 import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
+
 
 function truncateText(text, maxLength) {
   if (text.length <= maxLength) {
@@ -18,7 +19,7 @@ function truncateText(text, maxLength) {
 
 function Upload() {
   const dispatch = useDispatch();
-  const { isUploadOpen } = useSelector((store) => store.dashboard);
+  const { isUploadOpen, uploadSuccess } = useSelector((store) => store.dashboard);
   const { accessToken } = useSelector((store) => store.auth);
   function close() {
     dispatch(toggleUpload());
@@ -26,7 +27,7 @@ function Upload() {
   const [files, setFiles] = useState([]);
   const [fileName, setFileName] = useState();
   const [uploading, setUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
+  // const [uploadSuccess, toggleUploadSuccess] = useState(false);
 
   // prevents the browser from opening the file in another tab which is the default behaviour
   const handleDragOver = (event) => {
@@ -72,17 +73,19 @@ function Upload() {
 
       console.log("Files uploaded successfully", response.data);
       // Handle success (e.g., show success message, reset state, etc.)
-      setUploadSuccess(true)
+
+      dispatch(toggleUploadSuccess());
+
     } catch (error) {
       console.error("Error uploading files", error);
       // Handle error (e.g., show error message)
     } finally {
       setUploading(false);
       setFiles([]);
-      dispatch(toggleUpload())
+      dispatch(toggleUpload());
     }
   };
-  // console.log(uploading);
+  console.log("upload file:",uploadSuccess);
 
   return (
     <div

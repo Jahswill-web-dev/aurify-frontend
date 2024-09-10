@@ -1,7 +1,8 @@
 "use client";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
+import { setPdfName } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 function truncateText(text, maxLength) {
   if (text.length <= maxLength) {
@@ -11,23 +12,31 @@ function truncateText(text, maxLength) {
 }
 
 function Summary({ name }) {
-  const { pdfName } = useSelector((store) => store.dashboard);
-  const [pdfSummary, setPdfSummary] = useState();
-  // fetch the data from the backend
+  console.log("name", name);
+  console.log("testing....");
+  const [pdf, setPdf] = useState();
   const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/audiobook/${name}`
+    // `${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`
   );
-  // use url slug to find the the data
-  const dataArray = data?.data;
-  const matchedItem = data?.data?.find((data) => data.slug === name);
-  if (matchedItem) {
-    console.log(matchedItem);
-  }
+  // console.log("data:", data);
+  // console.log("error:", error);
+  // console.log("loading:", loading);
+  const dispatch = useDispatch();
   useEffect(() => {
-    // console.log(data?.data);
-    setPdfSummary(matchedItem)
-  }, []);
+    console.log("data:", data?.data);
+    setPdf(data?.data)
+    dispatch(setPdfName(data?.data?.title))
+  }, [data, error, loading]);
 
+  if (error) console.log(error);
+  if (error) {
+    return (
+      <div className="dashboard-main">
+        <p className="text-center text-xl">There was an error fetching PDFs. Please try again later.</p>;
+      </div>
+    );
+  }
   return (
     <div className="dashboard-main">
       <div>
@@ -40,7 +49,7 @@ function Summary({ name }) {
             className="bg-secondary text-x-head font-semibold border-t-2 border-primary 
         pt-1 pb-4 pl-5 text-primary"
           >
-            {truncateText(pdfName, 60)}
+            {truncateText(setPdfName, 60)}
           </div>
         </div>
       </div>
@@ -48,7 +57,7 @@ function Summary({ name }) {
         <h2 className="text-2xl font-semibold text-p-text-darker">
           First Heading
         </h2>
-        <p className="text-p-text text-lg">{pdfSummary?.text}</p>
+        <p className="text-p-text text-lg">{pdf?.text}</p>
       </div>
     </div>
   );

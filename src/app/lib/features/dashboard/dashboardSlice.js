@@ -13,6 +13,7 @@ const initialState = {
   pdfSummary: "",
   isUploadOpen: false,
   showOverlay: false,
+  uploadSuccess:false,
 };
 
 const dashboardSlice = createSlice({
@@ -58,6 +59,9 @@ const dashboardSlice = createSlice({
       state.isUploadOpen = !state.isUploadOpen;
       state.showOverlay = !state.showOverlay;
     },
+    toggleUploadSuccess:(state, action)=>{
+      state.uploadSuccess = !state.uploadSuccess
+    }
   },
 });
 
@@ -75,5 +79,6 @@ export const {
   setUserEmail,
   setUserLimit,
   setUserSubscription,
+  toggleUploadSuccess,
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

@@ -36,7 +36,7 @@ function DashboardLayout({ children }) {
   // console.log(error?.response?.status);
   if (error?.response?.status === 403) return <LoginPopUp />;
   if (loading) return <Loading/>;
-  if (error) return <p className="text-center text-3xl mt-[50%]">Error: {error.message}</p>;
+  if (error) return <p className="text-center text-3xl mt-28">Error: {error.message}</p>;
 
   return (
     <div className="max-w-[1557px] mx-auto">

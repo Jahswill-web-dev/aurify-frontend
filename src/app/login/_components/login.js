@@ -93,11 +93,18 @@ function Login() {
         router.push("/dashboard");
       })
       .catch((error) => {
-        console.log(error);
-        Toast.fire({
-          icon: "error",
-          title: "Login in Failed",
-        });
+        console.log(error.response.status);
+        if (error.response.status === 451) {
+          Toast.fire({
+            icon: "error",
+            title: "Incorrect Email or Password",
+          });
+        } else {
+          Toast.fire({
+            icon: "error",
+            title: "Login in Failed try again",
+          });
+        }
       });
 
     // console.log(data);
@@ -151,6 +158,12 @@ function Login() {
           </button>
         </form>
       </div>
+      <p className="text-center">
+        don't have an account?{" "}
+        <Link href="/signup">
+          <span className="text-primary underline">Signup</span>
+        </Link>
+      </p>
       <div className="flex items-center gap-2 w-full justify-center">
         <div className="w-[200px] h-[2px] bg-p-text-darker"></div>
         <p className="text-p-text text-xl text-center pb-3">or</p>
@@ -162,12 +175,6 @@ function Login() {
         <SocialSignIn name="LogIn in Facebook" logo={facebookIcon} />
         <SocialSignIn name="LogIn in Twitter" logo={xIcon} />
       </div>
-      <p className="text-center my-7">
-        dont have an account?{" "}
-        <Link href="/signup">
-          <span className="text-primary underline">Signup</span>
-        </Link>
-      </p>
     </div>
   );
 }

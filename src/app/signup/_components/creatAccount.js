@@ -12,6 +12,9 @@ import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
 import Swal from "sweetalert2";
 import Link from "next/link";
+import { setAccessToken } from "@/app/lib/features/auth/authSlice";
+import { useDispatch } from "react-redux";
+
 
 const Toast = Swal.mixin({
   toast: true,
@@ -63,6 +66,7 @@ function SocialSignIn({ name, logo }) {
 }
 
 function CreateAccount() {
+  const dispatch = useDispatch();
   const router = useRouter();
   const {
     register,
@@ -78,6 +82,10 @@ function CreateAccount() {
       .then((response) => {
         console.log(response);
 
+        const { access_token } = response.data;
+        sessionStorage.setItem("accessToken", access_token);
+        dispatch(setAccessToken(access_token));
+
         Toast.fire({
           icon: "success",
           title: "Signed in successfully",
@@ -86,10 +94,18 @@ function CreateAccount() {
       })
       .catch((error) => {
         console.log(error);
-        Toast.fire({
-          icon: "error",
-          title: "Failed to create account try again",
-        });
+        console.log(error.response.status);
+        if (error.response.status === 450) {
+          Toast.fire({
+            icon: "error",
+            title: "User with Email already exists!",
+          });
+        } else {
+          Toast.fire({
+            icon: "error",
+            title: "Failed to create account try again",
+          });
+        }
       });
 
     // console.log(data);
@@ -154,6 +170,12 @@ function CreateAccount() {
           </button>
         </form>
       </div>
+      <p className="text-center">
+        Already have an account?{" "}
+        <Link href="/login">
+          <span className="text-primary underline">Log In</span>
+        </Link>
+      </p>
       {/*  */}
       <div className="flex items-center gap-2 w-full justify-center">
         <div className="w-[200px] h-[2px] bg-p-text-darker"></div>
@@ -166,12 +188,6 @@ function CreateAccount() {
         <SocialSignIn name="Sign in Facebook" logo={facebookIcon} />
         <SocialSignIn name="Sign in Twitter" logo={xIcon} />
       </div>
-      <p className="text-center my-7">
-        Already have an account?{" "}
-        <Link href="/login">
-          <span className="text-primary underline">Log In</span>
-        </Link>
-      </p>
     </div>
   );
 }

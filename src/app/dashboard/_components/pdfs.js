@@ -5,7 +5,7 @@ import bookmarkIcon from "../../../../public/icons/transparent-bookmark.svg";
 import playIcon from "../../../../public/icons/play-icon.svg";
 import pauseIcon from "../../../../public/icons/pause-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   toggleDetails,
   setPdfName,
@@ -14,6 +14,7 @@ import {
   setFirstPdfSlug,
   setPdfSlug,
   setPdfSummary,
+  toggleUploadSuccess,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import Loading from "./loading";
@@ -88,9 +89,10 @@ function Block({ first, selected, name, playing, slug, summary }) {
 
 function Pdfs() {
   const [summaries, setSummaries] = useState();
+  const { uploadSuccess } = useSelector((store) => store.dashboard);
   const [selectedPdfId, setSelectedPdfId] = useState();
   const dispatch = useDispatch();
-  const { data, error, loading } = useFetchWithToken(
+  const { data, error, loading, refetch } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`
   );
 
@@ -101,25 +103,22 @@ function Pdfs() {
     }
   }, [data, loading, error]);
 
-  // if (data?.data?.length === 0)
-  //   return (
-  //     <div className="dashboard-main flex items-center justify-center">
-  //       <div
-  //         className="text-white bg-primary rounded py-2 px-4 inter-font cursor-pointer active:scale-95"
-  //         onClick={() => dispatch(toggleUpload())}
-  //       >
-  //         Upload a file
-  //       </div>
-  //     </div>
-  //   );
-
-  // if (loading) {
-  //   return <Loading/>;
-  // }
+  useEffect(() => {
+    if (uploadSuccess) {
+      refetch().then(() => {
+        dispatch(toggleUploadSuccess());
+        // console.log("holaa")
+      });
+    }
+  }, [uploadSuccess, refetch, dispatch]);
 
   if (error) {
     console.log("could not fetch pdf");
-    return <p>There was an error fetching PDFs. Please try again later.</p>;
+    return (
+      <div className="dashboard-main">
+        <p>There was an error fetching PDFs. Please try again later.</p>;
+      </div>
+    );
   }
 
   return data?.data?.length === 0 ? (
