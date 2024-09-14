@@ -59,3 +59,21 @@ export function usePostWithToken(url, data) {
   }, [url]);
   return { dataRes, error, loading };
 }
+
+export function useDeleteWithToken(pdfId) {
+  // const deletePdf = () => {
+  const token = sessionStorage.getItem("accessToken");
+  axios
+    .delete(`${process.env.NEXT_PUBLIC_BASE_URL}/audiobook/${pdfId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((response) => {
+      console.log("Delete succesful: ", response.data);
+    })
+    .catch((error) => {
+      console.log("error deleting data", error);
+    });
+  // };
+}

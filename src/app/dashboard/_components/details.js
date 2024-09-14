@@ -11,16 +11,26 @@ import shareIcon from "../../../../public/icons/share.svg";
 import deleteIcon from "../../../../public/icons/delete.svg";
 import cheveronDown from "../../../../public/icons/chevron-down.svg";
 import { useSelector, useDispatch } from "react-redux";
-import { closeDetails } from "@/app/lib/features/dashboard/dashboardSlice";
+import { closeDetails, setDeleteState } from "@/app/lib/features/dashboard/dashboardSlice";
 import Link from "next/link";
+import axios from "axios";
+import { useDeleteWithToken } from "@/app/hooks/useCustomHook";
+
 function Details() {
   const dispatch = useDispatch();
-  const { pdfName, firstPdfName, pdfSlug, firstPdfSlug } = useSelector((store) => store.dashboard);
-  
+  const { pdfName, firstPdfName, pdfSlug, firstPdfSlug, firstPdfId, pdfId } =
+    useSelector((store) => store.dashboard);
+  console.log("pdf Id: ", pdfId);
+  const deletePdf = () => {
+    useDeleteWithToken(pdfId);
+    dispatch(setDeleteState(true));
+  };
   return (
     <div className="hidden inter-font overflow-hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
       <div className="flex flex-col gap-2">
-        <h1 className="text-primary font-semibold text-xl">{pdfName === "" ? firstPdfName : pdfName}</h1>
+        <h1 className="text-primary font-semibold text-xl">
+          {pdfName === "" ? firstPdfName : pdfName}
+        </h1>
         {/* options */}
         <div className="flex flex-col gap-5 items-start mt-3">
           <Link href="/dashboard/questions">
@@ -43,7 +53,7 @@ function Details() {
             />
             <p>listen to audio</p>
           </div>
-          <Link href={`/dashboard/summary/${pdfName === "" ? firstPdfSlug : pdfSlug}`}>
+          <Link href={`/dashboard/summary/${pdfSlug}`}>
             <div className="flex  gap-3 items-center hover:text-primary">
               <Image
                 src={summaryIcon}
@@ -59,7 +69,10 @@ function Details() {
             <Image src={shareIcon} alt="share icon" width={30} height={30} />
             <p>share</p>
           </div>
-          <div className="flex  gap-3 items-center hover:text-primary">
+          <div
+            onClick={deletePdf}
+            className="flex  gap-3 items-center hover:text-primary cursor-pointer"
+          >
             <Image src={deleteIcon} alt="delete icon" width={30} height={30} />
             <p>Delete</p>
           </div>
@@ -71,11 +84,18 @@ function Details() {
 
 function MobileDetails() {
   const dispatch = useDispatch();
-  const { isdetailsOpen, pdfName, firstPdfName } = useSelector((store) => store.dashboard);
+  const { isdetailsOpen, pdfName, firstPdfName, pdfId, pdfSlug } = useSelector(
+    (store) => store.dashboard
+  );
 
-  function close() {
+  const close = () => {
     dispatch(closeDetails());
-  }
+  };
+  const deletePdf = () => {
+    useDeleteWithToken(pdfId);
+    dispatch(setDeleteState(true));
+  };
+
   return (
     <div className="lg:hidden">
       <div
@@ -124,7 +144,7 @@ function MobileDetails() {
               />
               <p>Listen to audio</p>
             </div>
-            <Link href={`/dashboard/summary/${pdfName === "" ? firstPdfName : pdfName}`} onClick={close}>
+            <Link href={`/dashboard/summary/${pdfSlug}`} onClick={close}>
               <div className="flex  gap-4 items-center hover:text-primary">
                 <Image
                   src={summaryIcon}
@@ -149,7 +169,10 @@ function MobileDetails() {
               <Image src={shareIcon} alt="share icon" width={30} height={30} />
               <p>Share</p>
             </div>
-            <div className="flex  gap-4 items-center hover:text-primary">
+            <div
+              onClick={deletePdf}
+              className="flex  gap-4 items-center hover:text-primary"
+            >
               <Image
                 src={deleteIcon}
                 alt="delete icon"

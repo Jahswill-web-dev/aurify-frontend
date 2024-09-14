@@ -2,13 +2,16 @@
 import Image from "next/image";
 import cancelIcon from "../../../../public/icons/cancel.svg";
 import fileImage from "../../../../public/icons/upload-file.svg";
-import { toggleUpload, toggleUploadSuccess } from "@/app/lib/features/dashboard/dashboardSlice";
+import {
+  toggleUpload,
+  toggleUploadSuccess,
+} from "@/app/lib/features/dashboard/dashboardSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { usePostWithToken } from "@/app/hooks/useCustomHook";
 import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
-
+import Swal from "sweetalert2";
 
 function truncateText(text, maxLength) {
   if (text.length <= maxLength) {
@@ -17,9 +20,23 @@ function truncateText(text, maxLength) {
   return text.substring(0, maxLength) + "...";
 }
 
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  },
+});
+
 function Upload() {
   const dispatch = useDispatch();
-  const { isUploadOpen, uploadSuccess } = useSelector((store) => store.dashboard);
+  const { isUploadOpen, uploadSuccess } = useSelector(
+    (store) => store.dashboard
+  );
   const { accessToken } = useSelector((store) => store.auth);
   function close() {
     dispatch(toggleUpload());
@@ -70,14 +87,26 @@ function Upload() {
           },
         }
       );
-
-      console.log("Files uploaded successfully", response.data);
-      // Handle success (e.g., show success message, reset state, etc.)
-
       dispatch(toggleUploadSuccess());
-
+      Toast.fire({
+        icon: "success",
+        title: "Upload Sucessful",
+      });
+      // console.log("Files uploaded successfully", response.data);
+      // Handle success (e.g., show success message, reset state, etc.)
     } catch (error) {
-      console.error("Error uploading files", error);
+      // console.error("Error uploading files", error)
+      if (error.message === "Network Error") {
+        Toast.fire({
+          icon: "error",
+          title: "Check Your Internet",
+        });
+      } else {
+        Toast.fire({
+          icon: "error",
+          title: "Failed to Upload",
+        });
+      }
       // Handle error (e.g., show error message)
     } finally {
       setUploading(false);
@@ -85,7 +114,7 @@ function Upload() {
       dispatch(toggleUpload());
     }
   };
-  console.log("upload file:",uploadSuccess);
+  console.log("upload file:", uploadSuccess);
 
   return (
     <div
@@ -156,22 +185,30 @@ function Upload() {
 
         {/* Progress bar */}
         {uploading && (
-          <div className="bg-white opacity-80 top-0 left-0 right-0 bottom-0 absolute 
-          flex flex-col gap-2 items-center justify-center">
+          <div
+            className="bg-white opacity-80 top-0 left-0 right-0 bottom-0 absolute 
+          flex flex-col gap-2 items-center justify-center"
+          >
             <div>
               <RingSpinner />
             </div>
-            <p className="text-xl text-p-text-darker font-semibold">Summarizing PDF's...</p>
+            <p className="text-xl text-p-text-darker font-semibold">
+              Summarizing PDF's...
+            </p>
           </div>
         )}
         {/* Success Message */}
         {uploadSuccess && (
-          <div className="bg-white opacity-80 top-0 left-0 right-0 bottom-0 absolute 
-          flex flex-col gap-2 items-center justify-center">
+          <div
+            className="bg-white opacity-80 top-0 left-0 right-0 bottom-0 absolute 
+          flex flex-col gap-2 items-center justify-center"
+          >
             <div>
               <RingSpinner />
             </div>
-            <p className="text-xl text-p-text-darker font-semibold">Summarizing PDF's...</p>
+            <p className="text-xl text-p-text-darker font-semibold">
+              Summarizing PDF's...
+            </p>
           </div>
         )}
       </div>

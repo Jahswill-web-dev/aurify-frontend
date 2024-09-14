@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { set } from "react-hook-form";
 
 const initialState = {
   userName: "",
@@ -10,10 +11,13 @@ const initialState = {
   firstPdfName: "",
   pdfSlug: "",
   firstPdfSlug: "",
+  pdfId: "",
+  firstPdfId: "",
   pdfSummary: "",
   isUploadOpen: false,
   showOverlay: false,
-  uploadSuccess:false,
+  uploadSuccess: false,
+  isDeleted: null,
 };
 
 const dashboardSlice = createSlice({
@@ -31,6 +35,12 @@ const dashboardSlice = createSlice({
     },
     setUserSubscription: (state, action) => {
       state.userSubscription = action.payload;
+    },
+    setPdfId: (state, action) => {
+      state.pdfId = action.payload;
+    },
+    setFirstPdfId: (state, action) => {
+      state.pdfId = action.payload;
     },
     setPdfName: (state, action) => {
       state.pdfName = action.payload;
@@ -59,9 +69,12 @@ const dashboardSlice = createSlice({
       state.isUploadOpen = !state.isUploadOpen;
       state.showOverlay = !state.showOverlay;
     },
-    toggleUploadSuccess:(state, action)=>{
-      state.uploadSuccess = !state.uploadSuccess
-    }
+    toggleUploadSuccess: (state, action) => {
+      state.uploadSuccess = !state.uploadSuccess;
+    },
+    setDeleteState: (state, action) => {
+      state.isDeleted = action.payload;
+    },
   },
 });
 
@@ -80,5 +93,8 @@ export const {
   setUserLimit,
   setUserSubscription,
   toggleUploadSuccess,
+  setPdfId,
+  setFirstPdfId,
+  setDeleteState,
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

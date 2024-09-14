@@ -2,10 +2,10 @@ import Main from "../../_components/main";
 import Summary from "../../_components/summary";
 
 function SubjectNotesPage({ params }) {
-  const name = params.slug;
+  const slug = params.slug;
   
   return (
-    <Main centerComp={<Summary name={name} />} name="summary" />
+    <Main centerComp={<Summary slug={slug} />} name="summary" />
 )
 }
 

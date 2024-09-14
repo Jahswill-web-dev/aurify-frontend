@@ -3,6 +3,7 @@ import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import { setPdfName } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import Loading from "./loading";
 
 function truncateText(text, maxLength) {
   if (text.length <= maxLength) {
@@ -11,29 +12,31 @@ function truncateText(text, maxLength) {
   return text.substring(0, maxLength) + "...";
 }
 
-function Summary({ name }) {
-  console.log("name", name);
-  console.log("testing....");
+function Summary({ slug }) {
+  // const { pdfId, pdfName } = useSelector((store) => store.dashboard);
+  console.log("slug:", slug);
+  // console.log("testing....");
   const [pdf, setPdf] = useState();
   const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/audiobook/${name}`
+    `${process.env.NEXT_PUBLIC_BASE_URL}/audiobook/s/${slug}`
     // `${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`
   );
-  // console.log("data:", data);
-  // console.log("error:", error);
-  // console.log("loading:", loading);
   const dispatch = useDispatch();
   useEffect(() => {
     console.log("data:", data?.data);
-    setPdf(data?.data)
-    dispatch(setPdfName(data?.data?.title))
+    setPdf(data?.data);
+    dispatch(setPdfName(data?.data?.title));
   }, [data, error, loading]);
 
+  console.log("title:",pdf?.title)
   if (error) console.log(error);
   if (error) {
     return (
       <div className="dashboard-main">
-        <p className="text-center text-xl">There was an error fetching PDFs. Please try again later.</p>;
+        <p className="text-center text-xl">
+          There was an error fetching PDFs. Please try again later.
+        </p>
+        ;
       </div>
     );
   }
@@ -49,15 +52,12 @@ function Summary({ name }) {
             className="bg-secondary text-x-head font-semibold border-t-2 border-primary 
         pt-1 pb-4 pl-5 text-primary"
           >
-            {truncateText(setPdfName, 60)}
+            {!pdf?.title ? "loading...":truncateText(pdf?.title, 60)}
           </div>
         </div>
       </div>
       <div className="flex flex-col gap-4 mt-10 px-2">
-        <h2 className="text-2xl font-semibold text-p-text-darker">
-          First Heading
-        </h2>
-        <p className="text-p-text text-lg">{pdf?.text}</p>
+        <div className="text-p-text text-lg">{pdf?.text ? pdf?.text:<div className="relative top-10"><Loading/></div>}</div>
       </div>
     </div>
   );

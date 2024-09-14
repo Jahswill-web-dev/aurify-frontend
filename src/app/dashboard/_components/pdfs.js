@@ -5,7 +5,7 @@ import bookmarkIcon from "../../../../public/icons/transparent-bookmark.svg";
 import playIcon from "../../../../public/icons/play-icon.svg";
 import pauseIcon from "../../../../public/icons/pause-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   toggleDetails,
   setPdfName,
@@ -13,8 +13,11 @@ import {
   toggleUpload,
   setFirstPdfSlug,
   setPdfSlug,
+  setPdfId,
   setPdfSummary,
   toggleUploadSuccess,
+  setFirstPdfId,
+  setDeleteState,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import Loading from "./loading";
@@ -24,9 +27,11 @@ function truncateText(text, maxLength) {
   }
   return text.substring(0, maxLength) + "...";
 }
-function Block({ first, selected, name, playing, slug, summary }) {
+function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
   const { pdfName } = useSelector((store) => store.dashboard);
   const dispatch = useDispatch();
+  const audioRef = useRef(null);
+
   // {
   //   pdfName ? pdfName : selected && name;
   // }
@@ -34,10 +39,14 @@ function Block({ first, selected, name, playing, slug, summary }) {
     if (selected) {
       dispatch(setFirstPdfName(name));
       dispatch(setFirstPdfSlug(slug));
+      dispatch(setPdfId(id));
+      dispatch(setFirstPdfId(id));
     }
     if (first) {
       dispatch(setPdfName(name));
       dispatch(setPdfSlug(slug));
+      // dispatch(setPdfId(id));
+      dispatch(setFirstPdfId(id));
     }
   }, [selected, name, dispatch]);
 
@@ -47,9 +56,34 @@ function Block({ first, selected, name, playing, slug, summary }) {
     }
     dispatch(setPdfName(name));
     dispatch(setPdfSlug(slug));
+    dispatch(setPdfId(id));
   }
+  useEffect(() => {
+    if (playing) {
+      audioRef.current.play();
+    } else {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [playing]);
 
-  console.log("first", first);
+  useEffect(() => {
+    const handleEnded = () => {
+      onPlayPause();
+    };
+    console.log("Audio url", url)
+    const audioElement = audioRef.current;
+    if (audioElement) {
+      audioElement.addEventListener("ended", handleEnded);
+    }
+    return () => {
+      if (audioElement) {
+        audioElement.removeEventListener("ended", handleEnded);
+      }
+    };
+  }, [onPlayPause]);
+  // console.log("pdf idd", id)
+  // console.log("first", first);
   return (
     <div onClick={detail}>
       <div
@@ -66,7 +100,14 @@ function Block({ first, selected, name, playing, slug, summary }) {
             width={17}
           />
         </div>
-        <div className="hidden md:block">
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onPlayPause();
+            console.log("play button is clicked!!!")
+          }}
+          className="hidden md:block"
+        >
           <Image
             alt="play Icon"
             src={playing ? pauseIcon : playIcon}
@@ -83,13 +124,15 @@ function Block({ first, selected, name, playing, slug, summary }) {
           />
         </div>
       </div>
+      <audio ref={audioRef} src={url} />
     </div>
   );
 }
 
 function Pdfs() {
   const [summaries, setSummaries] = useState();
-  const { uploadSuccess } = useSelector((store) => store.dashboard);
+  const { uploadSuccess, isDeleted } = useSelector((store) => store.dashboard);
+  const [playingAudioId, setPlayingAudioId] = useState(null);
   const [selectedPdfId, setSelectedPdfId] = useState();
   const dispatch = useDispatch();
   const { data, error, loading, refetch } = useFetchWithToken(
@@ -104,14 +147,23 @@ function Pdfs() {
   }, [data, loading, error]);
 
   useEffect(() => {
-    if (uploadSuccess) {
+    if (uploadSuccess || isDeleted) {
       refetch().then(() => {
         dispatch(toggleUploadSuccess());
         // console.log("holaa")
+        dispatch(setDeleteState(false))
       });
     }
-  }, [uploadSuccess, refetch, dispatch]);
+  }, [uploadSuccess, refetch, dispatch, isDeleted]);
 
+  const handlePlayPause = (id) => {
+    if (playingAudioId === id) {
+      setPlayingAudioId(null);
+    } else {
+      setPlayingAudioId(id);
+    }
+  };
+  // ...........................
   if (error) {
     console.log("could not fetch pdf");
     return (
@@ -145,11 +197,14 @@ function Pdfs() {
               key={summary.id}
               name={summary.title}
               slug={summary.slug}
+              id={summary.id}
+              url={summary.url}
+              playing={playingAudioId === summary.id}
+              onPlayPause={() => handlePlayPause(summary.id)}
             />
           ))}
           {/* <Block
             first={true}
-            selected={true}
             name="Web-development"
             playing={true}
           />
