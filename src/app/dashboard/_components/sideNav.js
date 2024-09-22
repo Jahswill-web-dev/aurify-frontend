@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import Image from "next/image";
 import WhiteHomeIcon from "../../../../public/icons/white-home-icon.svg";
 import homeIcon from "../../../../public/icons/home-icon.svg";
@@ -10,25 +10,27 @@ import closeIcon from "../../../../public/icons/closeicon.svg";
 import { useSelector, useDispatch } from "react-redux";
 import { closeNav } from "@/app/lib/features/nav/navSlice";
 import { toggleUpload } from "@/app/lib/features/dashboard/dashboardSlice";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 function MobileNav() {
+  const pathname = usePathname();
   const { isNavOpen } = useSelector((store) => store.nav);
   const dispatch = useDispatch();
-  
-  function closeNavigation(){
-    dispatch(closeNav())
-  }
-  function openUpload(){
-    dispatch(toggleUpload())
-  }
 
+  function closeNavigation() {
+    dispatch(closeNav());
+  }
+  function openUpload() {
+    dispatch(toggleUpload());
+  }
 
   return (
     <div className="md:hidden roboto-font">
       <div className="pl-4">
         {/* upload Button */}
         <div
-        onClick={openUpload}
+          onClick={openUpload}
           className="bg-secondary cursor-pointer text-primary rounded-xl border-2 border-p-text
       flex gap-0 items-center w-[132px] drop-shadow-xl px-2 active:scale-95"
         >
@@ -44,13 +46,18 @@ function MobileNav() {
               fill="#F7931A"
             />
           </svg>
-          <p className="roboto-font">Summarize</p>
+          <p className="roboto-font">
+            {/* {pathname === "/dashboard/questions" ? "Generate questions" : "Summarize"}             */}
+            Summarize
+          </p>
         </div>
       </div>
       {/* mobile respon1sive nav */}
       <div className="">
         <div
-          className={`transition-all duration-500 absolute ${isNavOpen ? 'right-14':'right-full'} bg-white h-[700px] w-4/5 top-[13%] rounded-md
+          className={`transition-all duration-500 absolute ${
+            isNavOpen ? "right-14" : "right-full"
+          } bg-white h-[700px] w-4/5 top-[13%] rounded-md
         border-[3px] border-p-text py-5 roboto-font z-20`}
         >
           <div className="h-full flex flex-col justify-between">
@@ -136,9 +143,10 @@ function MobileNav() {
 }
 
 function SideNav() {
+  const pathname = usePathname();
   const dispatch = useDispatch();
-  function openUpload(){
-    dispatch(toggleUpload())
+  function openUpload() {
+    dispatch(toggleUpload());
   }
   return (
     <div className="w-[30%] lg:w-[20%]">
@@ -150,7 +158,7 @@ function SideNav() {
           {/* Upload button */}
           <div className="pl-4">
             <div
-            onClick={openUpload}
+              onClick={openUpload}
               className="active:scale-95 cursor-pointer bg-secondary text-primary rounded-xl border-2 border-p-text
           flex gap-2 items-center h-[60px] shadow-lg w-[132px] drop-shadow-xl px-2"
             >
@@ -166,7 +174,10 @@ function SideNav() {
                   fill="#F7931A"
                 />
               </svg>
-              <p className="roboto-font">Summarize</p>
+              <p className="roboto-font">
+                {/* {pathname === "/dashboard/questions" ? "Generate questions" : "Summarize"} */}
+                Summarize
+                </p>
             </div>
           </div>
           {/* Nav Links */}
@@ -175,7 +186,7 @@ function SideNav() {
               <Image alt="home icon" src={homeIcon} width={20} height={20} />
               <p>Home</p>
             </div>
-            <div className="flex gap-3 text-p-text pl-4">
+            {/* <div className="flex gap-3 text-p-text pl-4">
               <Image
                 alt="bookmark icon"
                 src={bookmarkIcon}
@@ -183,16 +194,19 @@ function SideNav() {
                 height={20}
               />
               <p>Bookmarks</p>
-            </div>
-            <div className="flex items-center gap-3 pl-4 text-p-text">
-              <Image
-                alt="question icon"
-                src={questionIcon}
-                width={20}
-                height={20}
-              />
-              <p>practice Questions</p>
-            </div>
+            </div> */}
+
+            <Link href="/dashboard/questions">
+              <div className="flex items-center gap-3 pl-4 text-p-text">
+                <Image
+                  alt="question icon"
+                  src={questionIcon}
+                  width={20}
+                  height={20}
+                />
+                <p>practice Questions</p>
+              </div>
+            </Link>
           </div>
         </div>
         {/* upgrade */}

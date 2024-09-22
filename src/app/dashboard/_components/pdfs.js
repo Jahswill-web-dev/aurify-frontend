@@ -168,7 +168,7 @@ function Pdfs() {
     console.log("could not fetch pdf");
     return (
       <div className="dashboard-main">
-        <p>There was an error fetching PDFs. Please try again later.</p>;
+        <p>There was an error fetching PDFs. Please refresh the page.</p>;
       </div>
     );
   }

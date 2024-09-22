@@ -60,10 +60,10 @@ function Upload() {
   const handleFileSelect = (event) => {
     const selectedFiles = Array.from(event.target.files);
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
-    console.log(files);
   };
   // Upload to the server
   const handleUpload = async () => {
+    // check files length
     if (files.length === 0) {
       console.log("No files to upload");
       return;
@@ -72,9 +72,9 @@ function Upload() {
 
     const formData = new FormData();
     files.forEach((file) => {
-      formData.append("file", file); // "files" should match the key expected by your backend
+      formData.append("file", file);
     });
-
+// upload for summarization
     try {
       const token = sessionStorage.getItem("accessToken");
       const response = await axios.post(
@@ -113,8 +113,9 @@ function Upload() {
       setFiles([]);
       dispatch(toggleUpload());
     }
+// upload to generate Practice questions
+
   };
-  console.log("upload file:", uploadSuccess);
 
   return (
     <div

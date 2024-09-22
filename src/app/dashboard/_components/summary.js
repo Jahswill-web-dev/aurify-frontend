@@ -24,11 +24,11 @@ function Summary({ slug }) {
   const dispatch = useDispatch();
   useEffect(() => {
     console.log("data:", data?.data);
-    setPdf(data?.data);
-    dispatch(setPdfName(data?.data?.title));
+    setPdf(data?.data[0]);
+    dispatch(setPdfName(pdf?.title));
   }, [data, error, loading]);
 
-  console.log("title:",pdf?.title)
+  console.log("title:", pdf?.title);
   if (error) console.log(error);
   if (error) {
     return (
@@ -52,12 +52,20 @@ function Summary({ slug }) {
             className="bg-secondary text-x-head font-semibold border-t-2 border-primary 
         pt-1 pb-4 pl-5 text-primary"
           >
-            {!pdf?.title ? "loading...":truncateText(pdf?.title, 60)}
+            {!pdf?.title ? "loading..." : truncateText(pdf?.title, 60)}
           </div>
         </div>
       </div>
       <div className="flex flex-col gap-4 mt-10 px-2">
-        <div className="text-p-text text-lg">{pdf?.text ? pdf?.text:<div className="relative top-10"><Loading/></div>}</div>
+        <div className="text-p-text text-lg">
+          {pdf?.text ? (
+            <p className="leading-relaxed tracking-wide inter-font">{pdf?.text}</p>
+          ) : (
+            <div className="relative top-10">
+              <Loading />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

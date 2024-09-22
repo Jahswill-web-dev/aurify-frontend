@@ -43,7 +43,7 @@ function DashboardNav() {
           </div>
           <div className="flex items-center gap-2 cursor-pointer">
             <p className="text-lg sm:text-xl text-primary">
-              Good Morning, {userName}
+              Hello, {userName}
             </p>
             <Image
               alt="user Profile Image"
@@ -57,9 +57,9 @@ function DashboardNav() {
         <div className="hidden">dropDown</div>
       </div>
       {/* desktop Nav */}
-      <div className="hidden md:flex items-center max-w-[981px  ] mr-[20%] pl-10 py-2 justify-between">
+      <div className="hidden md:flex items-center max-w-[981px] mr-[20%] pl-10 py-2 justify-between">
         <div className="flex flex-row-reverse items-center gap-2">
-          <p className="text-xl text-primary">Good Morning, {userName}</p>
+          <p className="text-xl text-primary">Hello, {userName}</p>
           <Image alt="user Profile Image" src={avatar} width={65} height={65} />
         </div>
         <div className="bg-white border-2 border-primary rounded-md p-1">

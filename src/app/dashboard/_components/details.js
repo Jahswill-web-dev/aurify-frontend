@@ -11,7 +11,10 @@ import shareIcon from "../../../../public/icons/share.svg";
 import deleteIcon from "../../../../public/icons/delete.svg";
 import cheveronDown from "../../../../public/icons/chevron-down.svg";
 import { useSelector, useDispatch } from "react-redux";
-import { closeDetails, setDeleteState } from "@/app/lib/features/dashboard/dashboardSlice";
+import {
+  closeDetails,
+  setDeleteState,
+} from "@/app/lib/features/dashboard/dashboardSlice";
 import Link from "next/link";
 import axios from "axios";
 import { useDeleteWithToken } from "@/app/hooks/useCustomHook";
@@ -20,8 +23,7 @@ function Details() {
   const dispatch = useDispatch();
   const { pdfName, firstPdfName, pdfSlug, firstPdfSlug, firstPdfId, pdfId } =
     useSelector((store) => store.dashboard);
-  console.log("pdf Id: ", pdfId);
-  const deletePdf = () => {
+    const deletePdf = () => {
     useDeleteWithToken(pdfId);
     dispatch(setDeleteState(true));
   };

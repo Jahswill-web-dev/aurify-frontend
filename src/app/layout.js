@@ -3,7 +3,7 @@ import Footer from "@/components/footer/footer";
 import StoreProvider from "./lib/StoreProvider";
 
 export const metadata = {
-  title: "Aurify",
+  title: "Aurify AI",
   description:
     "Aurify summarizes PDF pages into brief summaries and converts them to audio.",
 };

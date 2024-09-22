@@ -14,7 +14,8 @@ import Swal from "sweetalert2";
 import Link from "next/link";
 import { setAccessToken } from "@/app/lib/features/auth/authSlice";
 import { useDispatch } from "react-redux";
-
+import { useEffect } from "react";
+import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 
 const Toast = Swal.mixin({
   toast: true,
@@ -68,6 +69,18 @@ function SocialSignIn({ name, logo }) {
 function CreateAccount() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { data, error, loading } = useFetchWithToken(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/me`
+  );
+  useEffect(() => {
+    if (data) {
+      console.log(data);
+    }
+    if (data?.status === 200) {
+      router.push("/dashboard");
+    }
+  }, [router, data]);
+
   const {
     register,
     handleSubmit,
