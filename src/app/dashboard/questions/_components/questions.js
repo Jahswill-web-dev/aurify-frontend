@@ -46,10 +46,10 @@ function Option({ value, onChange, isSelected }) {
 function CheckBox({ value, isChecked, onChange }) {
   const [selectedOption, setSelectedOption] = useState();
   const handleChange = (event) => {
-    setSelectedOption((prevValue) => prevValue, ...event.target.value);
+    setSelectedOption(event.target.checked);
     onChange(value, event.target.checked);
   };
-  return (
+  return (  
     <div className=" hover:bg-secondary text-xl border-2 border-p-text rounded-md p-1 flex gap-2 max-w-[300px]">
       <label className="pl-10 w-full cursor-pointer relative">
         {value}
@@ -170,7 +170,7 @@ function Questions({ slug }) {
   const [question, setQuestion] = useState();
   const [answers, setAnswers] = useState({});
   const [checkboxAnswers, setCheckboxAnswers] = useState({});
-  const [checkboxAnswer, setCheckboxAnswer] = useState();
+  // const [checkboxAnswer, setCheckboxAnswer] = useState();
   const router = useRouter();
   const { data, error, loading, refetch } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_BASE_URL}/audiobook/s/${slug}`
@@ -198,6 +198,7 @@ function Questions({ slug }) {
   };
   const handleOptionChange = (value, isChecked) => {
     if (Array.isArray(question?.answer)) {
+      console.log("Checked!!!");
       setCheckboxAnswers((prev) => {
         const updatedAnswers = [...(prev[num] || [])];
         if (isChecked) {
@@ -213,29 +214,31 @@ function Questions({ slug }) {
     } else {
       setAnswers((prev) => ({ ...prev, [num]: value }));
     }
-    //a code that checks if the option chosen is correct
+    
+  };
+  //a code that checks if the option chosen is correct
+  useEffect(() => {
     if (Array.isArray(question?.answer)) {
-      const userAnswers = checkboxAnswer || [];
-      const correctAnswers = question.answers;
+      const userAnswers = checkboxAnswers[num] || [];
+      const correctAnswers = question?.answer;
       const isCorrect =
         userAnswers?.sort().toString() === correctAnswers?.sort().toString();
-
+  
       if (isCorrect) {
-        console.log("correct");
-      } else if (!isCorrect) console.log("wrong");
-    } 
-    else {
-      const isCorrect = value === question.answer;
+        console.log("Correct");
+      } else {
+        console.log("Wrong");
+      }
+    } else {
+      const selectedAnswer = answers[num];
+      const isCorrect = selectedAnswer === question?.answer;
       if (isCorrect) {
-        console.log("correct");
+        console.log("Correct");
       } else {
         console.log("Wrong");
       }
     }
-  };
-  useEffect(() => {
-    setCheckboxAnswer(checkboxAnswers[num]);
-  }, [checkboxAnswers]);
+  }, [checkboxAnswers[num], question, answers[num], num]);
 
   // console.log(question);
   // console.log(answers[num]);
@@ -282,7 +285,7 @@ function Questions({ slug }) {
               add={add}
               subtract={subtract}
               selectedAnswer={answers[num]}
-              selectedCheckboxAnswers={checkboxAnswer || []}
+              selectedCheckboxAnswers={checkboxAnswers[num] || []}
               onOptionChange={handleOptionChange}
             />
           )}
