@@ -1,24 +1,11 @@
 "use client";
 import Main from "./_components/main";
 import Pdfs from "./_components/pdfs";
-import { LoginPopUp } from "./_components/loginPopUp";
-import { useFetchWithToken } from "../hooks/useCustomHook";
-import { useSelector, useDispatch } from "react-redux";
-import { useEffect } from "react";
-import {
-  setUserLimit,
-  setUserName,
-  setUserEmail,
-  setUserSubscription,
-} from "../lib/features/dashboard/dashboardSlice";
 import Loading from "./_components/loading";
 
 function DashboardPage() {
-  // const n = 0;
-  // if(n === 0) return <div>Upload a pdf file</div>
-
-  return <Main centerComp={<Pdfs />} /> ? (
-    <Main centerComp={<Pdfs />} />
+  return <Main comp={<Pdfs />} /> ? (
+    <Main comp={<Pdfs />} name="pdf" />
   ) : (
     <Loading />
   );

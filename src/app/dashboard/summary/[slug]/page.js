@@ -5,7 +5,7 @@ function SubjectNotesPage({ params }) {
   const slug = params.slug;
   
   return (
-    <Main centerComp={<Summary slug={slug} />} name="summary" />
+    <Main comp={<Summary slug={slug} />} name="summary" />
 )
 }
 

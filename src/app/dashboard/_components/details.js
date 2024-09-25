@@ -35,7 +35,7 @@ function Details() {
         </h1>
         {/* options */}
         <div className="flex flex-col gap-5 items-start mt-3">
-          <Link href="/dashboard/questions">
+          <Link href={`/dashboard/questions/${pdfSlug}`}>
             <div className="flex  gap-3 items-center hover:text-primary">
               <Image
                 src={questionIcon}

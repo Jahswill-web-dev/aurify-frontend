@@ -1,10 +1,8 @@
-import Link from "next/link";
-import Main from "../_components/main";
-import Questions from "./_components/questions";
+import { redirect } from "next/navigation";
 
 function QuestionPage() {
   // return <Main centerComp={<Questions />} name="questions" />;
-  return <Questions />;
+  return redirect("/dashboard");
 }
 
 export default QuestionPage;

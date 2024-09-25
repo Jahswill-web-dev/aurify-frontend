@@ -47,7 +47,7 @@ function DashboardLayout({ children }) {
   return (
     <div className="max-w-[1557px] mx-auto">
       <DashboardNav />
-      <div className="flex flex-col md:flex-row md:justify-between py-5 mt-5 gap-2 md:pr-2">
+      <div className="flex flex-col md:flex-row py-5 mt-5 gap-2 md:pr-2">
         <SideNav />
         {children}
       </div>
