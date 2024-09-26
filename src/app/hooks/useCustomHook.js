@@ -56,7 +56,7 @@ export function usePostWithToken(url, data) {
     if (url) {
       getData();
     }
-  }, [url]);
+  }, [url, data]);
   return { dataRes, error, loading };
 }
 

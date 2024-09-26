@@ -62,7 +62,7 @@ function HomePage() {
             Who can use Aurify AI?
           </h2>
           <div className="flex w-full justify-center items-center p-5">
-            <Image src={arrowDown} width={30} height={30} className="" />
+            <Image src={arrowDown} width={30} height={30} className="" alt=""/>
           </div>
           <div className="flex flex-col gap-10">
             {/*  */}

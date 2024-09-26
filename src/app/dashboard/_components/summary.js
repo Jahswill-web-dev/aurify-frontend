@@ -26,7 +26,7 @@ function Summary({ slug }) {
     console.log("data:", data?.data);
     setPdf(data?.data[0]);
     dispatch(setPdfName(pdf?.title));
-  }, [data, error, loading]);
+  }, [data, error, loading, dispatch, pdf]);
 
   console.log("title:", pdf?.title);
   if (error) console.log(error);

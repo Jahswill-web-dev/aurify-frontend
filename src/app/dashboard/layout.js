@@ -32,7 +32,7 @@ function DashboardLayout({ children }) {
       dispatch(setUserLimit(data.data.limit));
       dispatch(setUserSubscription(data.data.is_pro));
     }
-  }, [data, error, loading]);
+  }, [data, error, loading, dispatch]);
   // console.log(error?.response?.status);
   if (error?.response?.status === 403) {
     return <LoginPopUp />;

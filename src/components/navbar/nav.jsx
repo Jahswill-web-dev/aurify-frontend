@@ -28,6 +28,7 @@ function Navbar() {
           onClick={() => setOpen(!open)}
           src={bars}
           width={40}
+          alt=""
           height={40}
           className="cursor-pointer md:hidden"
         />

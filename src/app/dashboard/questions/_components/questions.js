@@ -280,7 +280,7 @@ function Questions({ slug }) {
       const isCorrect = selectedAnswer === question?.answer;
       setIsCorrectAnswer(isCorrect);
     }
-  }, [checkboxAnswers[num], question, answers[num], num]);
+  }, [question, num, answers, checkboxAnswers]);
 
   // console.log(question);
   // console.log(answers[num]);

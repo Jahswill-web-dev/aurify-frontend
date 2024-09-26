@@ -48,7 +48,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
       // dispatch(setPdfId(id));
       dispatch(setFirstPdfId(id));
     }
-  }, [selected, name, dispatch]);
+  }, [selected, name, dispatch, slug, id, first]);
 
   function detail() {
     if (window.matchMedia("(max-width:1023px)").matches) {

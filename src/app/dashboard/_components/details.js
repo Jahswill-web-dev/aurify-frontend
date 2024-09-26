@@ -23,8 +23,10 @@ function Details() {
   const dispatch = useDispatch();
   const { pdfName, firstPdfName, pdfSlug, firstPdfSlug, firstPdfId, pdfId } =
     useSelector((store) => store.dashboard);
-    const deletePdf = () => {
-    useDeleteWithToken(pdfId);
+
+  const deletePdf = useDeleteWithToken(pdfId);
+  const handledelete = () => {
+    deletePdf();
     dispatch(setDeleteState(true));
   };
   return (
@@ -75,7 +77,7 @@ function Details() {
             onClick={deletePdf}
             className="flex  gap-3 items-center hover:text-primary cursor-pointer"
           >
-            <Image src={deleteIcon} alt="delete icon" width={30} height={30} />
+            <Image src={handledelete} alt="delete icon" width={30} height={30} />
             <p>Delete</p>
           </div>
         </div>
@@ -93,8 +95,9 @@ function MobileDetails() {
   const close = () => {
     dispatch(closeDetails());
   };
-  const deletePdf = () => {
-    useDeleteWithToken(pdfId);
+  const deletePdf = useDeleteWithToken(pdfId);
+  const handledelete = () => {
+    deletePdf();
     dispatch(setDeleteState(true));
   };
 
@@ -176,7 +179,7 @@ function MobileDetails() {
               className="flex  gap-4 items-center hover:text-primary"
             >
               <Image
-                src={deleteIcon}
+                src={handledelete}
                 alt="delete icon"
                 width={30}
                 height={30}

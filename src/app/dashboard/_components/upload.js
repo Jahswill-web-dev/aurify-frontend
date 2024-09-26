@@ -194,7 +194,7 @@ function Upload() {
               <RingSpinner />
             </div>
             <p className="text-xl text-p-text-darker font-semibold">
-              Summarizing PDF's...
+              {"Summarizing PDF's..."}
             </p>
           </div>
         )}
@@ -208,7 +208,7 @@ function Upload() {
               <RingSpinner />
             </div>
             <p className="text-xl text-p-text-darker font-semibold">
-              Summarizing PDF's...
+              {"Summarizing PDF's..."}
             </p>
           </div>
         )}
