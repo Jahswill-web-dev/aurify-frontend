@@ -16,17 +16,29 @@ function truncateText(text, maxLength) {
   return text.substring(0, maxLength) + "...";
 }
 
-function Option({ value, onChange, isSelected }) {
+function Option({ value, onChange, isSelected, isCorrect, isWrong }) {
   const [selectedOption, setSelectedOption] = useState("");
 
   const handleChange = (event) => {
     setSelectedOption(event.target.value);
     onChange(value);
   };
+  if (isSelected) {
+    var backgroundColor = "bg-white";
+    backgroundColor = isCorrect
+      ? "bg-green-500"
+      : isWrong
+      ? "bg-red-500"
+      : isSelected && correctAnswer.includes(value)
+      ? "bg-green-500"
+      : "bg-white";
+  }
 
   // console.log(value)
   return (
-    <div className=" hover:bg-secondary text-xl border-2 border-p-text rounded-md p-1 flex gap-2 max-w-[300px]">
+    <div
+      className={` hover:scale-105 hover:text-primary text-xl border-2 border-p-text rounded-md p-1 flex gap-2 max-w-[300px] ${backgroundColor}`}
+    >
       <label className="pl-10 w-full cursor-pointer relative">
         {value}
         <input
@@ -43,14 +55,34 @@ function Option({ value, onChange, isSelected }) {
     </div>
   );
 }
-function CheckBox({ value, isChecked, onChange }) {
+function CheckBox({
+  value,
+  isChecked,
+  onChange,
+  correctAnswer,
+  isCorrect,
+  isWrong,
+}) {
   const [selectedOption, setSelectedOption] = useState();
   const handleChange = (event) => {
     setSelectedOption(event.target.checked);
     onChange(value, event.target.checked);
   };
-  return (  
-    <div className=" hover:bg-secondary text-xl border-2 border-p-text rounded-md p-1 flex gap-2 max-w-[300px]">
+  if (isChecked) {
+    var backgroundColor = "bg-white";
+    backgroundColor = isCorrect
+      ? "bg-green-500"
+      : isWrong
+      ? "bg-red-500"
+      : isChecked && correctAnswer.includes(value)
+      ? "bg-green-500"
+      : "bg-white";
+  }
+
+  return (
+    <div
+      className={` hover:scale-105 hover:text-primary text-xl border-2 border-p-text rounded-md p-1 flex gap-2 max-w-[300px] ${backgroundColor}`}
+    >
       <label className="pl-10 w-full cursor-pointer relative">
         {value}
         <input
@@ -93,6 +125,8 @@ function MultipleChoiceQuestions({
   onOptionChange,
   selectedAnswer,
   selectedCheckboxAnswers,
+  isCorrectAnswer,
+  correctAnswer,
 }) {
   // console.log(selectedCheckboxAnswers);
   return (
@@ -100,22 +134,39 @@ function MultipleChoiceQuestions({
       <p className="text-primary text-base sm:text-xl">{question} </p>
       <div className="flex flex-col gap-5">
         {Array.isArray(answer)
-          ? options.map((option, index) => (
-              <CheckBox
-                key={index}
-                value={option}
-                isChecked={selectedCheckboxAnswers.includes(option)}
-                onChange={onOptionChange}
-              />
-            ))
-          : options.map((option, index) => (
-              <Option
-                key={index}
-                value={option}
-                onChange={onOptionChange}
-                isSelected={selectedAnswer === option}
-              />
-            ))}
+          ? options.map((option, index) => {
+              const isCorrectOption = correctAnswer.includes(option);
+              const isSelectedWrong =
+                selectedCheckboxAnswers.includes(option) &&
+                !correctAnswer.includes(option);
+
+              return (
+                <CheckBox
+                  key={index}
+                  value={option}
+                  isChecked={selectedCheckboxAnswers.includes(option)}
+                  onChange={onOptionChange}
+                  isCorrect={isCorrectOption}
+                  isWrong={isSelectedWrong}
+                  correctAnswer={correctAnswer}
+                />
+              );
+            })
+          : options.map((option, index) => {
+              const isCorrectOption = correctAnswer === option;
+              const isSelectedWrong =
+                selectedAnswer === option && correctAnswer !== option;
+              return (
+                <Option
+                  key={index}
+                  value={option}
+                  onChange={onOptionChange}
+                  isSelected={selectedAnswer === option}
+                  isCorrect={isCorrectOption}
+                  isWrong={isSelectedWrong}
+                />
+              );
+            })}
 
         {/* <Option value={answer} />
         <Option value={answer} />
@@ -127,7 +178,7 @@ function MultipleChoiceQuestions({
         <div
           onClick={subtract}
           className="flex gap-1 items-center bg-primary text-white w-24 justify-center
-        rounded-lg py-1 border-2 border-p-text"
+        rounded-lg py-1 border-2 border-p-text hover:cursor-pointer active:scale-105"
         >
           <Image src={backIcon} alt="icon" width={16} height={16} />
           <p>Back</p>
@@ -136,7 +187,7 @@ function MultipleChoiceQuestions({
         <div
           onClick={add}
           className="flex gap-1 items-center bg-primary text-white w-24 justify-center
-        rounded-lg py-1 border-2 border-p-text"
+        rounded-lg py-1 border-2 border-p-text hover:cursor-pointer active:scale-105"
         >
           <p>Next</p>
           <Image src={nextIcon} alt="icon" width={16} height={16} />
@@ -170,6 +221,7 @@ function Questions({ slug }) {
   const [question, setQuestion] = useState();
   const [answers, setAnswers] = useState({});
   const [checkboxAnswers, setCheckboxAnswers] = useState({});
+  const [isCorrectAnswer, setIsCorrectAnswer] = useState(null);
   // const [checkboxAnswer, setCheckboxAnswer] = useState();
   const router = useRouter();
   const { data, error, loading, refetch } = useFetchWithToken(
@@ -198,7 +250,7 @@ function Questions({ slug }) {
   };
   const handleOptionChange = (value, isChecked) => {
     if (Array.isArray(question?.answer)) {
-      console.log("Checked!!!");
+      // console.log("Checked!!!");
       setCheckboxAnswers((prev) => {
         const updatedAnswers = [...(prev[num] || [])];
         if (isChecked) {
@@ -214,7 +266,6 @@ function Questions({ slug }) {
     } else {
       setAnswers((prev) => ({ ...prev, [num]: value }));
     }
-    
   };
   //a code that checks if the option chosen is correct
   useEffect(() => {
@@ -223,20 +274,11 @@ function Questions({ slug }) {
       const correctAnswers = question?.answer;
       const isCorrect =
         userAnswers?.sort().toString() === correctAnswers?.sort().toString();
-  
-      if (isCorrect) {
-        console.log("Correct");
-      } else {
-        console.log("Wrong");
-      }
+      setIsCorrectAnswer(isCorrect);
     } else {
       const selectedAnswer = answers[num];
       const isCorrect = selectedAnswer === question?.answer;
-      if (isCorrect) {
-        console.log("Correct");
-      } else {
-        console.log("Wrong");
-      }
+      setIsCorrectAnswer(isCorrect);
     }
   }, [checkboxAnswers[num], question, answers[num], num]);
 
@@ -287,6 +329,8 @@ function Questions({ slug }) {
               selectedAnswer={answers[num]}
               selectedCheckboxAnswers={checkboxAnswers[num] || []}
               onOptionChange={handleOptionChange}
+              isCorrectAnswer={isCorrectAnswer}
+              correctAnswer={question.answer}
             />
           )}
 

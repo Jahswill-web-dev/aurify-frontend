@@ -65,7 +65,7 @@ function Upload() {
   const handleUpload = async () => {
     // check files length
     if (files.length === 0) {
-      console.log("No files to upload");
+      // console.log("No files to upload");
       return;
     }
     setUploading(true);

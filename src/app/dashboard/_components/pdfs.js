@@ -71,7 +71,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
     const handleEnded = () => {
       onPlayPause();
     };
-    console.log("Audio url", url)
+    // console.log("Audio url", url)
     const audioElement = audioRef.current;
     if (audioElement) {
       audioElement.addEventListener("ended", handleEnded);
@@ -104,7 +104,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
           onClick={(e) => {
             e.stopPropagation();
             onPlayPause();
-            console.log("play button is clicked!!!")
+            // console.log("play button is clicked!!!")
           }}
           className="hidden md:block"
         >
@@ -141,7 +141,7 @@ function Pdfs() {
 
   useEffect(() => {
     if (data && !error && !loading) {
-      console.log(data.data);
+      // console.log(data.data);
       setSummaries(data.data);
     }
   }, [data, loading, error]);

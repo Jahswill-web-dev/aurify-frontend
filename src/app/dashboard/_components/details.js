@@ -126,7 +126,7 @@ function MobileDetails() {
           </h1>
           {/* options */}
           <div className="flex flex-col gap-5 items-start mt-3 text-p-text inter-font">
-            <Link href="/dashboard/questions" onClick={close}>
+            <Link href={`/dashboard/questions/${pdfSlug}`} onClick={close}>
               <div className="flex  gap-4 items-center hover:text-primary">
                 <Image
                   src={questionIcon}
