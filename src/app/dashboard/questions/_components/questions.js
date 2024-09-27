@@ -225,7 +225,7 @@ function Questions({ slug }) {
   // const [checkboxAnswer, setCheckboxAnswer] = useState();
   const router = useRouter();
   const { data, error, loading, refetch } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/audiobook/s/${slug}`
+    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/s/${slug}`
   );
 
   useEffect(() => {

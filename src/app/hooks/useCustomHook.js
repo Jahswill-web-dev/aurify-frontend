@@ -64,7 +64,7 @@ export function useDeleteWithToken(pdfId) {
   // const deletePdf = () => {
   const token = sessionStorage.getItem("accessToken");
   axios
-    .delete(`${process.env.NEXT_PUBLIC_BASE_URL}/audiobook/${pdfId}`, {
+    .delete(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/${pdfId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -70,7 +70,7 @@ function CreateAccount() {
   const dispatch = useDispatch();
   const router = useRouter();
   const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/me`
+    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/me`
   );
   useEffect(() => {
     if (data) {
@@ -91,7 +91,7 @@ function CreateAccount() {
 
   const onSubmit = async (data) => {
     await axios
-      .post(`${process.env.NEXT_PUBLIC_BASE_URL}/signup`, data)
+      .post(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/signup`, data)
       .then((response) => {
         console.log(response);
 

@@ -136,7 +136,7 @@ function Pdfs() {
   const [selectedPdfId, setSelectedPdfId] = useState();
   const dispatch = useDispatch();
   const { data, error, loading, refetch } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/audiobooks`
+    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobooks`
   );
 
   useEffect(() => {

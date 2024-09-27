@@ -22,7 +22,7 @@ function DashboardLayout({ children }) {
   // console.log(navOverlay);
   const dispatch = useDispatch();
   const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/me`
+    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/me`
   );
   useEffect(() => {
     if (data && !error && !loading) {

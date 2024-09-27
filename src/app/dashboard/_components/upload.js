@@ -78,7 +78,7 @@ function Upload() {
     try {
       const token = sessionStorage.getItem("accessToken");
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/pdf2ai`,
+        `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/pdf2ai`,
         formData,
         {
           headers: {
