@@ -68,7 +68,7 @@ function SocialSignIn({ name, logo }) {
 function Login() {
   const router = useRouter();
   const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/me`
+    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/me`
   );
   useEffect(() => {
     if (data) {
@@ -91,7 +91,7 @@ function Login() {
   const onSubmit = async (data) => {
     console.log(data);
     await axios
-      .post(`${process.env.NEXT_PUBLIC_BASE_URL}/token`, data)
+      .post(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/token`, data)
       .then((response) => {
         console.log(response);
 
