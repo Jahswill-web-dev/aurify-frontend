@@ -24,11 +24,11 @@ function Details() {
   const { pdfName, firstPdfName, pdfSlug, firstPdfSlug, firstPdfId, pdfId } =
     useSelector((store) => store.dashboard);
 
-  const deletePdf = useDeleteWithToken(pdfId);
-  const handledelete = () => {
-    deletePdf();
-    dispatch(setDeleteState(true));
-  };
+  // const deletePdf = useDeleteWithToken(pdfId);
+  // const handledelete = () => {
+  //   deletePdf();
+  //   dispatch(setDeleteState(true));
+  // };
   return (
     <div className="hidden inter-font overflow-hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
       <div className="flex flex-col gap-2">
@@ -74,10 +74,15 @@ function Details() {
             <p>share</p>
           </div>
           <div
-            onClick={deletePdf}
+            // onClick={deletePdf}
             className="flex  gap-3 items-center hover:text-primary cursor-pointer"
           >
-            <Image src={handledelete} alt="delete icon" width={30} height={30} />
+            <Image
+              src={deleteIcon}
+              alt="delete icon"
+              width={30}
+              height={30}
+            />
             <p>Delete</p>
           </div>
         </div>
@@ -95,11 +100,11 @@ function MobileDetails() {
   const close = () => {
     dispatch(closeDetails());
   };
-  const deletePdf = useDeleteWithToken(pdfId);
-  const handledelete = () => {
-    deletePdf();
-    dispatch(setDeleteState(true));
-  };
+  // const deletePdf = useDeleteWithToken(pdfId);
+  // const handledelete = () => {
+  //   deletePdf();
+  //   dispatch(setDeleteState(true));
+  // };
 
   return (
     <div className="lg:hidden">
@@ -175,11 +180,11 @@ function MobileDetails() {
               <p>Share</p>
             </div>
             <div
-              onClick={deletePdf}
+              // onClick={() => deletePdf}
               className="flex  gap-4 items-center hover:text-primary"
             >
               <Image
-                src={handledelete}
+                src={deleteIcon}
                 alt="delete icon"
                 width={30}
                 height={30}
