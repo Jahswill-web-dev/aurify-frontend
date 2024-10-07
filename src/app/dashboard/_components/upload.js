@@ -193,8 +193,10 @@ function Upload() {
             <div>
               <RingSpinner />
             </div>
-            <p className="text-xl text-p-text-darker font-semibold">
+            <p className="text-center text-xl text-p-text-darker font-semibold">
               {"Summarizing PDF's..."}
+              <br/>
+              {"pls be patient this may take a while..."}
             </p>
           </div>
         )}
@@ -209,6 +211,7 @@ function Upload() {
             </div>
             <p className="text-xl text-p-text-darker font-semibold">
               {"Summarizing PDF's..."}
+              
             </p>
           </div>
         )}
