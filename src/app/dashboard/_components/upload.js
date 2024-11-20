@@ -196,7 +196,7 @@ function Upload() {
             <p className="text-center text-xl text-p-text-darker font-semibold">
               {"Summarizing PDF's..."}
               <br/>
-              {"pls be patient this may take a while..."}
+              {"No need to hang around this may take a while..."}
             </p>
           </div>
         )}

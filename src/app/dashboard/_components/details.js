@@ -14,6 +14,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   closeDetails,
   setDeleteState,
+  setMobilePlay,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import Link from "next/link";
 import axios from "axios";
@@ -77,12 +78,7 @@ function Details() {
             // onClick={deletePdf}
             className="flex  gap-3 items-center hover:text-primary cursor-pointer"
           >
-            <Image
-              src={deleteIcon}
-              alt="delete icon"
-              width={30}
-              height={30}
-            />
+            <Image src={deleteIcon} alt="delete icon" width={30} height={30} />
             <p>Delete</p>
           </div>
         </div>
@@ -145,7 +141,10 @@ function MobileDetails() {
                 <p>Take Test questions</p>
               </div>
             </Link>
-            <div className="flex cursor-pointer gap-4 items-center hover:text-primary">
+            <div
+              onClick={() => dispatch(setMobilePlay())}
+              className="flex cursor-pointer gap-4 items-center hover:text-primary"
+            >
               <Image
                 src={headphoneIcon}
                 alt="audio icon"
