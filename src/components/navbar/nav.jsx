@@ -37,16 +37,25 @@ function Navbar() {
       {/* Links */}
       <div
         className={`${
-          open ? "h-[80px]" : "h-0"
-        } md:h-auto w-full flex flex-col gap-2 md:gap-10 items-center
+          open ? "h-[200px]" : "h-0"
+        } md:h-auto w-full flex flex-col gap-7 md:gap-10 items-center
       md:flex-row md:justify-end overflow-hidden transition-all`}
       >
+        {/* Blog lin */}
         <Link
           href="/blog"
-          className="text-p-text-darker roboto-font text-x-sub-head hover:text-p-text"
+          className="text-p-text-darker roboto-font text-x-head hover:text-p-text"
         >
           Blog
         </Link>
+        {/* Login link */}
+        <Link
+          href="/login"
+          className="text-p-text-darker roboto-font text-x-head hover:text-p-text"
+        >
+          Login
+        </Link>
+        {/* get started link */}
         <Link
           href="/signup"
           className="px-5 py-2 rounded-lg roboto-font font-semibold bg-primary text-secondary

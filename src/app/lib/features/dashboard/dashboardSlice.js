@@ -18,6 +18,7 @@ const initialState = {
   showOverlay: false,
   uploadSuccess: false,
   isDeleted: null,
+  mobilePlay:false,
 };
 
 const dashboardSlice = createSlice({
@@ -75,6 +76,9 @@ const dashboardSlice = createSlice({
     setDeleteState: (state, action) => {
       state.isDeleted = action.payload;
     },
+    setMobilePlay: (state, action) => {
+      state.mobilePlay = !state.mobilePlay;
+    },
   },
 });
 
@@ -96,5 +100,6 @@ export const {
   setPdfId,
   setFirstPdfId,
   setDeleteState,
+  setMobilePlay
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

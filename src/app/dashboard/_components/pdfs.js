@@ -18,6 +18,7 @@ import {
   toggleUploadSuccess,
   setFirstPdfId,
   setDeleteState,
+  setMobilePlay
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import Loading from "./loading";
@@ -131,7 +132,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
 
 function Pdfs() {
   const [summaries, setSummaries] = useState();
-  const { uploadSuccess, isDeleted } = useSelector((store) => store.dashboard);
+  const { uploadSuccess, isDeleted, mobilePlay } = useSelector((store) => store.dashboard);
   const [playingAudioId, setPlayingAudioId] = useState(null);
   const [selectedPdfId, setSelectedPdfId] = useState();
   const dispatch = useDispatch();
@@ -157,8 +158,11 @@ function Pdfs() {
   }, [uploadSuccess, refetch, dispatch, isDeleted]);
 
   const handlePlayPause = (id) => {
+    dispatch(setMobilePlay);
+    //check is if audio is already playing
     if (playingAudioId === id) {
       setPlayingAudioId(null);
+      //plays audio
     } else {
       setPlayingAudioId(id);
     }
@@ -199,7 +203,7 @@ function Pdfs() {
               slug={summary.slug}
               id={summary.id}
               url={summary.url}
-              playing={playingAudioId === summary.id}
+              playing={playingAudioId === summary.id || mobilePlay}
               onPlayPause={() => handlePlayPause(summary.id)}
             />
           ))}
