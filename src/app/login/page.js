@@ -2,6 +2,9 @@ import Image from "next/image";
 import Login from "./_components/login";
 import signImage from "../../../public/images/signin-image.svg";
 import Navbar from "@/components/navbar/nav";
+import Link from "next/link";
+import back from "../../../public/icons/back.svg";
+
 function LoginPage() {
   return (
     <div>

@@ -18,7 +18,7 @@ import {
   toggleUploadSuccess,
   setFirstPdfId,
   setDeleteState,
-  setMobilePlay
+  setAudioId,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import Loading from "./loading";
@@ -36,13 +36,15 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
   // {
   //   pdfName ? pdfName : selected && name;
   // }
+
+  
   useEffect(() => {
-    if (selected) {
-      dispatch(setFirstPdfName(name));
-      dispatch(setFirstPdfSlug(slug));
-      dispatch(setPdfId(id));
-      dispatch(setFirstPdfId(id));
-    }
+    // if (selected) {
+    //   dispatch(setFirstPdfName(name));
+    //   dispatch(setFirstPdfSlug(slug));
+    //   dispatch(setPdfId(id));
+    //   dispatch(setFirstPdfId(id));
+    // }
     if (first) {
       dispatch(setPdfName(name));
       dispatch(setPdfSlug(slug));
@@ -74,6 +76,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
     };
     // console.log("Audio url", url)
     const audioElement = audioRef.current;
+    // Pause or end audio at the end of the audio
     if (audioElement) {
       audioElement.addEventListener("ended", handleEnded);
     }
@@ -132,7 +135,9 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
 
 function Pdfs() {
   const [summaries, setSummaries] = useState();
-  const { uploadSuccess, isDeleted, mobilePlay } = useSelector((store) => store.dashboard);
+  const { uploadSuccess, isDeleted, audioId } = useSelector(
+    (store) => store.dashboard
+  );
   const [playingAudioId, setPlayingAudioId] = useState(null);
   const [selectedPdfId, setSelectedPdfId] = useState();
   const dispatch = useDispatch();
@@ -152,19 +157,20 @@ function Pdfs() {
       refetch().then(() => {
         dispatch(toggleUploadSuccess());
         // console.log("holaa")
-        dispatch(setDeleteState(false))
+        dispatch(setDeleteState(false));
       });
     }
   }, [uploadSuccess, refetch, dispatch, isDeleted]);
 
   const handlePlayPause = (id) => {
-    dispatch(setMobilePlay);
     //check is if audio is already playing
-    if (playingAudioId === id) {
-      setPlayingAudioId(null);
+    if (audioId === id) {
+      // setPlayingAudioId(null);
+      dispatch(setAudioId(null));
       //plays audio
     } else {
-      setPlayingAudioId(id);
+      // setPlayingAudioId(id);
+      dispatch(setAudioId(id));
     }
   };
   // ...........................
@@ -203,7 +209,7 @@ function Pdfs() {
               slug={summary.slug}
               id={summary.id}
               url={summary.url}
-              playing={playingAudioId === summary.id || mobilePlay}
+              playing={audioId === summary.id}
               onPlayPause={() => handlePlayPause(summary.id)}
             />
           ))}
