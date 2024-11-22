@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import logo from "../../../public/icons/aurify-logo.svg";
+import logo from "../../../public/icons/aurify-ai.svg";
 import Image from "next/image";
 import bars from "../../../public/icons/bars.svg";
 import { useState } from "react";
