@@ -1,9 +1,12 @@
 "use client";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import { setPdfName } from "@/app/lib/features/dashboard/dashboardSlice";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Loading from "./loading";
+import playIcon from "../../../../public/icons/play-icon.svg";
+import pauseIcon from "../../../../public/icons/pause-icon.svg";
+import Image from "next/image";
 
 function truncateText(text, maxLength) {
   if (text.length <= maxLength) {
@@ -13,9 +16,8 @@ function truncateText(text, maxLength) {
 }
 
 function Summary({ slug }) {
-  // const { pdfId, pdfName } = useSelector((store) => store.dashboard);
-  console.log("slug:", slug);
-  // console.log("testing....");
+  const audioRef = useRef(null);
+
   const [pdf, setPdf] = useState();
   const { data, error, loading } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/s/${slug}`
@@ -23,13 +25,21 @@ function Summary({ slug }) {
   );
   const dispatch = useDispatch();
   useEffect(() => {
-    console.log("data:", data?.data);
+    // console.log("data:", data?.data);
     setPdf(data?.data[0]);
     dispatch(setPdfName(pdf?.title));
   }, [data, error, loading, dispatch, pdf]);
 
-  console.log("title:", pdf?.title);
-  if (error) console.log(error);
+  const handleAudio = () => {
+    if(audioRef.current){
+      if(audioRef.current.paused){
+        audioRef.current.play();
+      }else{
+        audioRef.current.pause();
+      };
+    };
+  }
+
   if (error) {
     return (
       <div className="dashboard-main">
@@ -54,12 +64,21 @@ function Summary({ slug }) {
           >
             {!pdf?.title ? "loading..." : truncateText(pdf?.title, 60)}
           </div>
+          {/* audio button */}
+          <div
+          onClick={handleAudio} 
+          className="flex mt-5 gap-2 items-center">
+            <p className="text-xl">Audio</p>
+            <Image alt="play/pause button" src={pauseIcon} />
+          </div>
         </div>
       </div>
       <div className="flex flex-col gap-4 mt-10 px-2">
         <div className="text-p-text text-lg">
           {pdf?.text ? (
-            <p className="leading-relaxed tracking-wide inter-font">{pdf?.text}</p>
+            <p className="leading-relaxed tracking-wide inter-font">
+              {pdf?.text}
+            </p>
           ) : (
             <div className="relative top-10">
               <Loading />
@@ -67,6 +86,7 @@ function Summary({ slug }) {
           )}
         </div>
       </div>
+      <audio ref={audioRef} src={pdf?.url} />
     </div>
   );
 }

@@ -71,9 +71,11 @@ export function useDeleteWithToken(pdfId) {
     })
     .then((response) => {
       console.log("Delete succesful: ", response.data);
+       resolve(response.data);
     })
     .catch((error) => {
       console.log("error deleting data", error);
+      reject(error);
     });
   // };
 }

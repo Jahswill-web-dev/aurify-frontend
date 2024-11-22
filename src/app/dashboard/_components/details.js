@@ -13,8 +13,8 @@ import cheveronDown from "../../../../public/icons/chevron-down.svg";
 import { useSelector, useDispatch } from "react-redux";
 import {
   closeDetails,
+  setAudioId,
   setDeleteState,
-  setMobilePlay,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import Link from "next/link";
 import axios from "axios";
@@ -89,18 +89,34 @@ function Details() {
 
 function MobileDetails() {
   const dispatch = useDispatch();
-  const { isdetailsOpen, pdfName, firstPdfName, pdfId, pdfSlug } = useSelector(
-    (store) => store.dashboard
-  );
+  const {
+    isdetailsOpen,
+    pdfName,
+    firstPdfName,
+    pdfId,
+    pdfSlug,
+    audioId,
+  } = useSelector((store) => store.dashboard);
 
   const close = () => {
     dispatch(closeDetails());
   };
-  // const deletePdf = useDeleteWithToken(pdfId);
-  // const handledelete = () => {
-  //   deletePdf();
-  //   dispatch(setDeleteState(true));
-  // };
+  const togglePlayPause = () => {
+    if (audioId === null) {
+      dispatch(setAudioId(pdfId));
+    } else {
+      dispatch(setAudioId(null));
+    }
+  };
+  const handleDeletePdf = () => {
+    useDeleteWithToken(pdfId).then((data) => {
+      dispatch(setDeleteState(true));    
+    })
+    .catch((error) => {
+      dispatch(setDeleteState(false));   
+    });
+    
+  };
 
   return (
     <div className="lg:hidden">
@@ -142,7 +158,7 @@ function MobileDetails() {
               </div>
             </Link>
             <div
-              onClick={() => dispatch(setMobilePlay())}
+              onClick={togglePlayPause}
               className="flex cursor-pointer gap-4 items-center hover:text-primary"
             >
               <Image
@@ -179,7 +195,7 @@ function MobileDetails() {
               <p>Share</p>
             </div>
             <div
-              // onClick={() => deletePdf}
+              onClick={handleDeletePdf}
               className="flex  gap-4 items-center hover:text-primary"
             >
               <Image
