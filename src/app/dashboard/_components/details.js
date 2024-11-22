@@ -24,12 +24,24 @@ function Details() {
   const dispatch = useDispatch();
   const { pdfName, firstPdfName, pdfSlug, firstPdfSlug, firstPdfId, pdfId } =
     useSelector((store) => store.dashboard);
-
-  // const deletePdf = useDeleteWithToken(pdfId);
-  // const handledelete = () => {
-  //   deletePdf();
-  //   dispatch(setDeleteState(true));
-  // };
+  const handleDeletePdf = () => {
+    const token = sessionStorage.getItem("accessToken");
+    axios
+      .delete(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/${pdfId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        // console.log("Delete succesful: ", response.data);
+        resolve(response.data);
+      })
+      .catch((error) => {
+        // console.log("error deleting data", error);
+        reject(error);
+      });
+    // };
+  };
   return (
     <div className="hidden inter-font overflow-hidden w-0 lg:block lg:w-[30%] bg-white rounded-md border-2 border-p-text px-2 py-3">
       <div className="flex flex-col gap-2">
@@ -75,7 +87,7 @@ function Details() {
             <p>share</p>
           </div>
           <div
-            // onClick={deletePdf}
+            onClick={handleDeletePdf}
             className="flex  gap-3 items-center hover:text-primary cursor-pointer"
           >
             <Image src={deleteIcon} alt="delete icon" width={30} height={30} />
@@ -89,14 +101,8 @@ function Details() {
 
 function MobileDetails() {
   const dispatch = useDispatch();
-  const {
-    isdetailsOpen,
-    pdfName,
-    firstPdfName,
-    pdfId,
-    pdfSlug,
-    audioId,
-  } = useSelector((store) => store.dashboard);
+  const { isdetailsOpen, pdfName, firstPdfName, pdfId, pdfSlug, audioId } =
+    useSelector((store) => store.dashboard);
 
   const close = () => {
     dispatch(closeDetails());
@@ -109,13 +115,22 @@ function MobileDetails() {
     }
   };
   const handleDeletePdf = () => {
-    useDeleteWithToken(pdfId).then((data) => {
-      dispatch(setDeleteState(true));    
-    })
-    .catch((error) => {
-      dispatch(setDeleteState(false));   
-    });
-    
+    const token = sessionStorage.getItem("accessToken");
+    axios
+      .delete(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/${pdfId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        // console.log("Delete succesful: ", response.data);
+        resolve(response.data);
+      })
+      .catch((error) => {
+        // console.log("error deleting data", error);
+        reject(error);
+      });
+    // };
   };
 
   return (
