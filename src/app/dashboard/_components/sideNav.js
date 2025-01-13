@@ -7,23 +7,30 @@ import questionIcon from "../../../../public/icons/questiion-icon.svg";
 import crown from "../../../../public/icons/crown-icon.svg";
 import settingsIcon from "../../../../public/icons/settings.svg";
 import closeIcon from "../../../../public/icons/closeicon.svg";
+import logout from "../../../../public/icons/arrow-right-from-bracket-solid.svg";
 import { useSelector, useDispatch } from "react-redux";
 import { closeNav } from "@/app/lib/features/nav/navSlice";
 import { toggleUpload } from "@/app/lib/features/dashboard/dashboardSlice";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Cookie from "js-cookie";
+import { useRouter } from "next/navigation";
 
 function MobileNav() {
   const pathname = usePathname();
   const { isNavOpen } = useSelector((store) => store.nav);
   const dispatch = useDispatch();
-
+  const router = useRouter();
   function closeNavigation() {
     dispatch(closeNav());
   }
   function openUpload() {
     dispatch(toggleUpload());
   }
+  const handleLogout = () => {
+    Cookie.remove("accessToken", { path: "/" });
+    router.push("/");
+  };
 
   return (
     <div className="md:hidden roboto-font">
@@ -84,16 +91,19 @@ function MobileNav() {
                   />
                   <p>Home</p>
                 </div>
-                <div className="flex gap-3 text-p-text pl-4">
+                <div
+                  className="flex gap-3 text-p-text pl-4 cursor-pointer active:scale-95 hover:text-primary"
+                  onClick={handleLogout}
+                >
                   <Image
-                    alt="bookmark icon"
-                    src={bookmarkIcon}
+                    alt="logout icon"
+                    src={logout}
                     width={20}
                     height={20}
                   />
-                  <p>Bookmarks</p>
+                  <p>Logout</p>
                 </div>
-                <div className="flex items-center gap-3 pl-4 text-p-text">
+                {/* <div className="flex items-center gap-3 pl-4 text-p-text">
                   <Image
                     alt="question icon"
                     src={questionIcon}
@@ -101,8 +111,8 @@ function MobileNav() {
                     height={20}
                   />
                   <p>Practice Questions</p>
-                </div>
-                <div className="flex items-center gap-3 pl-4 text-p-text">
+                </div> */}
+                {/* <div className="flex items-center gap-3 pl-4 text-p-text">
                   <Image
                     alt="settings icon"
                     src={settingsIcon}
@@ -110,12 +120,12 @@ function MobileNav() {
                     height={28}
                   />
                   <p>Settings</p>
-                </div>
+                </div> */}
               </div>
             </div>
 
             {/* upgrade card */}
-            <div className="pl-4 roboto-font">
+            {/* <div className="pl-4 roboto-font">
               <div
                 className="absolute bottom-4 left-2 bg-p-text w-[205px] h-[244px] text-white flex
       flex-col gap-3 pt-5 pb-2 px-2 rounded-md border-2 border-p-text-darker
@@ -134,7 +144,7 @@ function MobileNav() {
                   <Image alt="crown icon" src={crown} width={39} height={39} />
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
@@ -145,9 +155,16 @@ function MobileNav() {
 function SideNav() {
   const pathname = usePathname();
   const dispatch = useDispatch();
+  const router = useRouter();
   function openUpload() {
     dispatch(toggleUpload());
   }
+  const handleLogout = () => {
+    // Remove the session cookie
+    Cookie.remove("accessToken", { path: "/" });
+
+    router.push("/");
+  };
   return (
     <div className="w-[30%] lg:w-[20%]">
       {/* Mobile nav */}
@@ -175,9 +192,8 @@ function SideNav() {
                 />
               </svg>
               <p className="roboto-font">
-                {/* {pathname === "/dashboard/questions" ? "Generate questions" : "Summarize"} */}
-                Summarize
-                </p>
+                Upload
+              </p>
             </div>
           </div>
           {/* Nav Links */}
@@ -186,17 +202,12 @@ function SideNav() {
               <Image alt="home icon" src={homeIcon} width={20} height={20} />
               <p>Home</p>
             </div>
-            {/* <div className="flex gap-3 text-p-text pl-4">
-              <Image
-                alt="bookmark icon"
-                src={bookmarkIcon}
-                width={20}
-                height={20}
-              />
-              <p>Bookmarks</p>
-            </div> */}
+            <div className="flex gap-3 text-p-text pl-4 cursor-pointer active:scale-95 hover:text-primary" onClick={handleLogout}>
+              <Image alt="logout icon" src={logout} width={20} height={20} />
+              <p>Logout</p>
+            </div>
 
-            <Link href="/dashboard/questions">
+            {/* <Link href="/dashboard/questions">
               <div className="flex items-center gap-3 pl-4 text-p-text">
                 <Image
                   alt="question icon"
@@ -206,30 +217,10 @@ function SideNav() {
                 />
                 <p>practice Questions</p>
               </div>
-            </Link>
+            </Link> */}
           </div>
         </div>
         {/* upgrade */}
-        <div className="pl-4 roboto-font">
-          <div
-            className=" bg-p-text w-[205px] h-[244px] text-white hidden md:flex
-          flex-col gap-3 pt-5 pb-2 px-2 rounded-md border-2 border-p-text-darker
-          bg-gradient-to-b from-p-text via-p-text via-60% to-white"
-          >
-            <p className="text-xl">Upgrade to Premium</p>
-            <p className="text-[12px]">
-              Experience the true power of Aurify by upgrading to Premium,
-              limitless practice question and much more{" "}
-            </p>
-            <div
-              className="flex gap-8 items-center justify-center bg-gradient-to-r from-p-text
-             to-secondary rounded-md border-2 border-white mt-11"
-            >
-              <p className="lg:text-xl">Upgrade</p>
-              <Image alt="crown icon" src={crown} width={39} height={39} />
-            </div>
-          </div>
-        </div>
       </div>
       {/* dark overlay */}
       <div className="hidden bg-black absolute top-0 bottom-0 left-0 right-0 opacity-30"></div>

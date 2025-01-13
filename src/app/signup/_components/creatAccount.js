@@ -16,6 +16,8 @@ import { setAccessToken } from "@/app/lib/features/auth/authSlice";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
+import Cookies from "js-cookie";
+import { cookies } from "next/headers";
 
 const Toast = Swal.mixin({
   toast: true,
@@ -71,7 +73,7 @@ function CreateAccount() {
   const router = useRouter();
   const { data, error, loading } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/me`
-  );
+  );  
   useEffect(() => {
     if (data) {
       console.log(data);
@@ -96,7 +98,7 @@ function CreateAccount() {
         console.log(response);
 
         const { access_token } = response.data;
-        sessionStorage.setItem("accessToken", access_token);
+        Cookies.set("accessToken", access_token, {expires: 7, path:""});
         dispatch(setAccessToken(access_token));
 
         Toast.fire({

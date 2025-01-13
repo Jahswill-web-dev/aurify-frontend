@@ -18,14 +18,27 @@ import {
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import Link from "next/link";
 import axios from "axios";
+import Cookies from "js-cookie";
 import { useDeleteWithToken } from "@/app/hooks/useCustomHook";
+import Swal from "sweetalert2";
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  },
+});
 
 function Details() {
   const dispatch = useDispatch();
   const { pdfName, firstPdfName, pdfSlug, firstPdfSlug, firstPdfId, pdfId } =
     useSelector((store) => store.dashboard);
   const handleDeletePdf = () => {
-    const token = sessionStorage.getItem("accessToken");
+    const token = Cookies.get("accessToken");
     axios
       .delete(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/${pdfId}`, {
         headers: {
@@ -33,12 +46,17 @@ function Details() {
         },
       })
       .then((response) => {
-        // console.log("Delete succesful: ", response.data);
-        resolve(response.data);
+        setDeleteState(true);
+        Toast.fire({
+          icon: "success",
+          title: "File Deleted Sucessful",
+        });
       })
       .catch((error) => {
-        // console.log("error deleting data", error);
-        reject(error);
+        Toast.fire({
+          icon: "error",
+          title: "Failed to Delete",
+        });
       });
     // };
   };
@@ -88,7 +106,7 @@ function Details() {
           </div>
           <div
             onClick={handleDeletePdf}
-            className="flex  gap-3 items-center hover:text-primary cursor-pointer"
+            className="flex  gap-3 items-center hover:text-primary cursor-pointer active:scale-95"
           >
             <Image src={deleteIcon} alt="delete icon" width={30} height={30} />
             <p>Delete</p>
@@ -115,7 +133,7 @@ function MobileDetails() {
     }
   };
   const handleDeletePdf = () => {
-    const token = sessionStorage.getItem("accessToken");
+    const token = Cookies.get("accessToken");
     axios
       .delete(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/${pdfId}`, {
         headers: {
@@ -123,12 +141,16 @@ function MobileDetails() {
         },
       })
       .then((response) => {
-        // console.log("Delete succesful: ", response.data);
-        resolve(response.data);
+        Toast.fire({
+          icon: "success",
+          title: "File Deleted Sucessful",
+        });
       })
       .catch((error) => {
-        // console.log("error deleting data", error);
-        reject(error);
+        Toast.fire({
+          icon: "error",
+          title: "Failed to Delete",
+        });
       });
     // };
   };
@@ -211,7 +233,7 @@ function MobileDetails() {
             </div>
             <div
               onClick={handleDeletePdf}
-              className="flex  gap-4 items-center hover:text-primary"
+              className="flex  gap-4 items-center hover:text-primary active:scale-95"
             >
               <Image
                 src={deleteIcon}

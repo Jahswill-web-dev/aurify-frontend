@@ -3,6 +3,7 @@ import Image from "next/image";
 import cancelIcon from "../../../../public/icons/cancel.svg";
 import fileImage from "../../../../public/icons/upload-file.svg";
 import {
+  setPdfList,
   toggleUpload,
   toggleUploadSuccess,
 } from "@/app/lib/features/dashboard/dashboardSlice";
@@ -12,7 +13,7 @@ import { usePostWithToken } from "@/app/hooks/useCustomHook";
 import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
 import Swal from "sweetalert2";
-
+import Cookies from "js-cookie";
 function truncateText(text, maxLength) {
   if (text.length <= maxLength) {
     return text;
@@ -74,9 +75,9 @@ function Upload() {
     files.forEach((file) => {
       formData.append("file", file);
     });
-// upload for summarization
+    // upload for summarization
     try {
-      const token = sessionStorage.getItem("accessToken");
+      const token = Cookies.get("accessToken");
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/pdf2ai`,
         formData,
@@ -88,6 +89,8 @@ function Upload() {
         }
       );
       dispatch(toggleUploadSuccess());
+      console.log(response);
+      // dispatch(setPdfList())
       Toast.fire({
         icon: "success",
         title: "Upload Sucessful",
@@ -113,8 +116,7 @@ function Upload() {
       setFiles([]);
       dispatch(toggleUpload());
     }
-// upload to generate Practice questions
-
+    // upload to generate Practice questions
   };
 
   return (
@@ -195,7 +197,7 @@ function Upload() {
             </div>
             <p className="text-center text-xl text-p-text-darker font-semibold">
               {"Summarizing PDF's..."}
-              <br/>
+              <br />
               {"No need to hang around this may take a while..."}
             </p>
           </div>
@@ -211,7 +213,6 @@ function Upload() {
             </div>
             <p className="text-xl text-p-text-darker font-semibold">
               {"Summarizing PDF's..."}
-              
             </p>
           </div>
         )}
