@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import Cookies from "js-cookie";
 import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
 import Swal from "sweetalert2";
@@ -96,7 +97,7 @@ function Login() {
         console.log(response);
 
         const { access_token } = response.data;
-        sessionStorage.setItem("accessToken", access_token);
+        Cookies.set("accessToken", access_token, { expires: 7, path: "" });
         dispatch(setAccessToken(access_token));
 
         Toast.fire({

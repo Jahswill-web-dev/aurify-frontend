@@ -10,6 +10,9 @@ import { useRouter } from "next/navigation";
 import back from "../../../../../public/icons/darkback.svg";
 import Loading from "../../_components/loading";
 function truncateText(text, maxLength) {
+  if (typeof text !== "string") {
+    return "";
+    }
   if (text.length <= maxLength) {
     return text;
   }
@@ -222,19 +225,24 @@ function Questions({ slug }) {
   const [answers, setAnswers] = useState({});
   const [checkboxAnswers, setCheckboxAnswers] = useState({});
   const [isCorrectAnswer, setIsCorrectAnswer] = useState(null);
-  // const [checkboxAnswer, setCheckboxAnswer] = useState();
+  const [currentpdfName, setPdfName] = useState();
   const router = useRouter();
   const { data, error, loading, refetch } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/s/${slug}`
   );
-
+  const { pdfName } = useSelector((store) => store.dashboard);
+  useEffect(() => {
+    if (data?.data && data.data[0].title !== currentpdfName) {
+      setPdfName(data.data[0].title); // Only set when the title changes
+    }
+  }, [data, currentpdfName]);
   useEffect(() => {
     if (data?.data) {
       setQuestion(data?.data[1][0]);
       setMaxNum(data?.data[1].length - 1);
     }
   }, [data]);
-
+  console.log("component rendered");
   useEffect(() => {
     if (data?.data && num < maxNum) {
       setQuestion(data.data[1][num]); // Set question based on current num
@@ -314,7 +322,7 @@ function Questions({ slug }) {
             className="bg-secondary text-p-text border-t-2 border-primary 
           pt-1 pb-4 pl-5"
           >
-            {truncateText("Full Stack Web Development Practice questions", 60)}
+            {truncateText(currentpdfName, 60)}
           </div>
         </div>
         {/* questions */}

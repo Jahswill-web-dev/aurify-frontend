@@ -62,11 +62,11 @@ function DashboardNav() {
           <p className="text-xl text-primary">Hello, {userName}</p>
           <Image alt="user Profile Image" src={avatar} width={65} height={65} />
         </div>
-        <div className="bg-white border-2 border-primary rounded-md p-1">
+        {/* <div className="bg-white border-2 border-primary rounded-md p-1">
           {userSubscription ? "Pro":"Free"}
-        </div>
+        </div> */}
         {/* Settings */}
-        <div>
+        {/* <div>
           <svg
             width="40"
             height="40"
@@ -83,7 +83,7 @@ function DashboardNav() {
               fill="#817474"
             />
           </svg>
-        </div>
+        </div> */}
       </div>
     </div>
   );

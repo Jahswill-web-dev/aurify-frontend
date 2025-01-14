@@ -156,7 +156,7 @@ function Pdfs() {
     if (uploadSuccess || isDeleted) {
       refetch().then(() => {
         dispatch(toggleUploadSuccess());
-        // console.log("holaa")
+        console.log("hola!!!")
         dispatch(setDeleteState(false));
       });
     }

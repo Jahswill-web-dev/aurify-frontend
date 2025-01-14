@@ -105,6 +105,6 @@ export const {
   setFirstPdfId,
   setDeleteState,
   setAudioId,
-  setCurrentSummaryAudioId
+  setCurrentSummaryAudioId,
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

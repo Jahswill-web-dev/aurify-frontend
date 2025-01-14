@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export function useFetchWithToken(url) {
   const [data, setData] = useState(null);
@@ -10,7 +11,7 @@ export function useFetchWithToken(url) {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const token = sessionStorage.getItem("accessToken");
+      const token = Cookies.get("accessToken");
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -41,6 +42,7 @@ export function usePostWithToken(url, data) {
   useEffect(() => {
     async function getData() {
       try {
+        const token = Cookies.get("accessToken");
         const response = axios.post(url, data, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -62,7 +64,7 @@ export function usePostWithToken(url, data) {
 
 export function useDeleteWithToken(pdfId) {
   // const deletePdf = () => {
-  const token = sessionStorage.getItem("accessToken");
+  const token = Cookies.get("accessToken");
   axios
     .delete(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/${pdfId}`, {
       headers: {
@@ -71,7 +73,7 @@ export function useDeleteWithToken(pdfId) {
     })
     .then((response) => {
       console.log("Delete succesful: ", response.data);
-       resolve(response.data);
+      resolve(response.data);
     })
     .catch((error) => {
       console.log("error deleting data", error);
