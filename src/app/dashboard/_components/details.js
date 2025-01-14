@@ -46,7 +46,7 @@ function Details() {
         },
       })
       .then((response) => {
-        setDeleteState(true);
+        dispatch(setDeleteState(true));
         Toast.fire({
           icon: "success",
           title: "File Deleted Sucessful",
@@ -140,7 +140,8 @@ function MobileDetails() {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((response) => {
+      .then(() => {
+        dispatch(setDeleteState(true));
         Toast.fire({
           icon: "success",
           title: "File Deleted Sucessful",

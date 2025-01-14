@@ -17,7 +17,6 @@ import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import Cookies from "js-cookie";
-import { cookies } from "next/headers";
 
 const Toast = Swal.mixin({
   toast: true,
