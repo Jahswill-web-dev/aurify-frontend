@@ -25,21 +25,21 @@ function Navbar() {
         min-[900px]:flex gap-[2.8125rem] text-primary-25 text-h5 inter-font-bold"
         >
           <Link href="/blogs">Blogs</Link>
-          <Link href="/Features">Features</Link>
-          <Link href="/Pricing">Pricing</Link>
+          <Link href="#features">Features</Link>
+          {/* <Link href="/pricing">Pricing</Link> */}
         </div>
         {/* signup and login buttons */}
         <div className="flex gap-2">
           <div className="hidden min-[600px]:flex  min-[600px]:gap-[1rem] items-center">
             <Link
-              href="#"
+              href="/signup"
               className="px-5 py-2 rounded-[50px] bg-primary-25 text-accent-25 
             text-h5 poppins-font-bold"
             >
               Sign Up
             </Link>
             <Link
-              href="#"
+              href="/login"
               className="px-5 py-2 rounded-[50px] border-2 border-primary-200 text-primary-100 
             text-h5 poppins-font-bold"
             >
@@ -48,7 +48,7 @@ function Navbar() {
           </div>
           {/* Mobile bars */}
           <div className="min-[900px]:hidden" onClick={handleNav}>
-            <Image src={bars} width={50} height={50} alt="bars" />
+            <Image src={bars} width={50} height={50} alt="bars" className="cursor-pointer"/>
           </div>
         </div>
       </div>
@@ -59,19 +59,19 @@ function Navbar() {
       >
         <div className="flex flex-col gap-7">
           <Link href="/blogs">Blogs</Link>
-          <Link href="/Features">Features</Link>
-          <Link href="/Pricing">Pricing</Link>
+          <Link href="#features">Features</Link>
+          {/* <Link href="/pricing">Pricing</Link> */}
         </div>
         <div className="flex flex-col-reverse gap-5 items-start mt-5">
           <Link
-            href="#"
+            href="/signup"
             className="px-5 py-2 rounded-[50px] bg-primary-25 text-accent-25 
             text-h5 poppins-font-bold"
           >
             Sign Up
           </Link>
           <Link
-            href="#"
+            href="/login"
             className="px-5 py-2 rounded-[50px] border-2 border-primary-200 text-primary-100 
             text-h5 poppins-font-bold"
           >
