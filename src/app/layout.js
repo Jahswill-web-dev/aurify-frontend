@@ -12,7 +12,7 @@ export default function RootLayout({ children }) {
   return (
     <StoreProvider>
       <html lang="en">
-        <body className="bg-secondary">
+        <body className="bg-off-white">
           {children}
           <Footer />
         </body>
