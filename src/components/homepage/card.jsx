@@ -13,7 +13,7 @@ function FirstCard() {
       />
       <div
         className="h-1/4 w-full 
-      text-off-white"
+      text-off-white-50"
       >
         <div className="absolute top-0 z-10 pt-5 px-2">
           <h3 className="text-h2 poppins-font-italics mb-2">Summarization</h3>
@@ -39,7 +39,7 @@ function SecondCard() {
       />
       <div
         className="h-1/4 w-full 
-          text-off-white"
+          text-off-white-50"
       >
         <div className="absolute bottom-0 z-10 pb-5 px-2">
           <h3 className="text-h2 poppins-font-italics mb-2">Audio Generation</h3>

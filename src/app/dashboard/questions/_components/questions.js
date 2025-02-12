@@ -9,6 +9,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import back from "../../../../../public/icons/darkback.svg";
 import Loading from "../../_components/loading";
+
+//...........................
+// Break it down step by step
+//...........................
+
 function truncateText(text, maxLength) {
   if (typeof text !== "string") {
     return "";
@@ -306,22 +311,11 @@ function Questions({ slug }) {
         <p>Back</p>
       </button>
       <div
-        className="inter-font bg-white px-5 rounded-md border-2 border-p-text 
-      h-[700px] w-full overflow-y-scroll"
+        className=""
       >
-        <div className="flex flex-col gap-2 my-2">
-          <h2 className="text-2xl text-primary">Practice Questions</h2>
-          <p className="text-p-text text-sm sm:text-xl">
-            Studies have shown that Practice questions help you retain
-            information better
-          </p>
-        </div>
+     
         <div className="my-4">
-          <p className="text-lg text-primary font-semibold">Name</p>
-          <div
-            className="bg-secondary text-p-text border-t-2 border-primary 
-          pt-1 pb-4 pl-5"
-          >
+          <div>
             {truncateText(currentpdfName, 60)}
           </div>
         </div>

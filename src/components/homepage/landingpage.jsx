@@ -30,13 +30,17 @@ function LandingPage() {
           src={productImage}
           width={924}
           height={667}
-          alt="product Image"
+          alt="Aurify AI Image"
         />
       </div>
       {/* About Product Section */}
       <div className="flex flex-col gap-5 items-center md:flex-row mt-28">
         <div className="md:w-1/2 flex justify-end">
-          <Image src={productImage2} alt="products Image" className="max-w-[400px]" />
+          <Image
+            src={productImage2}
+            className="max-w-[400px]"
+            alt="Aurify AI"
+          />
         </div>
         <div className="text-center md:text-left flex flex-col gap-5 md:w-1/2">
           <h2 className="text-primary-100 text-h3 md:text-h4 lg:text-h3 poppins-font-bold">
@@ -56,8 +60,10 @@ function LandingPage() {
           <SecondCard />
         </div>
 
-        <div className="mt-20 flex flex-col-reverse md:flex-row gap-2 md:gap-20
-         items-center max-w-[900px] mx-auto ">
+        <div
+          className="mt-20 flex flex-col-reverse md:flex-row gap-2 md:gap-20
+         items-center max-w-[900px] mx-auto "
+        >
           {/* texts */}
           <div className="md:w-1/2 text-center md:text-left md:pl-10">
             <h3 className="text-primary-100 text-h3 poppins-font">
@@ -69,14 +75,20 @@ function LandingPage() {
             </p>
           </div>
           <div className="">
-            <Image src={questionImg} className="w-[317px] h-[218px]" />
+            <Image
+              src={questionImg}
+              className="w-[317px] h-[218px]"
+              alt="Aurify AI practice question Image"
+            />
           </div>
         </div>
       </div>
       {/* Last section */}
       <div className="flex flex-col-reverse md:flex-row items-center mt-40 gap-5">
         <div className="md:w-1/2 flex gap-5 flex-col inter-font-bold pl-10">
-          <h2 className="hidden md:flex text-h3 text-primary-100 poppins-font">All you ever need in one place</h2>
+          <h2 className="hidden md:flex text-h3 text-primary-100 poppins-font">
+            All you ever need in one place
+          </h2>
           <p className="text-h5 text-grey-200 min-w-[302px] max-w-[500px]">
             Our tool condenses complex materials into easy-to-understand
             summaries, helping you grasp key concepts faster,
@@ -91,9 +103,19 @@ function LandingPage() {
           </p>
         </div>
         <div className="md:w-1/2 md:flex md:justify-center flex flex-col items-center gap-5">
-        <h3 className="md:hidden text-h3 text-primary-50">All you ever need in one place</h3>
-          <Image src={allFeatureImage} className="w-[300px] h-[400px] hidden md:flex" />
-          <Image src={allFeatureMobileImage} className="w-[400px] h-[300px] flex md:hidden" />
+          <h3 className="md:hidden text-h3 text-primary-50">
+            All you ever need in one place
+          </h3>
+          <Image
+            src={allFeatureImage}
+            alt="Students Using Aurify AI"
+            className="w-[300px] h-[400px] hidden md:flex"
+          />
+          <Image
+            src={allFeatureMobileImage}
+            alt="Students Using Aurify AI"
+            className="w-[400px] h-[300px] flex md:hidden"
+          />
         </div>
       </div>
     </div>

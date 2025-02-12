@@ -50,7 +50,7 @@ function InputForm({ type, title, name, id, register, errors }) {
         type={type}
         id={id}
         placeholder=""
-        className="focus:border-primary border-p-text-darker w-64 md:w-[400px] h-[35px] text-x-sub-head border-2
+        className="focus:border-primary rounded-sm border-p-text-darker w-64 md:w-[400px] h-[35px] text-x-sub-head border-2
               p-2"
       ></input>
       <p className="text-red-600 m-0 p-0 text-left text-xs">{errorMessage}</p>
@@ -199,8 +199,8 @@ function CreateAccount() {
 
       <div className="flex flex-col gap-5 items-center justify-center">
         <SocialSignIn name="Sign in with Google" logo={googleIcon} />
-        <SocialSignIn name="Sign in Facebook" logo={facebookIcon} />
-        <SocialSignIn name="Sign in Twitter" logo={xIcon} />
+        {/* <SocialSignIn name="Sign in Facebook" logo={facebookIcon} /> */}
+        {/* <SocialSignIn name="Sign in Twitter" logo={xIcon} /> */}
       </div>
     </div>
   );

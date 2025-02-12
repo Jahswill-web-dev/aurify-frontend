@@ -49,7 +49,7 @@ function InputForm({ type, title, name, id, register, errors }) {
         type={type}
         id={id}
         placeholder=""
-        className="focus:border-primary border-p-text-darker w-64 md:w-[400px] h-[35px] text-x-sub-head border-2
+        className="focus:border-primary rounded-sm border-p-text-darker w-64 md:w-[400px] h-[35px] text-x-sub-head border-2
               p-2"
       ></input>
       <p className="text-red-600 m-0 p-0 text-left text-xs">{errorMessage}</p>
@@ -90,11 +90,11 @@ function Login() {
   const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
-    console.log(data);
+    // console.log(data);
     await axios
       .post(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/token`, data)
       .then((response) => {
-        console.log(response);
+        // console.log(response);
 
         const { access_token } = response.data;
         Cookies.set("accessToken", access_token, { expires: 7, path: "" });
@@ -186,8 +186,8 @@ function Login() {
 
       <div className="flex flex-col gap-5 items-center justify-center">
         <SocialSignIn name="LogIn in with Google" logo={googleIcon} />
-        <SocialSignIn name="LogIn in Facebook" logo={facebookIcon} />
-        <SocialSignIn name="LogIn in Twitter" logo={xIcon} />
+        {/* <SocialSignIn name="LogIn in Facebook" logo={facebookIcon} /> */}
+        {/* <SocialSignIn name="LogIn in Twitter" logo={xIcon} /> */}
       </div>
     </div>
   );

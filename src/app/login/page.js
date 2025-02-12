@@ -1,32 +1,27 @@
 import Image from "next/image";
 import Login from "./_components/login";
 import signImage from "../../../public/images/signin-image.svg";
-import Navbar from "@/components/navbar/nav";
+import logo from "../../../public/icons/aurify-new-logo.png";
 import Link from "next/link";
-import back from "../../../public/icons/back.svg";
-
 function LoginPage() {
   return (
     <div>
       <div className="container">
-        {/* title */}
-        <div className="text-center mb-5">
-          <h2 className="text-x-head md:text-l-head text-center text-primary roboto-font font-semibold">
-            Welcome Back To Aurify
-          </h2>
-          <p className="text-p-text-darker font-medium roboto-font">
-            Enter your email or sign in with google, facebook or twitter
-          </p>
-        </div>
+        {/* logo */}
+        <Link href="/">
+          <div className="text-center mb-5 mt-5 flex justify-center">
+            <Image width={200} height={200} src={logo} alt="Aurify AI logo" />
+          </div>
+        </Link>
         {/* form and illustration */}
         <div className="lg:flex justify-between items-start">
           {/* signup with socials and email */}
           <div>
-            <div className="text-center flex flex-col items-center">
+            <div className="w-[400px] mx-auto md:pl-0 pl-16 text-left flex flex-col items-start">
               <span className="text-primary font-medium text-[18px] md:text-l-sub-head">
                 Log In
               </span>
-              <div className="h-[2px] w-[200px] bg-primary"></div>
+              <div className="h-[2px] w-[50px] bg-primary"></div>
             </div>
             <Login />
           </div>

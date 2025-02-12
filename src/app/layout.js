@@ -11,8 +11,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <StoreProvider>
-      <html lang="en">
-        <body className="bg-off-white">
+      <html lang="en" className="scroll-smooth">
+        <body className="bg-off-white max-w-[1557px] mx-auto">
           {children}
           <Footer />
         </body>
