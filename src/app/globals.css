@@ -55,7 +55,7 @@
   }
 
   .dashboard-main {
-    @apply bg-off-white-100 text-p-text-darker px-3 py-5 rounded-md border border-grey-50 h-full w-full lg:w-[100%] min-h-[600px] max-h-[700px] overflow-y-auto
+    @apply bg-off-white-100 text-p-text-darker px-3 py-5 rounded-md border border-grey-25 h-full w-full lg:w-[100%] min-h-[600px] max-h-[700px] overflow-y-auto
   }
 }
 

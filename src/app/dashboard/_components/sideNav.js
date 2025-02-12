@@ -1,11 +1,6 @@
 "use client";
 import Image from "next/image";
-import WhiteHomeIcon from "../../../../public/icons/white-home-icon.svg";
-import homeIcon from "../../../../public/icons/home-icon.svg";
-import bookmarkIcon from "../../../../public/icons/bookmark-icon.svg";
 import questionIcon from "../../../../public/icons/questiion-icon.svg";
-import crown from "../../../../public/icons/crown-icon.svg";
-import settingsIcon from "../../../../public/icons/settings.svg";
 import closeIcon from "../../../../public/icons/closeicon.svg";
 import logout from "../../../../public/icons/arrow-right-from-bracket-solid.svg";
 import { useSelector, useDispatch } from "react-redux";
@@ -16,6 +11,8 @@ import { usePathname } from "next/navigation";
 import Cookie from "js-cookie";
 import { useRouter } from "next/navigation";
 import plus from "../../../../public/icons/ic_baseline-plus.svg";
+import summary from "../../../../public/icons/summary-check.svg";
+import audio from "../../../../public/icons/light_headphones.svg";
 
 function MobileNav() {
   const pathname = usePathname();
@@ -82,17 +79,26 @@ function MobileNav() {
 
               {/* Nav Links */}
               <div className="flex flex-col gap-8 mt-10">
-                <div className="flex items-center gap-3 pl-4 text-p-text">
+                <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
+                  <Image alt="home icon" src={summary} width={20} height={20} />
+                  <p>Summaries</p>
+                </div>
+                <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
                   <Image
                     alt="home icon"
-                    src={homeIcon}
+                    src={questionIcon}
                     width={20}
                     height={20}
                   />
-                  <p>Home</p>
+                  <p>Practice Question</p>
                 </div>
+                <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
+                  <Image alt="home icon" src={audio} width={20} height={20} />
+                  <p>Audio</p>
+                </div>
+
                 <div
-                  className="flex gap-3 text-p-text pl-4 cursor-pointer active:scale-95 hover:text-primary"
+                  className="flex gap-3 inter-bold text-grey-50 font-medium hover:scale-100 pl-4 cursor-pointer active:scale-95 hover:text-primary"
                   onClick={handleLogout}
                 >
                   <Image
@@ -103,48 +109,8 @@ function MobileNav() {
                   />
                   <p>Logout</p>
                 </div>
-                {/* <div className="flex items-center gap-3 pl-4 text-p-text">
-                  <Image
-                    alt="question icon"
-                    src={questionIcon}
-                    width={20}
-                    height={20}
-                  />
-                  <p>Practice Questions</p>
-                </div> */}
-                {/* <div className="flex items-center gap-3 pl-4 text-p-text">
-                  <Image
-                    alt="settings icon"
-                    src={settingsIcon}
-                    width={28}
-                    height={28}
-                  />
-                  <p>Settings</p>
-                </div> */}
               </div>
             </div>
-
-            {/* upgrade card */}
-            {/* <div className="pl-4 roboto-font">
-              <div
-                className="absolute bottom-4 left-2 bg-p-text w-[205px] h-[244px] text-white flex
-      flex-col gap-3 pt-5 pb-2 px-2 rounded-md border-2 border-p-text-darker
-      bg-gradient-to-b from-p-text via-p-text via-60% to-white z-10"
-              >
-                <p className="text-xl">Upgrade to Premium</p>
-                <p className="text-[12px]">
-                  Experience the true power of Aurify by upgrading to Premium,
-                  limitless practice question and much more{" "}
-                </p>
-                <div
-                  className="flex gap-8 items-center justify-center bg-gradient-to-r from-p-text
-         to-secondary rounded-md border-2 border-white mt-11"
-                >
-                  <p className="lg:text-xl">Upgrade</p>
-                  <Image alt="crown icon" src={crown} width={39} height={39} />
-                </div>
-              </div>
-            </div> */}
           </div>
         </div>
       </div>
@@ -179,21 +145,36 @@ function SideNav() {
               className="active:scale-95 cursor-pointer bg-primary-50 text-off-white-50 rounded-xl
           flex items-center h-[60px] shadow-lg w-[132px] drop-shadow-xl px-2"
             >
-              <Image src={plus} alt="" width={47} height={47}/>
-              <p className="poppins-font text-h4">
-                Upload
-              </p>
+              <Image src={plus} alt="" width={47} height={47} />
+              <p className="poppins-font text-h4">Upload</p>
             </div>
           </div>
 
           {/* Nav Links */}
 
           <div className="mt-12 flex flex-col gap-5">
-            <div className="flex items-center gap-3 pl-4 text-p-text bg-white p-2 rounded-r-3xl">
-              <Image alt="home icon" src={homeIcon} width={20} height={20} />
-              <p>summaries</p>
+            <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
+              <Image alt="home icon" src={summary} width={30} height={30} />
+              <p>Summaries</p>
             </div>
-            <div className="flex gap-3 text-p-text pl-4 cursor-pointer active:scale-95 hover:text-primary" onClick={handleLogout}>
+            <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
+              <Image
+                alt="home icon"
+                src={questionIcon}
+                width={30}
+                height={30}
+              />
+              <p>Practice Question</p>
+            </div>
+            <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
+              <Image alt="home icon" src={audio} width={35} height={35} />
+              <p>Audio</p>
+            </div>
+
+            <div
+              className="flex gap-3 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 pl-4 cursor-pointer active:scale-95"
+              onClick={handleLogout}
+            >
               <Image alt="logout icon" src={logout} width={20} height={20} />
               <p>Logout</p>
             </div>
