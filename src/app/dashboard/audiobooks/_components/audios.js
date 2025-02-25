@@ -56,7 +56,6 @@ function Block({
   id,
   onPlayPause,
   url,
-  audioId,
 }) {
   const { pdfName, pdfId, audioSrc, } = useSelector(
     (store) => store.dashboard
@@ -194,7 +193,7 @@ function Audios() {
       // Otherwise, play the selected audio
       setCurrentAudioId(id);
       dispatch(setAudioSrc(url));
-      dispatch(setPlaying(playing));
+      dispatch(setPlaying(false));
     }
   };
   // ...........................
