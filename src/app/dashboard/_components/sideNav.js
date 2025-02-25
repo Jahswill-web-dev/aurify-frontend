@@ -79,24 +79,34 @@ function MobileNav() {
 
               {/* Nav Links */}
               <div className="flex flex-col gap-8 mt-10">
-                <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
-                  <Image alt="home icon" src={summary} width={20} height={20} />
-                  <p>Summaries</p>
-                </div>
-                <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
-                  <Image
-                    alt="home icon"
-                    src={questionIcon}
-                    width={20}
-                    height={20}
-                  />
-                  <p>Practice Question</p>
-                </div>
-                <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
-                  <Image alt="home icon" src={audio} width={20} height={20} />
-                  <p>Audio</p>
-                </div>
-
+                <Link href="/dashboard" className="cursor-pointer">
+                  <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
+                    <Image
+                      alt="summary icon"
+                      src={summary}
+                      width={20}
+                      height={20}
+                    />
+                    <p>Summaries</p>
+                  </div>
+                </Link>
+                <Link href="/dashboard/questions" className="cursor-pointer">
+                  <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
+                    <Image
+                      alt="home icon"
+                      src={questionIcon}
+                      width={20}
+                      height={20}
+                    />
+                    <p>Practice Question</p>
+                  </div>
+                </Link>
+                <Link href="/dashboard/audiobooks" className="cursor-pointer">
+                  <div className="flex items-center gap-3 pl-4 inter-bold font-medium hover:text-primary-100 hover:scale-90 p-2 rounded-r-3xl">
+                    <Image alt="Audio Icon" src={audio} width={20} height={20} />
+                    <p>Audio</p>
+                  </div>
+                </Link>
                 <div
                   className="flex gap-3 inter-bold text-grey-50 font-medium hover:scale-100 pl-4 cursor-pointer active:scale-95 hover:text-primary"
                   onClick={handleLogout}
@@ -153,23 +163,29 @@ function SideNav() {
           {/* Nav Links */}
 
           <div className="mt-12 flex flex-col gap-5">
-            <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
-              <Image alt="home icon" src={summary} width={30} height={30} />
-              <p>Summaries</p>
-            </div>
-            <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
-              <Image
-                alt="home icon"
-                src={questionIcon}
-                width={30}
-                height={30}
-              />
-              <p>Practice Question</p>
-            </div>
-            <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
-              <Image alt="home icon" src={audio} width={35} height={35} />
-              <p>Audio</p>
-            </div>
+            <Link href="/dashboard" className="cursor-pointer">
+              <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
+                <Image alt="home icon" src={summary} width={30} height={30} />
+                <p>Summaries</p>
+              </div>
+            </Link>
+            <Link href="/dashboard/questions" className="cursor-pointer">
+              <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
+                <Image
+                  alt="home icon"
+                  src={questionIcon}
+                  width={25}
+                  height={25}
+                />
+                <p>Practice Question</p>
+              </div>
+            </Link>
+            <Link href="/dashboard/audiobooks" className="cursor-pointer">
+              <div className="flex items-center gap-3 pl-4 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 bg-white p-2 rounded-r-3xl">
+                <Image alt="home icon" src={audio} width={35} height={35} />
+                <p>Audio</p>
+              </div>
+            </Link>
 
             <div
               className="flex gap-3 text-grey-50 inter-bold font-medium hover:text-primary-100 hover:scale-90 pl-4 cursor-pointer active:scale-95"

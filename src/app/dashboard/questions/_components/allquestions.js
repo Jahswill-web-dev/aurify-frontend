@@ -2,10 +2,8 @@
 import Image from "next/image";
 import axios from "axios";
 import Swal from "sweetalert2";
-import moreIcon from "../../../../public/icons/more-icon.svg";
-import playIcon from "../../../../public/icons/play-icon.svg";
-import pauseIcon from "../../../../public/icons/pause-icon.svg";
-import deleteIcon from "../../../../public/icons/delete.svg";
+import moreIcon from "../../../../../public/icons/more-icon.svg";
+import deleteIcon from "../../../../../public/icons/delete.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -23,7 +21,7 @@ import {
   setAudioId,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
-import Loading from "./loading";
+// import Loading from "./../loading";
 import Cookies from "js-cookie";
 import Link from "next/link";
 
@@ -139,21 +137,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
         <div className="hidden md:block active:scale-90" onClick={handleDeletePdf}>
           <Image alt="Delete icon" src={deleteIcon} height={35} width={35} />
         </div>
-        {/* <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onPlayPause();
-            // console.log("play button is clicked!!!")
-          }}
-          className="hidden md:block"
-        >
-          <Image
-            alt="play Icon"
-            src={playing ? pauseIcon : playIcon}
-            width={20}
-            height={20}
-          />
-        </div> */}
+        
         <div className="cursor-pointer lg:hidden">
           <Image
             alt="more details icons"
@@ -168,7 +152,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
   );
 }
 
-function Pdfs() {
+function AllQuestsions() {
   const [summaries, setSummaries] = useState();
   const { uploadSuccess, isDeleted, audioId } = useSelector(
     (store) => store.dashboard
@@ -230,14 +214,14 @@ function Pdfs() {
   ) : (
     <div className="dashboard-main">
       <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
-        Summaries
+        Practice questions
       </p>
       <div>
         {/* Blocks container */}
         <div className="flex flex-col gap-5">
           {/* Single Blocks */}
           {summaries?.map((summary, index) => (
-            <Link  key={summary.id} href={`/dashboard/summary/${summary.slug}`}>
+            <Link  key={summary.id} href={`/dashboard/questions/${summary.slug}`}>
             <Block
               first={index + 1 === 1}
               key={summary.id}
@@ -250,19 +234,10 @@ function Pdfs() {
               />
               </Link>
           ))}
-          {/* <Block
-            first={true}
-            name="Web-development"
-            playing={true}
-          />
-          <Block name="Math-Notes" playing={false} />
-          <Block name="Biology-Notes" playing={false} />
-          <Block name="English-Essay" playing={false} />
-          <Block name="English-Essays" playing={false} /> */}
         </div>
       </div>
     </div>
   );
 }
 
-export default Pdfs;
+export default AllQuestsions;

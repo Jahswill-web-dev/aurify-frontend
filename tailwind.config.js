@@ -18,7 +18,7 @@ module.exports = {
         "accent-200": "#E2D89F",
         "grey-25": "#D3D3D3",
         "grey-50": "#817474",
-        "grey-100": "##808080",
+        "grey-100": "#808080",
         "grey-200": "#333333",
         "off-white":"#FCFCFC",
         "off-white-50": "#F5F5F5",

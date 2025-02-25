@@ -2,10 +2,10 @@
 import Image from "next/image";
 import axios from "axios";
 import Swal from "sweetalert2";
-import moreIcon from "../../../../public/icons/more-icon.svg";
-import playIcon from "../../../../public/icons/play-icon.svg";
-import pauseIcon from "../../../../public/icons/pause-icon.svg";
-import deleteIcon from "../../../../public/icons/delete.svg";
+import moreIcon from "../../../../../public/icons/more-icon.svg";
+import deleteIcon from "../../../../../public/icons/delete.svg";
+import playIcon from "../../../../../public/icons/play-bold.svg";
+import pauseIcon from "../../../../../public/icons/pause-rounded.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -21,12 +21,14 @@ import {
   setFirstPdfId,
   setDeleteState,
   setAudioId,
+  setAudioSrc,
+  setPlaying,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
-import Loading from "./loading";
+// import Loading from "./../loading";
+import ReactHowler from "react-howler";
 import Cookies from "js-cookie";
 import Link from "next/link";
-
 
 const Toast = Swal.mixin({
   toast: true,
@@ -45,21 +47,23 @@ function truncateText(text, maxLength) {
   }
   return text.substring(0, maxLength) + "...";
 }
-function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
-  const { pdfNam0e, pdfId } = useSelector((store) => store.dashboard);
+function Block({
+  first,
+  selected,
+  name,
+  playing,
+  slug,
+  id,
+  onPlayPause,
+  url,
+  audioId,
+}) {
+  const { pdfName, pdfId, audioSrc, } = useSelector(
+    (store) => store.dashboard
+  );
   const dispatch = useDispatch();
-  const audioRef = useRef(null);
-  // {
-  //   pdfName ? pdfName : selected && name;
-  // }
 
   useEffect(() => {
-    // if (selected) {
-    //   dispatch(setFirstPdfName(name));
-    //   dispatch(setFirstPdfSlug(slug));
-    //   dispatch(setPdfId(id));
-    //   dispatch(setFirstPdfId(id));
-    // }
     if (first) {
       dispatch(setPdfName(name));
       dispatch(setPdfSlug(slug));
@@ -76,33 +80,6 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
     dispatch(setPdfSlug(slug));
     dispatch(setPdfId(id));
   }
-  useEffect(() => {
-    if (playing) {
-      audioRef.current.play();
-    } else {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  }, [playing]);
-
-  useEffect(() => {
-    const handleEnded = () => {
-      onPlayPause();
-    };
-    // console.log("Audio url", url)
-    const audioElement = audioRef.current;
-    // Pause or end audio at the end of the audio
-    if (audioElement) {
-      audioElement.addEventListener("ended", handleEnded);
-    }
-    return () => {
-      if (audioElement) {
-        audioElement.removeEventListener("ended", handleEnded);
-      }
-    };
-  }, [onPlayPause]);
-  // console.log("pdf idd", id)
-  // console.log("first", first);
   
   const handleDeletePdf = () => {
     const token = Cookies.get("accessToken");
@@ -127,33 +104,41 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
       });
     // };
   };
+
+ 
+
+  useEffect(() => {
+    // console.log("audio url: ", url);
+    dispatch(setAudioSrc(url));
+  }, [url]);
+
   return (
-    <div onClick={detail}>
+    <div onClick={detail} className="hover:bg-grey-25 rounded transition-all">
       <div
-        className={`cursor-pointer flex justify-between w-11/12 mx-auto py-2 px-2 
-           ${selected ? "bg-secondary" : ""} text-grey-50 roboto-font`}
+        className={`flex justify-between w-11/12 mx-auto py-2 px-2 
+        roboto-font text-grey-200 items-center`}
       >
-        <p className="w-[250px] poppins-font text-h4">
-          {truncateText(name, 30)}
-        </p>
-        <div className="hidden md:block active:scale-90" onClick={handleDeletePdf}>
+        <div className="flex gap-2 items-center">
+          <Image
+            src={playing ? pauseIcon : playIcon}
+            alt=""
+            width={30}
+            height={30}
+            onClick={onPlayPause}
+            className="cursor-pointer"
+          />
+          <p className="w-[400px] poppins-font text-h4">
+            {truncateText(name, 30)}
+          </p>
+        </div>
+        <p className="text-h4 hidden lg:block">1:45</p>
+        <div
+          className="hidden lg:block active:scale-90"
+          onClick={handleDeletePdf}
+        >
           <Image alt="Delete icon" src={deleteIcon} height={35} width={35} />
         </div>
-        {/* <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onPlayPause();
-            // console.log("play button is clicked!!!")
-          }}
-          className="hidden md:block"
-        >
-          <Image
-            alt="play Icon"
-            src={playing ? pauseIcon : playIcon}
-            width={20}
-            height={20}
-          />
-        </div> */}
+        {/* More Icon */}
         <div className="cursor-pointer lg:hidden">
           <Image
             alt="more details icons"
@@ -163,18 +148,19 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
           />
         </div>
       </div>
-      <audio ref={audioRef} src={url} />
+
+      {/* <ReactHowler src={audioSrc} playing={false} volume={1} ref={audioRef} /> */}
     </div>
   );
 }
 
-function Pdfs() {
+function Audios() {
   const [summaries, setSummaries] = useState();
-  const { uploadSuccess, isDeleted, audioId } = useSelector(
+  const { uploadSuccess, isDeleted, audioId, audioSrc, playing } = useSelector(
     (store) => store.dashboard
   );
   const [playingAudioId, setPlayingAudioId] = useState(null);
-  const [selectedPdfId, setSelectedPdfId] = useState();
+  const [currentAudioId, setCurrentAudioId] = useState(null);
   const dispatch = useDispatch();
   const { data, error, loading, refetch } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobooks`
@@ -182,7 +168,7 @@ function Pdfs() {
 
   useEffect(() => {
     if (data && !error && !loading) {
-      console.log(data.data);
+      // console.log(data.data);
       setSummaries(data.data);
     }
   }, [data, loading, error]);
@@ -191,26 +177,29 @@ function Pdfs() {
     if (uploadSuccess || isDeleted) {
       refetch().then(() => {
         dispatch(toggleUploadSuccess());
-        console.log("hola!!!");
+        // console.log("hola!!!");
         dispatch(setDeleteState(false));
       });
     }
   }, [uploadSuccess, refetch, dispatch, isDeleted]);
 
-  const handlePlayPause = (id) => {
-    //check is if audio is already playing
-    if (audioId === id) {
-      // setPlayingAudioId(null);
-      dispatch(setAudioId(null));
-      //plays audio
+  
+  const handlePlayPause = (id, url) => {
+    // If the selected audio is already playing, stop it
+    if (currentAudioId === id) {
+      setCurrentAudioId(null);
+      dispatch(setAudioSrc(""));
+      dispatch(setPlaying(playing));
     } else {
-      // setPlayingAudioId(id);
-      dispatch(setAudioId(id));
+      // Otherwise, play the selected audio
+      setCurrentAudioId(id);
+      dispatch(setAudioSrc(url));
+      dispatch(setPlaying(playing));
     }
   };
   // ...........................
   if (error) {
-    console.log("could not fetch pdf");
+    // console.log("could not fetch pdf");
     return (
       <div className="dashboard-main">
         <p>There was an error fetching PDFs. Please refresh the page.</p>;
@@ -230,14 +219,13 @@ function Pdfs() {
   ) : (
     <div className="dashboard-main">
       <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
-        Summaries
+        Audios
       </p>
       <div>
         {/* Blocks container */}
         <div className="flex flex-col gap-5">
           {/* Single Blocks */}
           {summaries?.map((summary, index) => (
-            <Link  key={summary.id} href={`/dashboard/summary/${summary.slug}`}>
             <Block
               first={index + 1 === 1}
               key={summary.id}
@@ -245,24 +233,18 @@ function Pdfs() {
               slug={summary.slug}
               id={summary.id}
               url={summary.url}
-              playing={audioId === summary.id}
-              onPlayPause={() => handlePlayPause(summary.id)}
-              />
-              </Link>
+              playing={currentAudioId === summary.id}
+              onPlayPause={() => handlePlayPause(summary.id, summary.url)}
+              audioId={audioId}
+            />
           ))}
-          {/* <Block
-            first={true}
-            name="Web-development"
-            playing={true}
-          />
-          <Block name="Math-Notes" playing={false} />
-          <Block name="Biology-Notes" playing={false} />
-          <Block name="English-Essay" playing={false} />
-          <Block name="English-Essays" playing={false} /> */}
         </div>
+        {audioSrc && (
+          <ReactHowler src={audioSrc} playing={playing} volume={1} />
+        )}
       </div>
     </div>
   );
 }
 
-export default Pdfs;
+export default Audios;

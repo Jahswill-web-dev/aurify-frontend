@@ -245,6 +245,7 @@ function Questions({ slug }) {
     if (data?.data) {
       setQuestion(data?.data[1][0]);
       setMaxNum(data?.data[1].length - 1);
+      console.log(data)
     }
   }, [data]);
   console.log("component rendered");

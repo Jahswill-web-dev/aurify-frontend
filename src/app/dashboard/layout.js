@@ -14,6 +14,7 @@ import {
   setUserSubscription,
 } from "../lib/features/dashboard/dashboardSlice";
 import Loading from "./_components/loading";
+import AudioControlls from "./_components/audioControlls";
 
 function DashboardLayout({ children }) {
   const { showOverlay } = useSelector((store) => store.dashboard);
@@ -47,11 +48,10 @@ function DashboardLayout({ children }) {
   return (
     <div className="">
       {/* <DashboardNav /> */}
-      <div className="">
-        {children}
-      </div>
+      <div className="">{children}</div>
       <MobileDetails />
       <Upload />
+      <AudioControlls/>
       {/* <DeleteBox/> */}
       {/* dark overlay */}
       {isOverlayVisible && (
