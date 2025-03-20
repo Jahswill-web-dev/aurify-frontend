@@ -8,11 +8,11 @@ function LoginPage() {
     <div>
       <div className="container">
         {/* logo */}
-        <Link href="/">
-          <div className="text-center mb-5 mt-5 flex justify-center">
+        <div className="text-center mb-5 mt-5 flex justify-center">
+          <Link href="/">
             <Image width={200} height={200} src={logo} alt="Aurify AI logo" />
-          </div>
-        </Link>
+          </Link>
+        </div>
         {/* form and illustration */}
         <div className="lg:flex justify-between items-start">
           {/* signup with socials and email */}

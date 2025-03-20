@@ -110,7 +110,7 @@ function LandingPage() {
             src={allFeatureImage}
             alt="Students Using Aurify AI"
             className="w-[300px] h-[400px] hidden md:flex"
-          />
+          />  
           <Image
             src={allFeatureMobileImage}
             alt="Students Using Aurify AI"

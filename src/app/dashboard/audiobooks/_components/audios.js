@@ -188,12 +188,12 @@ function Audios() {
     if (currentAudioId === id) {
       setCurrentAudioId(null);
       dispatch(setAudioSrc(""));
-      dispatch(setPlaying(playing));
+      // dispatch(setPlaying(playing));
     } else {
       // Otherwise, play the selected audio
       setCurrentAudioId(id);
       dispatch(setAudioSrc(url));
-      dispatch(setPlaying(false));
+      // dispatch(setPlaying(false));
     }
   };
   // ...........................

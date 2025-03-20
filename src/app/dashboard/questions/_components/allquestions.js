@@ -131,7 +131,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
         className={`cursor-pointer flex justify-between w-11/12 mx-auto py-2 px-2 
            ${selected ? "bg-secondary" : ""} text-grey-50 roboto-font`}
       >
-        <p className="w-[250px] poppins-font text-h4">
+        <p className="w-[400px] poppins-font text-h4">
           {truncateText(name, 30)}
         </p>
         <div className="hidden md:block active:scale-90" onClick={handleDeletePdf}>

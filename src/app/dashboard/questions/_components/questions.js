@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import back from "../../../../../public/icons/darkback.svg";
 import Loading from "../../_components/loading";
+import Link from "next/link";
 
 //...........................
 // Break it down step by step
@@ -17,16 +18,16 @@ import Loading from "../../_components/loading";
 function truncateText(text, maxLength) {
   if (typeof text !== "string") {
     return "";
-    }
+  }
   if (text.length <= maxLength) {
     return text;
   }
   return text.substring(0, maxLength) + "...";
 }
 
-function Option({ value, onChange, isSelected, isCorrect, isWrong }) {
+function Option({ id, value, onChange, isSelected, isCorrect, isWrong }) {
   const [selectedOption, setSelectedOption] = useState("");
-
+  console.log(id);
   const handleChange = (event) => {
     setSelectedOption(event.target.value);
     onChange(value);
@@ -34,32 +35,56 @@ function Option({ value, onChange, isSelected, isCorrect, isWrong }) {
   if (isSelected) {
     var backgroundColor = "bg-white";
     backgroundColor = isCorrect
-      ? "bg-green-500"
+      ? "bg-green-300"
       : isWrong
-      ? "bg-red-500"
+      ? "bg-red-300"
       : isSelected && correctAnswer.includes(value)
       ? "bg-green-500"
       : "bg-white";
   }
+  let letter;
+  switch (id) {
+    case 0:
+      letter = "(A)";
+      break;
+    case 1:
+      letter = "(B)";
+      break;
+    case 2:
+      letter = "(C)";
+      break;
+    case 3:
+      letter = "(D)";
+      break;
 
-  // console.log(value)
+    default:
+      break;
+  }
+  console.log(letter);
   return (
-    <div
-      className={` hover:scale-105 hover:text-primary text-xl border-2 border-p-text rounded-md p-1 flex gap-2 max-w-[300px] ${backgroundColor}`}
-    >
-      <label className="pl-10 w-full cursor-pointer relative">
-        {value}
-        <input
-          className="w-4 h-4 cursor-pointer peer absolute top-1 left-0 opacity-0"
-          type="radio"
-          name="radio"
-          value={value}
-          checked={isSelected}
-          onChange={handleChange}
-        />
-        <span className="p-1 border-p-text border-2 w-6 h-6 absolute top-0 left-0 rounded-[50%] peer-checked:bg-primary"></span>
-      </label>
-      <br />
+    <div className="flex items-center gap-5">
+      <p className="text-h3">{letter}</p>
+      <div
+        className={`hover:scale-105 text-xl border border-grey-50 rounded-[15px] p-1 flex gap-2 w-[400px] ${backgroundColor}
+        px-2`}
+      >
+        <label
+          className="text-grey-200 w-full cursor-pointer relative text-h5 poppins-font flex items-center justify-between
+        "
+        >
+          {value}
+          <input
+            className="w-4 h-4 cursor-pointer peer top-1 left-0 opacity-0"
+            type="radio"
+            name="radio"
+            value={value}
+            checked={isSelected}
+            onChange={handleChange}
+          />
+          <span className="p-1 border-p-text border w-8 h-8 rounded-full peer-checked:bg-primary"></span>
+        </label>
+        <br />
+      </div>
     </div>
   );
 }
@@ -88,40 +113,30 @@ function CheckBox({
   }
 
   return (
-    <div
-      className={` hover:scale-105 hover:text-primary text-xl border-2 border-p-text rounded-md p-1 flex gap-2 max-w-[300px] ${backgroundColor}`}
-    >
-      <label className="pl-10 w-full cursor-pointer relative">
-        {value}
-        <input
-          className="w-4 h-4 cursor-pointer peer absolute top-1 left-0 opacity-0"
-          type="checkbox"
-          name="checkbox"
-          value={value}
-          checked={isChecked}
-          onChange={handleChange}
-        />
-        <span className="p-1 border-p-text border-2 w-6 h-6 absolute top-0 left-0 peer-checked:bg-primary"></span>
-      </label>
-      <br />
+    <div>
+      <div
+        className={` hover:scale-105 hover:text-primary text-xl border-2 border-p-text rounded-md p-1 flex gap-2 max-w-[300px] ${backgroundColor}`}
+      >
+        <label className="pl-10 w-full cursor-pointer relative">
+          {value}
+          <input
+            className="w-4 h-4 cursor-pointer peer absolute top-1 left-0 opacity-0"
+            type="checkbox"
+            name="checkbox"
+            value={value}
+            checked={isChecked}
+            onChange={handleChange}
+          />
+          <span className="p-1 border-p-text border-2 w-6 h-6 absolute top-0 left-0 peer-checked:bg-primary"></span>
+        </label>
+        <br />
+      </div>
     </div>
   );
 }
 // Intro questions
-function IntroQuestions() {
-  return (
-    <div className="flex flex-col gap-5 max-h-[700px] overflow-scroll min-h-[600px]">
-      <p className="text-primary text-base sm:text-xl">
-        How many practice questions would you like?
-      </p>
-      <div className="flex flex-col gap-5">
-        <Option value={10} />
-        <Option value={15} />
-        <Option value={20} />
-        <Option value="Type your desired amount" />
-      </div>
-    </div>
-  );
+function TotalScore() {
+  return <div>Total Scores</div>;
 }
 // multiple-choice questions
 function MultipleChoiceQuestions({
@@ -135,11 +150,27 @@ function MultipleChoiceQuestions({
   selectedCheckboxAnswers,
   isCorrectAnswer,
   correctAnswer,
+  numOfQuestions,
+  currentNum,
+  sendDataToQuestions,
 }) {
-  // console.log(selectedCheckboxAnswers);
+  const [isFinished, setIsFinished] = useState(false);
+  // console.log(question);
+  function finished() {
+    setIsFinished(!isFinished);
+  }
+  useEffect(() => {
+    sendDataToQuestions(isFinished);
+  }, [isFinished]);
+
   return (
     <div className="flex flex-col gap-5 min-h-[600px] max-h-[700px] w-full">
-      <p className="text-primary text-base sm:text-xl">{question} </p>
+      <p className="text-primary-50 text-h5 inter-font">
+        Question {currentNum + 1} of {numOfQuestions}
+      </p>
+      <p className="text-grey-100 text-h4 poppins-font sm:text-xl">
+        {question}{" "}
+      </p>
       <div className="flex flex-col gap-5">
         {Array.isArray(answer)
           ? options.map((option, index) => {
@@ -166,6 +197,7 @@ function MultipleChoiceQuestions({
                 selectedAnswer === option && correctAnswer !== option;
               return (
                 <Option
+                  id={index}
                   key={index}
                   value={option}
                   onChange={onOptionChange}
@@ -181,24 +213,45 @@ function MultipleChoiceQuestions({
         <Option value={answer} />
         <Option value={answer} /> */}
       </div>
-      <div className="flex justify-between items-center max-w-[300px]">
+
+      {/* ...................................... */}
+      <div className="flex justify-between items-center max-w-[300px] ml-10 md:ml-24 gap-3">
         {/* previous button */}
         <div
           onClick={subtract}
-          className="flex gap-1 items-center bg-primary text-white w-24 justify-center
-        rounded-lg py-1 border-2 border-p-text hover:cursor-pointer active:scale-105"
+          className="flex gap-1 items-center bg-primary-50 text-accent-25 w-24 justify-center
+        rounded-[50px] py-1 hover:cursor-pointer active:scale-105 text-h5 poppins-font-bold"
         >
-          <Image src={backIcon} alt="icon" width={16} height={16} />
           <p>Back</p>
         </div>
-        {/* next button */}
-        <div
-          onClick={add}
-          className="flex gap-1 items-center bg-primary text-white w-24 justify-center
-        rounded-lg py-1 border-2 border-p-text hover:cursor-pointer active:scale-105"
+        {/* Quit button */}
+        <Link
+          href="/dashboard/questions"
+          className="flex gap-1 items-center bg-red-500 text-accent-25 w-24 justify-center
+        rounded-[50px] py-1 border-2 hover:cursor-pointer active:scale-105 poppins-font-bold text-h5"
         >
-          <p>Next</p>
-          <Image src={nextIcon} alt="icon" width={16} height={16} />
+          <p>Quit</p>
+        </Link>
+        {/* next button */}
+
+        <div>
+          {currentNum + 1 === numOfQuestions ? (
+            <div
+              onClick={finished}
+              className="flex gap-1 items-center bg-grey-100 text-accent-25 w-24 justify-center
+          rounded-[50px] py-1 hover:cursor-pointer active:scale-105 text-h5 poppins-font-bold"
+            >
+              <p>Finish</p>
+            </div>
+          ) : (
+            <div
+              onClick={add}
+              className="flex gap-1 items-center bg-primary-50 text-accent-25 w-24 justify-center
+        rounded-[50px] py-1 hover:cursor-pointer active:scale-105 text-h5 poppins-font-bold"
+            >
+              <p>Next</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -231,6 +284,9 @@ function Questions({ slug }) {
   const [checkboxAnswers, setCheckboxAnswers] = useState({});
   const [isCorrectAnswer, setIsCorrectAnswer] = useState(null);
   const [currentpdfName, setPdfName] = useState();
+  const [numberOfQuestions, setNumberOfQuestions] = useState();
+  const [isFinished, setIsFinished] = useState();
+
   const router = useRouter();
   const { data, error, loading, refetch } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/s/${slug}`
@@ -241,14 +297,17 @@ function Questions({ slug }) {
       setPdfName(data.data[0].title); // Only set when the title changes
     }
   }, [data, currentpdfName]);
+
   useEffect(() => {
     if (data?.data) {
       setQuestion(data?.data[1][0]);
       setMaxNum(data?.data[1].length - 1);
-      console.log(data)
+      setNumberOfQuestions(data.data[1].length);
+      // console.log(data);
     }
   }, [data]);
-  console.log("component rendered");
+
+  // console.log("component rendered");
   useEffect(() => {
     if (data?.data && num < maxNum) {
       setQuestion(data.data[1][num]); // Set question based on current num
@@ -296,54 +355,41 @@ function Questions({ slug }) {
     }
   }, [question, num, answers, checkboxAnswers]);
 
-  // console.log(question);
-  // console.log(answers[num]);
-  // console.log("question id:", num);
-  // console.log("checkbox answer: ", checkboxAnswer);
+  function handleDataFromMultiple(data) {
+    setIsFinished(data);
+  }
 
   return (
-    <div className="mx-auto w-full">
-      <button
-        onClick={() => router.back()}
-        className="border-primary border-2 px-2 py-1 bg-white
-      text-p-text text-base font-medium roboto-font flex items-center gap-2 w-24 my-2 rounded-md"
-      >
-        <Image src={back} width={25} height={25} alt="back button" />
-        <p>Back</p>
-      </button>
-      <div
-        className=""
-      >
-     
-        <div className="my-4">
-          <div>
-            {truncateText(currentpdfName, 60)}
+    <div className="mx-auto w-full px-10 md:pl-24 py-5">
+      {isFinished ? (
+        <TotalScore />
+      ) : (
+        <div className="">
+          <div className="my-4 text-grey-50 text-h2 poppins-font">
+            <div>{truncateText(currentpdfName, 60)}</div>
+          </div>
+          {/* questions */}
+          <div className="h-[500px] flex gap-5">
+            {question && (
+              <MultipleChoiceQuestions
+                question={question.question}
+                options={question.options}
+                answer={question.answer}
+                add={add}
+                subtract={subtract}
+                selectedAnswer={answers[num]}
+                selectedCheckboxAnswers={checkboxAnswers[num] || []}
+                onOptionChange={handleOptionChange}
+                isCorrectAnswer={isCorrectAnswer}
+                correctAnswer={question.answer}
+                numOfQuestions={numberOfQuestions}
+                currentNum={num}
+                sendDataToQuestions={handleDataFromMultiple}
+              />
+            )}
           </div>
         </div>
-        {/* questions */}
-        <div className="h-[500px] flex gap-5">
-          {question && (
-            <MultipleChoiceQuestions
-              question={question.question}
-              options={question.options}
-              answer={question.answer}
-              add={add}
-              subtract={subtract}
-              selectedAnswer={answers[num]}
-              selectedCheckboxAnswers={checkboxAnswers[num] || []}
-              onOptionChange={handleOptionChange}
-              isCorrectAnswer={isCorrectAnswer}
-              correctAnswer={question.answer}
-            />
-          )}
-
-          {/* <MultipleChoiceQuestions
-            question="What is Javascript"
-            options="A Programming language"
-            answer="A Programming language"
-          />{" "} */}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
