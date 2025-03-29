@@ -14,7 +14,6 @@ export default function RootLayout({ children }) {
       <html lang="en" className="scroll-smooth">
         <body className="bg-off-white max-w-[1557px] mx-auto">
           {children}
-          <Footer />
         </body>
       </html>
     </StoreProvider>

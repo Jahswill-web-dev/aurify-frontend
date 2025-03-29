@@ -3,6 +3,7 @@ import CreateAccount from "./_components/creatAccount";
 import signImage from "../../../public/images/signin-image.svg";
 import logo from "../../../public/icons/aurify-new-logo.png";
 import Link from "next/link";
+import Footer from "@/components/footer/footer";
 
 function SignUpPage() {
   // Todo: ask chatgpt how to practice connecting to backend
@@ -38,6 +39,7 @@ function SignUpPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import nextIcon from "../../../../../public/icons/next.svg";
 import backIcon from "../../../../../public/icons/back.svg";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import { useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import back from "../../../../../public/icons/darkback.svg";
 import Loading from "../../_components/loading";
@@ -27,7 +27,7 @@ function truncateText(text, maxLength) {
 
 function Option({ id, value, onChange, isSelected, isCorrect, isWrong }) {
   const [selectedOption, setSelectedOption] = useState("");
-  console.log(id);
+  // console.log(id);
   const handleChange = (event) => {
     setSelectedOption(event.target.value);
     onChange(value);
@@ -60,7 +60,7 @@ function Option({ id, value, onChange, isSelected, isCorrect, isWrong }) {
     default:
       break;
   }
-  console.log(letter);
+  // console.log(letter);
   return (
     <div className="flex items-center gap-5">
       <p className="text-h3">{letter}</p>
@@ -100,6 +100,7 @@ function CheckBox({
   const handleChange = (event) => {
     setSelectedOption(event.target.checked);
     onChange(value, event.target.checked);
+    // console.log(event.target)
   };
   if (isChecked) {
     var backgroundColor = "bg-white";
@@ -136,7 +137,29 @@ function CheckBox({
 }
 // Intro questions
 function TotalScore() {
-  return <div>Total Scores</div>;
+  return (
+    <div>
+      <p className="text-grey-100 text-h3">you have completed your quiz</p>
+      <div>
+        <div>
+          <p>15</p>
+          <p>Total questions</p>
+        </div>
+
+        <div>
+          <p>15</p>
+          <p>Correct Answers</p>
+        </div>
+        <div>
+          <p>15</p>
+          <p>Incorrect Answers</p>
+        </div>
+      </div>
+      <Link href="/dashboard" className="text-off-white-50 bg-primary-50">
+        Exit
+      </Link>
+    </div>
+  );
 }
 // multiple-choice questions
 function MultipleChoiceQuestions({
@@ -286,12 +309,34 @@ function Questions({ slug }) {
   const [currentpdfName, setPdfName] = useState();
   const [numberOfQuestions, setNumberOfQuestions] = useState();
   const [isFinished, setIsFinished] = useState();
+  const [extractedAns, setExtractedAns] = useState();
+  const hasExtractedRef = useRef(false);
 
   const router = useRouter();
   const { data, error, loading, refetch } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/s/${slug}`
   );
+  // console.log(data)
   const { pdfName } = useSelector((store) => store.dashboard);
+
+  useEffect(() => {
+    // console.log(data.data[1]);
+    if (!hasExtractedRef.current && data?.data) {
+      let questions = data?.data[1];
+      if (Array.isArray(questions)) {
+        const allAnswers = questions.map((question) => question.answer);
+        setExtractedAns((prevAns) => [...(prevAns || []), ...allAnswers]);
+        hasExtractedRef.current = true;
+      }
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (extractedAns) {
+      console.log("Updated extractedAns:", extractedAns);
+    }
+  }, [extractedAns]);
+
   useEffect(() => {
     if (data?.data && data.data[0].title !== currentpdfName) {
       setPdfName(data.data[0].title); // Only set when the title changes
@@ -301,7 +346,7 @@ function Questions({ slug }) {
   useEffect(() => {
     if (data?.data) {
       setQuestion(data?.data[1][0]);
-      setMaxNum(data?.data[1].length - 1);
+      setMaxNum(data?.data[1].length);
       setNumberOfQuestions(data.data[1].length);
       // console.log(data);
     }
@@ -322,8 +367,9 @@ function Questions({ slug }) {
     setNum((prevNum) => Math.max(prevNum - 1, 0));
   };
   const handleOptionChange = (value, isChecked) => {
+    console.log(value, isChecked)
     if (Array.isArray(question?.answer)) {
-      // console.log("Checked!!!");
+      console.log("Checked!!!");
       setCheckboxAnswers((prev) => {
         const updatedAnswers = [...(prev[num] || [])];
         if (isChecked) {
@@ -340,6 +386,7 @@ function Questions({ slug }) {
       setAnswers((prev) => ({ ...prev, [num]: value }));
     }
   };
+  
   //a code that checks if the option chosen is correct
   useEffect(() => {
     if (Array.isArray(question?.answer)) {
@@ -353,6 +400,8 @@ function Questions({ slug }) {
       const isCorrect = selectedAnswer === question?.answer;
       setIsCorrectAnswer(isCorrect);
     }
+    // console.log(checkboxAnswers);
+
   }, [question, num, answers, checkboxAnswers]);
 
   function handleDataFromMultiple(data) {
@@ -395,3 +444,9 @@ function Questions({ slug }) {
 }
 
 export default Questions;
+
+// get an array of all the correct answers
+// get an array of all the picked answers
+// get the matching ones between the arrays
+//get the numbers of the matched ones
+//substract the matched ones from the picked answes

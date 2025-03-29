@@ -1,4 +1,5 @@
 // import Navbar from "@/components/navbar/nav";
+import Footer from "@/components/footer/footer";
 import HomePage from "@/components/homepage/homepage";
 import LandingPage from "@/components/homepage/landingpage";
 import Navbar from "@/components/navbar/nav";
@@ -11,6 +12,7 @@ export default function Home() {
         {/* <HomePage/> */}
         <LandingPage />
       </main>
+      <Footer />
     </div>
   );
 }

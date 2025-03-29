@@ -3,6 +3,7 @@ import Login from "./_components/login";
 import signImage from "../../../public/images/signin-image.svg";
 import logo from "../../../public/icons/aurify-new-logo.png";
 import Link from "next/link";
+import Footer from "@/components/footer/footer";
 function LoginPage() {
   return (
     <div>
@@ -36,6 +37,7 @@ function LoginPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -182,7 +182,7 @@ function Pdfs() {
 
   useEffect(() => {
     if (data && !error && !loading) {
-      console.log(data.data);
+      // console.log(data.data);
       setSummaries(data.data);
     }
   }, [data, loading, error]);
