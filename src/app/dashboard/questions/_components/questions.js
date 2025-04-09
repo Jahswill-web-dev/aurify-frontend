@@ -97,10 +97,10 @@ function CheckBox({
   isWrong,
 }) {
   const [selectedOption, setSelectedOption] = useState();
-  const handleChange = (event) => {
-    setSelectedOption(event.target.checked);
-    onChange(value, event.target.checked);
-    // console.log(event.target)
+  const handleChange = (e) => {
+    // setSelectedOption(isChecked);
+    onChange(value);
+    // console.log(e.target)
   };
   if (isChecked) {
     var backgroundColor = "bg-white";
@@ -126,7 +126,7 @@ function CheckBox({
             name="checkbox"
             value={value}
             checked={isChecked}
-            onChange={handleChange}
+            onChange={(e) => handleChange(e)}
           />
           <span className="p-1 border-p-text border-2 w-6 h-6 absolute top-0 left-0 peer-checked:bg-primary"></span>
         </label>
@@ -310,6 +310,9 @@ function Questions({ slug }) {
   const [numberOfQuestions, setNumberOfQuestions] = useState();
   const [isFinished, setIsFinished] = useState();
   const [extractedAns, setExtractedAns] = useState();
+  const [isNextEnabled, setIsNextEnabled] = useState();
+  const latestValueRef = useRef();
+
   const hasExtractedRef = useRef(false);
 
   const router = useRouter();
@@ -361,15 +364,16 @@ function Questions({ slug }) {
   const add = () => {
     setNum((prevNum) => Math.min(prevNum + 1, maxNum));
     // console.log(num);
+    setIsNextEnabled(true);
   };
 
   const subtract = () => {
     setNum((prevNum) => Math.max(prevNum - 1, 0));
+    setIsNextEnabled(false);
   };
   const handleOptionChange = (value, isChecked) => {
-    console.log(value, isChecked)
+    // console.log(value);
     if (Array.isArray(question?.answer)) {
-      console.log("Checked!!!");
       setCheckboxAnswers((prev) => {
         const updatedAnswers = [...(prev[num] || [])];
         if (isChecked) {
@@ -386,8 +390,8 @@ function Questions({ slug }) {
       setAnswers((prev) => ({ ...prev, [num]: value }));
     }
   };
-  
-  //a code that checks if the option chosen is correct
+
+  // checks if the option chosen is correct
   useEffect(() => {
     if (Array.isArray(question?.answer)) {
       const userAnswers = checkboxAnswers[num] || [];
@@ -400,13 +404,15 @@ function Questions({ slug }) {
       const isCorrect = selectedAnswer === question?.answer;
       setIsCorrectAnswer(isCorrect);
     }
-    // console.log(checkboxAnswers);
-
+    console.log(answers);
   }, [question, num, answers, checkboxAnswers]);
 
+  
   function handleDataFromMultiple(data) {
     setIsFinished(data);
   }
+
+//A function that calculates total scores
 
   return (
     <div className="mx-auto w-full px-10 md:pl-24 py-5">
