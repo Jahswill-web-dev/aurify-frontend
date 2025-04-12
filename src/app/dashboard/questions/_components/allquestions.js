@@ -214,7 +214,7 @@ function AllQuestsions() {
   ) : (
     <div className="dashboard-main">
       <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
-        Practice questions
+      Logo  Practice questions
       </p>
       <div>
         {/* Blocks container */}

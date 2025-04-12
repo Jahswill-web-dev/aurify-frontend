@@ -54,7 +54,7 @@ function Summary({ slug }) {
     <div className="dashboard-main">
       <div>
         <div className="flex flex-col gap-2 my-2">
-          <h2 className="text-2xl text-primary">Summary</h2>
+          <h2 className="text-2xl text-primary">Logo Summary</h2>
         </div>
         <div className="my-4">
           <p className="text-lg text-p-text-darker font-semibold">Name</p>

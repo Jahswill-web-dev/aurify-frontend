@@ -176,11 +176,13 @@ function MultipleChoiceQuestions({
   numOfQuestions,
   currentNum,
   sendDataToQuestions,
+  calculateScores,
 }) {
   const [isFinished, setIsFinished] = useState(false);
   // console.log(question);
   function finished() {
     setIsFinished(!isFinished);
+    calculateScores();
   }
   useEffect(() => {
     sendDataToQuestions(isFinished);
@@ -303,13 +305,13 @@ function Questions({ slug }) {
   const [num, setNum] = useState(0);
   const [maxNum, setMaxNum] = useState(1);
   const [question, setQuestion] = useState();
-  const [answers, setAnswers] = useState({});
+  const [answers, setAnswers] = useState({}); //user answers
   const [checkboxAnswers, setCheckboxAnswers] = useState({});
   const [isCorrectAnswer, setIsCorrectAnswer] = useState(null);
   const [currentpdfName, setPdfName] = useState();
   const [numberOfQuestions, setNumberOfQuestions] = useState();
-  const [isFinished, setIsFinished] = useState();
-  const [extractedAns, setExtractedAns] = useState();
+  const [isFinished, setIsFinished] = useState(); //flag to track the end of the test
+  const [extractedAns, setExtractedAns] = useState(); // Correct answers
   const [isNextEnabled, setIsNextEnabled] = useState();
   const latestValueRef = useRef();
 
@@ -374,6 +376,7 @@ function Questions({ slug }) {
   const handleOptionChange = (value, isChecked) => {
     // console.log(value);
     if (Array.isArray(question?.answer)) {
+      //checks if the current question expects multiple answers
       setCheckboxAnswers((prev) => {
         const updatedAnswers = [...(prev[num] || [])];
         if (isChecked) {
@@ -407,13 +410,28 @@ function Questions({ slug }) {
     console.log(answers);
   }, [question, num, answers, checkboxAnswers]);
 
-  
   function handleDataFromMultiple(data) {
     setIsFinished(data);
   }
 
-//A function that calculates total scores
+  // useEffect(() => {
+  //   console.log(answers);
+  //   console.log(extractedAns);
+  // }, [answers]);
 
+  //A function that calculates total scores
+  function calculateScores() {
+    let score = 0;
+    let correctQuestions = [];
+    let IncorrectQuestions = [];
+    //Calculates number of correct answers
+    for (let i = 0; i < extractedAns.length; i++) {
+      if (answers[i] === extractedAns[i]) {
+        score++;
+      }
+    }
+    console.log(`${score} / ${extractedAns.length}`);
+  }
   return (
     <div className="mx-auto w-full px-10 md:pl-24 py-5">
       {isFinished ? (
@@ -440,6 +458,7 @@ function Questions({ slug }) {
                 numOfQuestions={numberOfQuestions}
                 currentNum={num}
                 sendDataToQuestions={handleDataFromMultiple}
+                calculateScores={calculateScores}
               />
             )}
           </div>
