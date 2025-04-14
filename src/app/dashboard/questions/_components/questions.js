@@ -136,26 +136,41 @@ function CheckBox({
   );
 }
 // Intro questions
-function TotalScore() {
+function TotalScore({
+  totalScore,
+  totalScorePercentage,
+  totalNumOfQuestions,
+  numOfIncorrectAns,
+}) {
   return (
     <div>
-      <p className="text-grey-100 text-h3">you have completed your quiz</p>
-      <div>
-        <div>
-          <p>15</p>
-          <p>Total questions</p>
+      <p className="text-grey-100 text-h3">
+      Performance Overview
+      </p>
+      <div className="flex gap-2 py-10">
+        <div className="bg-accent-100 inline-block px-4 py-4 rounded-lg text-grey-50">
+          <p>Total Questions</p>
+          <p className="text-h3">{totalNumOfQuestions}</p>
         </div>
 
-        <div>
-          <p>15</p>
+        <div className="bg-accent-100 inline-block px-4 py-4 rounded-lg text-grey-50">
           <p>Correct Answers</p>
+          <p className="text-h3">{totalScore}</p>
         </div>
-        <div>
-          <p>15</p>
+
+        <div className="bg-red-400 inline-block px-4 py-4 rounded-lg text-off-white">
           <p>Incorrect Answers</p>
+          <p className="text-h3">{numOfIncorrectAns}</p>
+        </div>
+        <div className="bg-accent-100 inline-block px-4 py-4 rounded-lg text-grey-50">
+          <p>Score</p>
+          <p className="text-h3">{totalScorePercentage}</p>
         </div>
       </div>
-      <Link href="/dashboard" className="text-off-white-50 bg-primary-50">
+      <Link
+        href="/dashboard/questions"
+        className="text-off-white-50 bg-red-400 inline-block px-5 py-2 rounded-lg"
+      >
         Exit
       </Link>
     </div>
@@ -313,6 +328,11 @@ function Questions({ slug }) {
   const [isFinished, setIsFinished] = useState(); //flag to track the end of the test
   const [extractedAns, setExtractedAns] = useState(); // Correct answers
   const [isNextEnabled, setIsNextEnabled] = useState();
+  const [totalScore, setTotalScore] = useState();
+  const [totalScorePercentage, setTotalScorePercentage] = useState();
+  const [totalNumOfQuestions, setTotalNumOfQuestions] = useState();
+  const [numOfIncorrectAns, setNumOfIncorrectAns] = useState();
+
   const latestValueRef = useRef();
 
   const hasExtractedRef = useRef(false);
@@ -407,7 +427,6 @@ function Questions({ slug }) {
       const isCorrect = selectedAnswer === question?.answer;
       setIsCorrectAnswer(isCorrect);
     }
-    console.log(answers);
   }, [question, num, answers, checkboxAnswers]);
 
   function handleDataFromMultiple(data) {
@@ -422,20 +441,32 @@ function Questions({ slug }) {
   //A function that calculates total scores
   function calculateScores() {
     let score = 0;
+    let scorePercentage;
     let correctQuestions = [];
     let IncorrectQuestions = [];
-    //Calculates number of correct answers
+    //Calculates number of correct answers for single choice questions
     for (let i = 0; i < extractedAns.length; i++) {
       if (answers[i] === extractedAns[i]) {
         score++;
       }
     }
-    console.log(`${score} / ${extractedAns.length}`);
+    setTotalScore(score);
+    scorePercentage = (score / extractedAns.length) * 100;
+    setTotalScorePercentage(`${scorePercentage}%`);
+    setTotalNumOfQuestions(extractedAns.length);
+    setNumOfIncorrectAns(extractedAns.length - score);
+    // console.log(`${score} / ${extractedAns.length}`);
+    //get questions answered wrong and present the correct answers
   }
   return (
     <div className="mx-auto w-full px-10 md:pl-24 py-5">
       {isFinished ? (
-        <TotalScore />
+        <TotalScore
+          totalScore={totalScore}
+          totalScorePercentage={totalScorePercentage}
+          totalNumOfQuestions={totalNumOfQuestions}
+          numOfIncorrectAns={numOfIncorrectAns}
+        />
       ) : (
         <div className="">
           <div className="my-4 text-grey-50 text-h2 poppins-font">
