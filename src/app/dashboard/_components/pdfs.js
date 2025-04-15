@@ -128,10 +128,10 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
     // };
   };
   return (
-    <div onClick={detail}>
+    <div>
       <div
         className={`cursor-pointer flex justify-between w-11/12 mx-auto py-2 px-2 
-           ${selected ? "bg-secondary" : ""} text-grey-50 roboto-font`}
+           ${selected ? "bg-secondary" : ""} text-grey-50 roboto-font hover:text-primary-50`}
       >
         <p className="w-[250px] poppins-font text-h4">
           {truncateText(name, 30)}

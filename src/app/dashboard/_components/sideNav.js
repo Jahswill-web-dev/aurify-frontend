@@ -69,9 +69,9 @@ function MobileNav() {
               {/* free plan close icon... */}
               <div className="flex justify-between items-center px-3 ">
                 <div></div>
-                <div className="bg-white border-2 text-p-text-darker inter-font border-primary rounded-md p-1">
+                {/* <div className="bg-white border-2 text-p-text-darker inter-font border-primary rounded-md p-1">
                   Free plan
-                </div>
+                </div> */}
                 <div onClick={closeNavigation} className="cursor-pointer">
                   <Image alt="" src={closeIcon} width={35} height={35} />
                 </div>

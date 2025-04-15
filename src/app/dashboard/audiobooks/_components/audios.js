@@ -112,7 +112,7 @@ function Block({
   }, [url]);
 
   return (
-    <div onClick={detail} className="hover:bg-grey-25 rounded transition-all">
+    <div className="hover:bg-grey-25 rounded transition-all">
       <div
         className={`flex justify-between w-11/12 mx-auto py-2 px-2 
         roboto-font text-grey-200 items-center`}
