@@ -4,6 +4,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import moreIcon from "../../../../../public/icons/more-icon.svg";
 import deleteIcon from "../../../../../public/icons/delete.svg";
+import questionIcon from "../../../../../public/icons/questiion-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -213,9 +214,12 @@ function AllQuestsions() {
     </div>
   ) : (
     <div className="dashboard-main">
-      <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
-      Logo  Practice questions
-      </p>
+      <div className="flex gap-3 items-center p-2">
+        <Image src={questionIcon} alt="summary icon" width={25} height={25} />
+        <p className="text-primary text-x-sub-head md:text-l-sub-head inter-font">
+          Practice Question
+        </p>
+      </div>
       <div>
         {/* Blocks container */}
         <div className="flex flex-col gap-5">

@@ -147,7 +147,7 @@ function TotalScore({
       <p className="text-grey-100 text-h3">
       Performance Overview
       </p>
-      <div className="flex gap-2 py-10">
+      <div className="flex flex-col gap-2 pt-10 pb-5 sm:py-10 sm:flex-row">
         <div className="bg-accent-100 inline-block px-4 py-4 rounded-lg text-grey-50">
           <p>Total Questions</p>
           <p className="text-h3">{totalNumOfQuestions}</p>

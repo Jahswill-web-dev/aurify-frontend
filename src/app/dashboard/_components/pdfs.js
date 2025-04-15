@@ -3,8 +3,7 @@ import Image from "next/image";
 import axios from "axios";
 import Swal from "sweetalert2";
 import moreIcon from "../../../../public/icons/more-icon.svg";
-import playIcon from "../../../../public/icons/play-icon.svg";
-import pauseIcon from "../../../../public/icons/pause-icon.svg";
+import summaryIcon from "../../../../public/icons/summary-check.svg";
 import deleteIcon from "../../../../public/icons/delete.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
@@ -26,7 +25,6 @@ import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import Loading from "./loading";
 import Cookies from "js-cookie";
 import Link from "next/link";
-
 
 const Toast = Swal.mixin({
   toast: true,
@@ -103,7 +101,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
   }, [onPlayPause]);
   // console.log("pdf idd", id)
   // console.log("first", first);
-  
+
   const handleDeletePdf = () => {
     const token = Cookies.get("accessToken");
     axios
@@ -131,12 +129,17 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
     <div>
       <div
         className={`cursor-pointer flex justify-between w-11/12 mx-auto py-2 px-2 
-           ${selected ? "bg-secondary" : ""} text-grey-50 roboto-font hover:text-primary-50`}
+           ${
+             selected ? "bg-secondary" : ""
+           } text-grey-50 roboto-font hover:text-primary-50`}
       >
         <p className="w-[250px] poppins-font text-h4">
           {truncateText(name, 30)}
         </p>
-        <div className="hidden md:block active:scale-90" onClick={handleDeletePdf}>
+        <div
+          className="hidden md:block active:scale-90"
+          onClick={handleDeletePdf}
+        >
           <Image alt="Delete icon" src={deleteIcon} height={35} width={35} />
         </div>
         {/* <div
@@ -229,26 +232,29 @@ function Pdfs() {
     </div>
   ) : (
     <div className="dashboard-main">
-      <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
-        Summaries
-      </p>
+      <div className="flex gap-2 items-center p-2">
+        <Image src={summaryIcon} alt="summary icon" width={30} height={30} />
+        <p className="text-primary text-x-sub-head md:text-l-sub-head inter-font">
+          Summaries
+        </p>
+      </div>
       <div>
         {/* Blocks container */}
         <div className="flex flex-col gap-5">
           {/* Single Blocks */}
           {summaries?.map((summary, index) => (
-            <Link  key={summary.id} href={`/dashboard/summary/${summary.slug}`}>
-            <Block
-              first={index + 1 === 1}
-              key={summary.id}
-              name={summary.title}
-              slug={summary.slug}
-              id={summary.id}
-              url={summary.url}
-              playing={audioId === summary.id}
-              onPlayPause={() => handlePlayPause(summary.id)}
+            <Link key={summary.id} href={`/dashboard/summary/${summary.slug}`}>
+              <Block
+                first={index + 1 === 1}
+                key={summary.id}
+                name={summary.title}
+                slug={summary.slug}
+                id={summary.id}
+                url={summary.url}
+                playing={audioId === summary.id}
+                onPlayPause={() => handlePlayPause(summary.id)}
               />
-              </Link>
+            </Link>
           ))}
           {/* <Block
             first={true}

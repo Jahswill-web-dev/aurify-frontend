@@ -6,6 +6,7 @@ import moreIcon from "../../../../../public/icons/more-icon.svg";
 import deleteIcon from "../../../../../public/icons/delete.svg";
 import playIcon from "../../../../../public/icons/play-bold.svg";
 import pauseIcon from "../../../../../public/icons/pause-rounded.svg";
+import audioIcon from "../../../../../public/icons/audio-book.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -47,19 +48,8 @@ function truncateText(text, maxLength) {
   }
   return text.substring(0, maxLength) + "...";
 }
-function Block({
-  first,
-  selected,
-  name,
-  playing,
-  slug,
-  id,
-  onPlayPause,
-  url,
-}) {
-  const { pdfName, pdfId, audioSrc, } = useSelector(
-    (store) => store.dashboard
-  );
+function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
+  const { pdfName, pdfId, audioSrc } = useSelector((store) => store.dashboard);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -79,7 +69,7 @@ function Block({
     dispatch(setPdfSlug(slug));
     dispatch(setPdfId(id));
   }
-  
+
   const handleDeletePdf = () => {
     const token = Cookies.get("accessToken");
     axios
@@ -103,8 +93,6 @@ function Block({
       });
     // };
   };
-
- 
 
   useEffect(() => {
     // console.log("audio url: ", url);
@@ -182,7 +170,6 @@ function Audios() {
     }
   }, [uploadSuccess, refetch, dispatch, isDeleted]);
 
-  
   const handlePlayPause = (id, url) => {
     // If the selected audio is already playing, stop it
     if (currentAudioId === id) {
@@ -217,9 +204,12 @@ function Audios() {
     </div>
   ) : (
     <div className="dashboard-main">
-      <p className="text-primary text-x-sub-head pl-4 md:text-l-sub-head mb-4 inter-font">
-        Audios
-      </p>
+      <div className="flex gap-2 items-center p-2">
+        <Image src={audioIcon} alt="audio icon" width={30} height={30} />
+        <p className="text-primary text-x-sub-head md:text-l-sub-head inter-font">
+          Audios
+        </p>
+      </div>
       <div>
         {/* Blocks container */}
         <div className="flex flex-col gap-5">
