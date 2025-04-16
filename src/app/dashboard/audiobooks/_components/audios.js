@@ -94,10 +94,10 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
     // };
   };
 
-  useEffect(() => {
-    // console.log("audio url: ", url);
-    dispatch(setAudioSrc(url));
-  }, [url]);
+  // useEffect(() => {
+  //   // console.log("audio url: ", url);
+  //   dispatch(setAudioSrc(url));
+  // }, [url]);
 
   return (
     <div className="hover:bg-grey-25 rounded transition-all">
