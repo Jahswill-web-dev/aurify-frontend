@@ -7,6 +7,8 @@ import Loading from "./loading";
 import playIcon from "../../../../public/icons/play-icon.svg";
 import pauseIcon from "../../../../public/icons/pause-icon.svg";
 import Image from "next/image";
+import Link from "next/link";
+import backIcon from "../../../../public/icons/darkback.svg";
 
 function truncateText(text, maxLength) {
   if (text.length <= maxLength) {
@@ -31,14 +33,14 @@ function Summary({ slug }) {
   }, [data, error, loading, dispatch, pdf]);
 
   const handleAudio = () => {
-    if(audioRef.current){
-      if(audioRef.current.paused){
+    if (audioRef.current) {
+      if (audioRef.current.paused) {
         audioRef.current.play();
-      }else{
+      } else {
         audioRef.current.pause();
-      };
-    };
-  }
+      }
+    }
+  };
 
   if (error) {
     return (
@@ -51,26 +53,26 @@ function Summary({ slug }) {
     );
   }
   return (
-    <div className="dashboard-main">
+    <div className="max-w-[1200px] mx-auto">
       <div>
-        <div className="flex flex-col gap-2 my-2">
-          <h2 className="text-2xl text-primary">Summary</h2>
-        </div>
-        <div className="my-4">
-          <p className="text-lg text-p-text-darker font-semibold">Name</p>
+        <Link href="/dashboard" className="inline-block my-4 mx-3 sm:mx-0">
+            <Image src={backIcon} alt="icon" width={40} height={40} />
+            {/* <p>Back</p> */}
+        </Link>
+        <div className="my-2">
           <div
-            className="bg-secondary text-x-head font-semibold border-t-2 border-primary 
-        pt-1 pb-4 pl-5 text-primary"
+            className="text-x-head font-semibold
+        pt-1 pl-5 text-primary"
           >
-            {!pdf?.title ? "loading..." : truncateText(pdf?.title, 60)}
+            {!pdf?.title ? "" : truncateText(pdf?.title, 60)}
           </div>
           {/* audio button */}
-          <div
+          {/* <div
           onClick={handleAudio} 
           className="flex mt-5 gap-2 items-center">
             <p className="text-xl">Audio</p>
             <Image alt="play/pause button" src={pauseIcon} />
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="flex flex-col gap-4 mt-10 px-2">

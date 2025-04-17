@@ -14,6 +14,7 @@ import {
   setUserSubscription,
 } from "../lib/features/dashboard/dashboardSlice";
 import Loading from "./_components/loading";
+import AudioControlls from "./_components/audioControlls";
 
 function DashboardLayout({ children }) {
   const { showOverlay } = useSelector((store) => store.dashboard);
@@ -45,14 +46,12 @@ function DashboardLayout({ children }) {
     return <p className="text-center text-3xl mt-28">Error: {error.message}</p>;
 
   return (
-    <div className="max-w-[1557px] mx-auto">
-      <DashboardNav />
-      <div className="flex flex-col md:flex-row py-5 mt-5 gap-2 md:pr-2">
-        <SideNav />
-        {children}
-      </div>
+    <div className="">
+      {/* <DashboardNav /> */}
+      <div className="">{children}</div>
       <MobileDetails />
       <Upload />
+      <AudioControlls/>
       {/* <DeleteBox/> */}
       {/* dark overlay */}
       {isOverlayVisible && (

@@ -1,30 +1,30 @@
 import Image from "next/image";
 import CreateAccount from "./_components/creatAccount";
 import signImage from "../../../public/images/signin-image.svg";
-import Navbar from "@/components/navbar/nav";
+import logo from "../../../public/icons/aurify-new-logo.png";
+import Link from "next/link";
+import Footer from "@/components/footer/footer";
+
 function SignUpPage() {
-      // Todo: ask chatgpt how to practice connecting to backend
+  // Todo: ask chatgpt how to practice connecting to backend
   return (
     <div>
       <div className="container">
-        {/* title */}
-        <div className="text-center mb-5">
-          <h2 className="text-x-head md:text-l-head text-center text-primary roboto-font font-semibold">
-            Welcome To Aurify
-          </h2>
-          <p className="text-p-text-darker font-medium roboto-font">
-            Enter your email or sign in with google, facebook or twitter
-          </p>
+        {/* Logo */}
+        <div className="text-center mb-5 mt-5 flex justify-center">
+          <Link href="/">
+            <Image width={200} height={200} src={logo} alt="Aurify AI logo" />
+          </Link>
         </div>
         {/* form and illustration */}
         <div className="lg:flex justify-between items-start">
           {/* signup with socials and email */}
           <div>
-            <div className="text-center flex flex-col items-center">
+            <div className="w-[400px] mx-auto pl-16 md:pl-0 text-center flex flex-col items-start">
               <span className="text-primary font-medium text-[18px] md:text-l-sub-head">
                 Create an account
               </span>
-              <div className="h-[2px] w-[200px] bg-primary"></div>
+              <div className="h-[2px] w-[70px] bg-primary"></div>
             </div>
             <CreateAccount />
           </div>
@@ -39,6 +39,7 @@ function SignUpPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -2,9 +2,9 @@
 import Image from "next/image";
 import axios from "axios";
 import Swal from "sweetalert2";
-import moreIcon from "../../../../public/icons/more-icon.svg";
-import summaryIcon from "../../../../public/icons/summary-check.svg";
-import deleteIcon from "../../../../public/icons/delete.svg";
+import moreIcon from "../../../../../public/icons/more-icon.svg";
+import deleteIcon from "../../../../../public/icons/delete.svg";
+import questionIcon from "../../../../../public/icons/questiion-icon.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -22,9 +22,10 @@ import {
   setAudioId,
 } from "@/app/lib/features/dashboard/dashboardSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
-import Loading from "./loading";
+// import Loading from "./../loading";
 import Cookies from "js-cookie";
 import Link from "next/link";
+
 
 const Toast = Swal.mixin({
   toast: true,
@@ -101,7 +102,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
   }, [onPlayPause]);
   // console.log("pdf idd", id)
   // console.log("first", first);
-
+  
   const handleDeletePdf = () => {
     const token = Cookies.get("accessToken");
     axios
@@ -129,36 +130,15 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
     <div>
       <div
         className={`cursor-pointer flex justify-between w-11/12 mx-auto py-2 px-2 
-           ${
-             selected ? "bg-secondary" : ""
-           } text-grey-50 roboto-font hover:text-primary-50`}
+           ${selected ? "bg-secondary" : ""} text-grey-50 roboto-font`}
       >
-        <Link href={`/dashboard/summary/${slug}`}>
-          <p className="w-[250px] poppins-font text-h4">
-            {truncateText(name, 30)}
-          </p>
-        </Link>
-        <div
-          className="hidden md:block active:scale-90"
-          onClick={handleDeletePdf}
-        >
+        <p className="w-[400px] poppins-font text-h4">
+          {truncateText(name, 30)}
+        </p>
+        <div className="hidden md:block active:scale-90" onClick={handleDeletePdf}>
           <Image alt="Delete icon" src={deleteIcon} height={35} width={35} />
         </div>
-        {/* <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onPlayPause();
-            // console.log("play button is clicked!!!")
-          }}
-          className="hidden md:block"
-        >
-          <Image
-            alt="play Icon"
-            src={playing ? pauseIcon : playIcon}
-            width={20}
-            height={20}
-          />
-        </div> */}
+        
         <div className="cursor-pointer lg:hidden">
           <Image
             alt="more details icons"
@@ -173,7 +153,7 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
   );
 }
 
-function Pdfs() {
+function AllQuestsions() {
   const [summaries, setSummaries] = useState();
   const { uploadSuccess, isDeleted, audioId } = useSelector(
     (store) => store.dashboard
@@ -234,10 +214,10 @@ function Pdfs() {
     </div>
   ) : (
     <div className="dashboard-main">
-      <div className="flex gap-2 items-center p-2">
-        <Image src={summaryIcon} alt="summary icon" width={30} height={30} />
+      <div className="flex gap-3 items-center p-2">
+        <Image src={questionIcon} alt="summary icon" width={25} height={25} />
         <p className="text-primary text-x-sub-head md:text-l-sub-head inter-font">
-          Summaries
+          Practice Question
         </p>
       </div>
       <div>
@@ -245,7 +225,7 @@ function Pdfs() {
         <div className="flex flex-col gap-5">
           {/* Single Blocks */}
           {summaries?.map((summary, index) => (
-            // <Link key={summary.id} href={`/dashboard/summary/${summary.slug}`}>
+            <Link  key={summary.id} href={`/dashboard/questions/${summary.slug}`}>
             <Block
               first={index + 1 === 1}
               key={summary.id}
@@ -255,22 +235,13 @@ function Pdfs() {
               url={summary.url}
               playing={audioId === summary.id}
               onPlayPause={() => handlePlayPause(summary.id)}
-            />
-            // </Link>
+              />
+              </Link>
           ))}
-          {/* <Block
-            first={true}
-            name="Web-development"
-            playing={true}
-          />
-          <Block name="Math-Notes" playing={false} />
-          <Block name="Biology-Notes" playing={false} />
-          <Block name="English-Essay" playing={false} />
-          <Block name="English-Essays" playing={false} /> */}
         </div>
       </div>
     </div>
   );
 }
 
-export default Pdfs;
+export default AllQuestsions;

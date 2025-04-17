@@ -20,6 +20,8 @@ const initialState = {
   isDeleted: null,
   audioId: null,
   currentSummaryAudioId: null,
+  playing:false,
+  audioSrc:"",
 };
 
 const dashboardSlice = createSlice({
@@ -83,6 +85,12 @@ const dashboardSlice = createSlice({
     setCurrentSummaryAudioId: (state, action) => {
       state.currentSummaryAudioId = action.payload;
     },
+    setPlaying: (state, action) => {
+     state.playing = !action.payload;
+    },
+    setAudioSrc:(state, action) =>{
+      state.audioSrc = action.payload;
+    }
   },
 });
 
@@ -106,5 +114,7 @@ export const {
   setDeleteState,
   setAudioId,
   setCurrentSummaryAudioId,
+  setPlaying,
+  setAudioSrc,
 } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

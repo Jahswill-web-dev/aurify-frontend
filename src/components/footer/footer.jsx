@@ -2,9 +2,10 @@ import Link from "next/link";
 
 function Footer() {
   return (
-    <footer className="text-p-text text-base text-center mt-10 p-2 absolute bottom-0">
-      {/* <p>© 2024 Aurify AI</p>
-      <p className="text-xs">Icons by <Link href="https://www.freepik.com/">Freepik</Link></p> */}
+    <footer className="pt-10 pb-5 text-h4 text-grey-50 text-center relative bottom-0
+    w-full">
+      <p>© 2025 Aurify AI.</p>
+      {/* <p className="text-xs">Icons by <Link href="https://www.freepik.com/">Freepik</Link></p> */}
     </footer>
   );
 }
