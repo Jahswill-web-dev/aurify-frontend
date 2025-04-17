@@ -133,9 +133,11 @@ function Block({ first, selected, name, playing, slug, id, onPlayPause, url }) {
              selected ? "bg-secondary" : ""
            } text-grey-50 roboto-font hover:text-primary-50`}
       >
-        <p className="w-[250px] poppins-font text-h4">
-          {truncateText(name, 30)}
-        </p>
+        <Link href={`/dashboard/summary/${slug}`}>
+          <p className="w-[250px] poppins-font text-h4">
+            {truncateText(name, 30)}
+          </p>
+        </Link>
         <div
           className="hidden md:block active:scale-90"
           onClick={handleDeletePdf}
@@ -243,18 +245,18 @@ function Pdfs() {
         <div className="flex flex-col gap-5">
           {/* Single Blocks */}
           {summaries?.map((summary, index) => (
-            <Link key={summary.id} href={`/dashboard/summary/${summary.slug}`}>
-              <Block
-                first={index + 1 === 1}
-                key={summary.id}
-                name={summary.title}
-                slug={summary.slug}
-                id={summary.id}
-                url={summary.url}
-                playing={audioId === summary.id}
-                onPlayPause={() => handlePlayPause(summary.id)}
-              />
-            </Link>
+            // <Link key={summary.id} href={`/dashboard/summary/${summary.slug}`}>
+            <Block
+              first={index + 1 === 1}
+              key={summary.id}
+              name={summary.title}
+              slug={summary.slug}
+              id={summary.id}
+              url={summary.url}
+              playing={audioId === summary.id}
+              onPlayPause={() => handlePlayPause(summary.id)}
+            />
+            // </Link>
           ))}
           {/* <Block
             first={true}

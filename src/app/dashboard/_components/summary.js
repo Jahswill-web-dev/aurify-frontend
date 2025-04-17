@@ -55,7 +55,7 @@ function Summary({ slug }) {
   return (
     <div className="max-w-[1200px] mx-auto">
       <div>
-        <Link href="/dashboard" className="inline-block my-4">
+        <Link href="/dashboard" className="inline-block my-4 mx-3 sm:mx-0">
             <Image src={backIcon} alt="icon" width={40} height={40} />
             {/* <p>Back</p> */}
         </Link>
