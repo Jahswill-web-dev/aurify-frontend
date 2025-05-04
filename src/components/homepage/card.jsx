@@ -4,7 +4,7 @@ import summarizeImg from "../../../public/images/summarizeimg.jpg";
 
 function FirstCard() {
   return (
-    <div className="w-[365px] h-[485px] relative">
+    <div className="max-[400px]:w-full w-[365px] h-[485px] relative">
       {/* <div className="w-[494px] h-[657px] relative"> */}
       <Image
         src={summarizeImg}
@@ -30,7 +30,7 @@ function FirstCard() {
 }
 function SecondCard() {
   return (
-    <div className=" w-[365px] h-[485px] relative">
+    <div className="max-[400px]:w-full w-[365px] h-[485px] relative">
       {/* <div className="w-[494px] h-[657px] relative"> */}
       <Image
         src={audioImg}

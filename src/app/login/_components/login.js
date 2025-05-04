@@ -58,7 +58,7 @@ function InputForm({ type, title, name, id, register, errors }) {
 }
 function SocialSignIn({ name, logo }) {
   return (
-    <div className="text-p-text-darker flex justify-around items-center bg-white w-[300px] py-2 rounded-md">
+    <div className="cursor-pointer text-p-text-darker flex justify-around items-center bg-off-white-100 border border-2 w-[300px] py-2 rounded-md">
       <Image src={logo} width={30} height={30} alt="google icon" />
       <div>{name}</div>
       <Image src={chevron} alt="chevron right" width={30} height={30} />
