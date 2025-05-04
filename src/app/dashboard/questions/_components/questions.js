@@ -201,7 +201,7 @@ function MultipleChoiceQuestions({
   }
   useEffect(() => {
     sendDataToQuestions(isFinished);
-  }, [isFinished]);
+  }, [isFinished, sendDataToQuestions]);
 
   return (
     <div className="flex flex-col gap-5 min-h-[600px] max-h-[700px] w-full">

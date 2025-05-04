@@ -34,12 +34,14 @@ function LandingPage() {
         />
       </div>
       {/* About Product Section */}
-      <div className="flex flex-col gap-5 items-center md:flex-row mt-28">
-        <div className="md:w-1/2 flex justify-end">
+      <div className="flex flex-col gap-5 items-center md:flex-row mt-28 md:justify-center">
+        <div className="">
           <Image
             src={productImage2}
-            className="max-w-[400px]"
+            className="mx-auto"
             alt="Aurify AI"
+            width={400}
+            height={400}
           />
         </div>
         <div className="text-center md:text-left flex flex-col gap-5 md:w-1/2">
