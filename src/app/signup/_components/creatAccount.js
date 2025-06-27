@@ -79,7 +79,7 @@ function CreateAccount() {
 
   useEffect(() => {
     if (data) {
-      console.log(data);
+      // console.log(data);
     }
     if (data?.status === 200) {
       router.push("/dashboard");
