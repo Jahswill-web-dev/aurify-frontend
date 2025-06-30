@@ -32,6 +32,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import Cookies from "js-cookie";
 import {
   Play,
   Pause,
@@ -47,16 +48,71 @@ import {
   MoreVertical,
 } from "lucide-react";
 import Link from "next/link";
+import { useFetchWithToken } from "@/app/hooks/useCustomHook";
+import axios from "axios";
 
-export default function SummaryDetail({ onBack }) {
+export default function SummaryDetail({ params }) {
+  const slug = params.slug;
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const audioRef = useRef(null);
+  const [summaryText, setSummaryText] = useState();
 
-  // Mock audio URL - in a real app, this would come from your backend
-  const audioUrl = "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav";
+  const { data, error, loading } = useFetchWithToken(
+    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/s/${slug}`
+    // `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobooks`
+  );
+  useEffect(() => {
+    setSummaryText(data?.data[0]);
+    // console.log(data?.data[0].url);
+  }, [data]);
+
+async function downloadAudioWithAuth() {
+  // const url = `/api/download-audio?public_url=${summaryText.url}`;
+const token = Cookies.get("accessToken");
+ const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/download-audio`, // Adjust this if needed
+      {
+        params: {
+          public_url: summaryText.url,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob", // Required to get the file as a blob
+      }
+    );
+  if (response.status !== 200) {
+    alert('Download failed');
+    return;
+  }
+
+
+  const downloadUrl = window.URL.createObjectURL(response.data);
+
+  // Create an invisible anchor element
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+
+  // Optionally, extract filename from headers or set a default name
+  // For example, from content-disposition:
+  const disposition = response.headers.get('Content-Disposition');
+  let filename = 'audio.mp3';
+  if (disposition && disposition.includes('filename=')) {
+    filename = disposition.split('filename=')[1].replace(/"/g, '');
+  }
+
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+
+  // Cleanup
+  a.remove();
+  window.URL.revokeObjectURL(downloadUrl);
+}
+
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -129,7 +185,6 @@ export default function SummaryDetail({ onBack }) {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={onBack}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
@@ -196,7 +251,7 @@ export default function SummaryDetail({ onBack }) {
           className="mb-8"
         >
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-            AI Summary of 'The History of Ancient Civilizations'
+            {summaryText?.title}
           </h1>
           <div className="flex items-center space-x-4 text-gray-600">
             <div className="flex items-center space-x-1">
@@ -231,8 +286,17 @@ export default function SummaryDetail({ onBack }) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+               onClick={() => downloadAudioWithAuth(summaryText.id)}
             >
-              <Download className="w-5 h-5 text-gray-600" />
+              {/* <a
+                href={summaryText?.url}
+                download
+                target="_blank"
+                rel="noopener noreferrer"
+              > */}
+                <Download className="w-5 h-5 text-gray-600" />
+              {/* </a> */}
+
             </motion.button>
           </div>
 
@@ -321,7 +385,7 @@ export default function SummaryDetail({ onBack }) {
           {/* Hidden Audio Element */}
           <audio
             ref={audioRef}
-            src={audioUrl}
+            src={summaryText?.url}
             onEnded={() => setIsPlaying(false)}
             preload="metadata"
           />
@@ -334,75 +398,8 @@ export default function SummaryDetail({ onBack }) {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 mb-8"
         >
-          <div className="prose prose-lg max-w-none">
-            <p className="text-gray-700 leading-relaxed mb-6">
-              This comprehensive summary of 'The History of Ancient
-              Civilizations' covers the rise and fall of major civilizations
-              from Mesopotamia to the Roman Empire. It details key developments
-              in governance, societal structures, technological advancements,
-              and cultural achievements. The summary highlights the
-              interconnectedness of these civilizations and their lasting impact
-              on modern society, providing a concise yet thorough overview of
-              ancient history.
-            </p>
-
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Key Civilizations Covered
-            </h2>
-            <ul className="space-y-2 mb-6">
-              <li className="text-gray-700">
-                • Mesopotamian Civilizations (Sumerians, Babylonians, Assyrians)
-              </li>
-              <li className="text-gray-700">
-                • Ancient Egypt and the Pharaohs
-              </li>
-              <li className="text-gray-700">• Indus Valley Civilization</li>
-              <li className="text-gray-700">
-                • Ancient China and the Dynasties
-              </li>
-              <li className="text-gray-700">
-                • Greek City-States and Classical Period
-              </li>
-              <li className="text-gray-700">• Roman Republic and Empire</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Major Themes
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <h3 className="font-semibold text-blue-900 mb-2">
-                  Political Systems
-                </h3>
-                <p className="text-blue-800 text-sm">
-                  Evolution from tribal societies to complex empires
-                </p>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg">
-                <h3 className="font-semibold text-green-900 mb-2">
-                  Technology & Innovation
-                </h3>
-                <p className="text-green-800 text-sm">
-                  Writing systems, agriculture, and engineering marvels
-                </p>
-              </div>
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <h3 className="font-semibold text-purple-900 mb-2">
-                  Cultural Exchange
-                </h3>
-                <p className="text-purple-800 text-sm">
-                  Trade routes and cultural diffusion
-                </p>
-              </div>
-              <div className="p-4 bg-orange-50 rounded-lg">
-                <h3 className="font-semibold text-orange-900 mb-2">
-                  Religious Systems
-                </h3>
-                <p className="text-orange-800 text-sm">
-                  From polytheism to monotheistic traditions
-                </p>
-              </div>
-            </div>
+          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mb-6">
+            {summaryText?.text}
           </div>
         </motion.div>
 
@@ -424,7 +421,6 @@ export default function SummaryDetail({ onBack }) {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={onBack}
               className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-medium transition-colors"
             >
               Back to Dashboard

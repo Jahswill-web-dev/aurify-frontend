@@ -1,7 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useSelector } from 'react-redux';
 
 export const WelcomeSection = () => {
+    const { userName } = useSelector((store) => store.dashboard);
   return (
     <div className="flex items-center justify-between">
       {/* Left Content */}
@@ -23,7 +25,7 @@ export const WelcomeSection = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-4xl font-bold text-gray-900 mb-6"
         >
-          Welcome back, Alex!
+          Welcome back, {userName}!
         </motion.h1>
 
         <motion.div

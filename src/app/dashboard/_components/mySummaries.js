@@ -1,35 +1,49 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { FileText, Calendar, BookOpen } from 'lucide-react';
+"use client";
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { FileText, Calendar, BookOpen } from "lucide-react";
+import { useFetchWithToken } from "@/app/hooks/useCustomHook";
+import Link from "next/link";
 
-const summaries = [
+const summariess = [
   {
     id: 1,
-    title: 'Calculus Fundamentals',
-    subject: 'Mathematics',
-    date: '2023-08-15',
+    title: "Calculus Fundamentals",
+    subject: "Mathematics",
+    date: "2023-08-15",
     pages: 12,
-    status: 'completed'
+    status: "completed",
   },
   {
     id: 2,
-    title: 'Cell Biology Overview',
-    subject: 'Biology',
-    date: '2023-08-10',
+    title: "Cell Biology Overview",
+    subject: "Biology",
+    date: "2023-08-10",
     pages: 8,
-    status: 'in-progress'
+    status: "in-progress",
   },
   {
     id: 3,
-    title: 'WWII Timeline',
-    subject: 'History',
-    date: '2023-08-05',
+    title: "WWII Timeline",
+    subject: "History",
+    date: "2023-08-05",
     pages: 15,
-    status: 'completed'
+    status: "completed",
   },
 ];
 
 export const MySummaries = () => {
+  const [summaries, setSummaries] = useState([]);
+
+  const { data, error, loading } = useFetchWithToken(
+    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobooks`
+  );
+  useEffect(() => {
+    if (data && !error && !loading) {
+      console.log(data.data);
+      // setSummaries(data.data);
+    }
+  }, [data, loading, error]);
   return (
     <div className="h-full overflow-auto">
       <div className="p-8 space-y-6">
@@ -38,12 +52,17 @@ export const MySummaries = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Summaries</h1>
-          <p className="text-gray-600">Review and manage your study summaries</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            My Summaries
+          </h1>
+          <p className="text-gray-600">
+            Review and manage your study summaries
+          </p>
         </motion.div>
 
         <div className="grid gap-4">
           {summaries.map((summary, index) => (
+            <Link key={index} href={`/dashboard/summary/${summary.slug}`}>
             <motion.div
               key={summary.id}
               initial={{ opacity: 0, y: 20 }}
@@ -70,16 +89,19 @@ export const MySummaries = () => {
                     <BookOpen className="w-4 h-4" />
                     <span>{summary.pages} pages</span>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    summary.status === 'completed' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      summary.status === "completed"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
                     {summary.status}
                   </span>
                 </div>
               </div>
             </motion.div>
+            </Link>
           ))}
         </div>
       </div>
