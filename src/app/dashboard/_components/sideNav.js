@@ -230,7 +230,7 @@ const navigation = [
   { id: 'scores', label: 'Scores & Results', icon: BarChart3 },
 ];
 
-export const Sidebar = ({ activeSection, onSectionChange }) => {
+export const Sidebar = ({ activeSection, onSectionChange, onCreateStudy }) => {
   return (
     <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-screen">
       {/* Header */}
@@ -263,6 +263,7 @@ export const Sidebar = ({ activeSection, onSectionChange }) => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          onClick={onCreateStudy}
           className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors"
         >
           Create Study

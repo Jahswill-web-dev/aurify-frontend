@@ -50,6 +50,8 @@ import {
 import Link from "next/link";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import axios from "axios";
+import markdownit from "markdown-it";
+import DOMPurify from "dompurify";
 
 export default function SummaryDetail({ params }) {
   const slug = params.slug;
@@ -59,20 +61,35 @@ export default function SummaryDetail({ params }) {
   const [volume, setVolume] = useState(1);
   const audioRef = useRef(null);
   const [summaryText, setSummaryText] = useState();
+  const [blogContent, setBlogContent] = useState();
+  const md = markdownit({
+    html: true,
+    linkify: true,
+    typographer: true,
+  });
 
   const { data, error, loading } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/s/${slug}`
     // `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobooks`
   );
   useEffect(() => {
-    setSummaryText(data?.data[0]);
-    // console.log(data?.data[0].url);
+    if (data) {
+      setSummaryText(data?.data[0]);
+      // console.log(data?.data[0].text);
+    }
   }, [data]);
 
-async function downloadAudioWithAuth() {
-  // const url = `/api/download-audio?public_url=${summaryText.url}`;
-const token = Cookies.get("accessToken");
- const response = await axios.get(
+  useEffect(() => {
+    if (summaryText) {
+      setBlogContent(md.render(summaryText?.text));
+      // console.log(summaryText?.text);
+    }
+  }, [summaryText]);
+
+  async function downloadAudioWithAuth() {
+    // const url = `/api/download-audio?public_url=${summaryText.url}`;
+    const token = Cookies.get("accessToken");
+    const response = await axios.get(
       `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/download-audio`, // Adjust this if needed
       {
         params: {
@@ -84,35 +101,33 @@ const token = Cookies.get("accessToken");
         responseType: "blob", // Required to get the file as a blob
       }
     );
-  if (response.status !== 200) {
-    alert('Download failed');
-    return;
+    if (response.status !== 200) {
+      alert("Download failed");
+      return;
+    }
+
+    const downloadUrl = window.URL.createObjectURL(response.data);
+
+    // Create an invisible anchor element
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+
+    // Optionally, extract filename from headers or set a default name
+    // For example, from content-disposition:
+    const disposition = response.headers.get("Content-Disposition");
+    let filename = "audio.mp3";
+    if (disposition && disposition.includes("filename=")) {
+      filename = disposition.split("filename=")[1].replace(/"/g, "");
+    }
+
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+
+    // Cleanup
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
   }
-
-
-  const downloadUrl = window.URL.createObjectURL(response.data);
-
-  // Create an invisible anchor element
-  const a = document.createElement('a');
-  a.href = downloadUrl;
-
-  // Optionally, extract filename from headers or set a default name
-  // For example, from content-disposition:
-  const disposition = response.headers.get('Content-Disposition');
-  let filename = 'audio.mp3';
-  if (disposition && disposition.includes('filename=')) {
-    filename = disposition.split('filename=')[1].replace(/"/g, '');
-  }
-
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-
-  // Cleanup
-  a.remove();
-  window.URL.revokeObjectURL(downloadUrl);
-}
-
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -278,7 +293,7 @@ const token = Cookies.get("accessToken");
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-900">
-                Summary of 'The History of Ancient Civilizations'
+               {summaryText?.title}
               </h3>
               <p className="text-gray-600">AI Summary</p>
             </div>
@@ -286,7 +301,7 @@ const token = Cookies.get("accessToken");
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-               onClick={() => downloadAudioWithAuth(summaryText.id)}
+              onClick={() => downloadAudioWithAuth(summaryText.id)}
             >
               {/* <a
                 href={summaryText?.url}
@@ -294,9 +309,8 @@ const token = Cookies.get("accessToken");
                 target="_blank"
                 rel="noopener noreferrer"
               > */}
-                <Download className="w-5 h-5 text-gray-600" />
+              <Download className="w-5 h-5 text-gray-600" />
               {/* </a> */}
-
             </motion.button>
           </div>
 
@@ -392,16 +406,21 @@ const token = Cookies.get("accessToken");
         </motion.div>
 
         {/* Summary Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 mb-8"
-        >
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed mb-6">
-            {summaryText?.text}
-          </div>
-        </motion.div>
+        {blogContent && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 mb-8"
+          >
+            <div
+              className="prose prose-lg max-w-none text-gray-800 leading-relaxed"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(blogContent),
+              }}
+            />
+          </motion.div>
+        )}
 
         {/* Action Buttons */}
         <motion.div
@@ -415,7 +434,7 @@ const token = Cookies.get("accessToken");
             whileTap={{ scale: 0.98 }}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-medium transition-colors shadow-lg"
           >
-            Generate Practice Questions
+            View Practice Questions
           </motion.button>
           <Link href="/dashboard">
             <motion.button
