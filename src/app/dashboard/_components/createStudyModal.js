@@ -9,10 +9,25 @@ import {
   AlertCircle,
   ChevronDown,
 } from "lucide-react";
+import Cookies from "js-cookie";
+import axios from "axios";
+import Swal from "sweetalert2";
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: (toast) => {
+    toast.onmouseenter = Swal.stopTimer;
+    toast.onmouseleave = Swal.resumeTimer;
+  },
+});
 
 export const CreateStudyModal = ({ isOpen, onClose }) => {
   const [dragActive, setDragActive] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -58,26 +73,46 @@ export const CreateStudyModal = ({ isOpen, onClose }) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files[0].type === "application/pdf") {
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        setUploadedFile((prevFiles) => [...prevFiles, ...droppedFiles]);
+        //   handleFile(e.dataTransfer.files[0]);
+      }
+    } else {
+      Toast.fire({
+        icon: "warning",
+        title: "Please Upload a Pdf file only",
+      });
     }
   };
 
   const handleFileInput = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      handleFile(e.target.files[0]);
+    if (e.target.files[0].type === "application/pdf") {
+      if (e.target.files && e.target.files[0]) {
+        const selectedFiles = Array.from(e.target.files);
+        setUploadedFile((prevFile) => [...prevFile, ...selectedFiles]);
+        // handleFile(e.target.files[0]);
+      }
+    } else {
+      Toast.fire({
+        icon: "warning",
+        title: "Please Upload a Pdf file only",
+      });
     }
   };
 
-  const handleFile = (file) => {
-    if (file.type === "application/pdf") {
-      setUploadedFile(file);
-      simulateUpload();
-    } else {
-      alert("Please upload a PDF file only.");
-    }
-  };
+//   const handleFile = (file) => {
+//     if (file.type === "application/pdf") {
+//       setUploadedFile(file);
+//       simulateUpload();
+//     } else {
+//       Toast.fire({
+//         icon: "warning",
+//         title: "Please Upload a Pdf file only",
+//       });
+//     }
+//   };
 
   const simulateUpload = () => {
     setIsUploading(true);
@@ -95,25 +130,68 @@ export const CreateStudyModal = ({ isOpen, onClose }) => {
     }, 200);
   };
 
-  const handleGenerateQuestions = () => {
+  const handleGenerateQuestions = async () => {
     if (!uploadedFile && (!subject || !topic || !gradeLevel)) {
-      alert("Please upload a PDF or fill in all the form fields.");
+      Toast.fire({
+        icon: "warning",
+        title: "Please upload a PDF or fill in all the form fields.",
+      });
       return;
     }
-
     setIsProcessing(true);
+    const formData = new FormData();
+    uploadedFile.forEach((file) => {
+      formData.append("file", file);
+    });
+    try {
+      const token = Cookies.get("accessToken");
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/pdf2ai`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log(response);
+      Toast.fire({
+        icon: "success",
+        title: "Upload Sucessful",
+      });
+      resetForm();
+      // console.log("Files uploaded successfully", response.data);
+      // Handle success (e.g., show success message, reset state, etc.)
+    } catch (error) {
+    //   setIsProcessing(false);
+      console.error("Error uploading files", error)
+      if (error.message === "Network Error") {
+        Toast.fire({
+          icon: "error",
+          title: "Check Your Internet",
+        });
+      } else {
+        Toast.fire({
+          icon: "error",
+          title: "Failed to Upload",
+        });
+      }
+      resetForm()
+      // Handle error (e.g., show error message)
+    }
 
-    // Simulate processing time
-    setTimeout(() => {
-      setIsProcessing(false);
-      onClose();
-      // Here you would typically navigate to the generated study or show success
-      alert("Study created successfully!");
-    }, 3000);
+    // // Simulate processing time
+    // setTimeout(() => {
+    //   setIsProcessing(false);
+    //   onClose();
+    //   // Here you would typically navigate to the generated study or show success
+    //   alert("Study created successfully!");
+    // }, 3000);
   };
 
   const resetForm = () => {
-    setUploadedFile(null);
+    setUploadedFile([]);
     setIsUploading(false);
     setUploadProgress(0);
     setIsProcessing(false);
@@ -184,7 +262,7 @@ export const CreateStudyModal = ({ isOpen, onClose }) => {
                 className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
                   dragActive
                     ? "border-blue-500 bg-blue-50"
-                    : uploadedFile
+                    : uploadedFile?.length > 0
                     ? "border-green-500 bg-green-50"
                     : "border-gray-300 hover:border-gray-400"
                 }`}
@@ -220,7 +298,7 @@ export const CreateStudyModal = ({ isOpen, onClose }) => {
                       </p>
                     </div>
                   </div>
-                ) : uploadedFile ? (
+                ) : uploadedFile?.length > 0 ? (
                   <div className="space-y-3">
                     <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
                     <div>
@@ -228,14 +306,14 @@ export const CreateStudyModal = ({ isOpen, onClose }) => {
                         File uploaded successfully!
                       </p>
                       <p className="text-sm text-gray-500">
-                        {uploadedFile.name}
+                        {uploadedFile[0].name}
                       </p>
                     </div>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => {
-                        setUploadedFile(null);
+                        setUploadedFile([]);
                         setUploadProgress(0);
                       }}
                       className="text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -263,7 +341,9 @@ export const CreateStudyModal = ({ isOpen, onClose }) => {
                 )}
               </motion.div>
             </div>
-            <span className="text-lg font-medium text-gray-900 flex justify-center">OR</span>
+            <span className="text-lg font-medium text-gray-900 flex justify-center">
+              OR
+            </span>
             {/* Form Fields */}
             <div className="space-y-4">
               {/* Subject Dropdown */}

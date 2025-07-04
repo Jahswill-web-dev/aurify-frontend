@@ -40,8 +40,8 @@ export const MySummaries = () => {
   );
   useEffect(() => {
     if (data && !error && !loading) {
-      console.log(data.data);
-      // setSummaries(data.data);
+      // console.log(data.data);
+      setSummaries(data.data);
     }
   }, [data, loading, error]);
   return (
