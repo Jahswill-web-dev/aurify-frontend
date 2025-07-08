@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -12,7 +13,7 @@ import {
   Circle,
   AlertTriangle,
 } from "lucide-react";
-import { QuizResultsOverview } from "./QuizResultsOverview";
+import { QuizResultsOverview } from "./quizResultsOverview";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 
 const sampleQuestions = [
@@ -139,6 +140,7 @@ export const QuizInterface = ({
   const [showResults, setShowResults] = useState(false);
   const [questions, setQuestions] = useState();
 
+  const router = useRouter();
   const { data, error, loading, refetch } = useFetchWithToken(
     `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/audiobook/s/${slug}`
   );
@@ -146,7 +148,8 @@ export const QuizInterface = ({
   useEffect(() => {
     if (data) {
       setQuestions(data.data[1]);
-      console.log(data.data[1]);
+      // console.log("Questions set to:", data?.data?.[1]);
+    //   console.log(data.data[1]);
     }
   }, [data]);
 
@@ -169,13 +172,14 @@ export const QuizInterface = ({
       .padStart(2, "0")}`;
   };
 
-  const handleAnswerSelect = (optionIndex) => {
+  const handleAnswerSelect = (optionIndex, option) => {
     if (isSubmitted) return;
 
     setAnswers((prev) => ({
       ...prev,
       [currentQuestion]: optionIndex,
     }));
+    // console.log(optionIndex);
   };
 
   const handleNext = () => {
@@ -201,7 +205,8 @@ export const QuizInterface = ({
   };
 
   const confirmQuit = () => {
-    onBack();
+    // onBack();
+    router.push("/dashboard");
   };
 
   const handleRetakeTest = () => {
@@ -228,8 +233,15 @@ export const QuizInterface = ({
     setIsTimerRunning(false);
   };
 
+//   useEffect(() => {
+//     console.log(answers);
+//     console.log(questions)
+//   }, [answers, questions]);
+
   // Show results overview if quiz is completed
-  if (showResults) {
+
+
+  if (questions && showResults) {
     return (
       <QuizResultsOverview
         onBack={onBack}
@@ -406,7 +418,7 @@ export const QuizInterface = ({
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                   whileHover={{ scale: 1.01 }}
-                  onClick={() => handleAnswerSelect(index)}
+                  onClick={() => handleAnswerSelect(index, option)}
                   className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${
                     answers[currentQuestion] === index
                       ? "border-blue-500 bg-blue-50"
