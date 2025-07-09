@@ -599,10 +599,10 @@ export const QuizResultsOverview = ({
                           </h3>
                           <div className="mt-2 space-y-1">
                             <p className="text-sm text-red-600">
-                              Your Answer: {getAnswerLabel(item.userAnswer)}
+                              Your Answer:✗	 {getAnswerLabel(item.userAnswer)}	
                             </p>
                             <p className="text-sm text-green-600">
-                              Correct Answer:{" "}
+                              Correct Answer:{" "} ✓
                               {getAnswerLabel(item.question.options.indexOf(item.correctAnswer))}
                             </p>
                           </div>
@@ -734,7 +734,7 @@ export const QuizResultsOverview = ({
                             </p>
                             <p className="text-sm text-green-600">
                               Correct Answer:{" "}
-                              {getAnswerLabel(item.correctAnswer)}
+                              {getAnswerLabel(item.question.options.indexOf(item.correctAnswer))}
                             </p>
                           </div>
                         </div>
@@ -768,7 +768,7 @@ export const QuizResultsOverview = ({
                                     <div
                                       key={optionIndex}
                                       className={`flex items-center space-x-3 p-3 rounded-lg border-2 ${
-                                        optionIndex === item.correctAnswer
+                                        option === item.correctAnswer
                                           ? "border-green-500 bg-green-50"
                                           : "border-gray-200 bg-white"
                                       }`}
