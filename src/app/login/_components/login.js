@@ -13,8 +13,8 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
 import Swal from "sweetalert2";
-import { useDispatch } from "react-redux";
-import { setAccessToken } from "@/app/lib/features/auth/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setAccessToken, setAuthMode } from "@/app/lib/features/auth/authSlice";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import { useEffect } from "react";
 const Toast = Swal.mixin({
@@ -56,9 +56,12 @@ function InputForm({ type, title, name, id, register, errors }) {
     </div>
   );
 }
-function SocialSignIn({ name, logo }) {
+function SocialSignIn({ name, logo, onClick }) {
   return (
-    <div className="cursor-pointer text-p-text-darker flex justify-around items-center bg-off-white-100 border border-2 w-[300px] py-2 rounded-md">
+    <div
+      onClick={onClick}
+      className="cursor-pointer text-p-text-darker flex justify-around items-center bg-off-white-100  border-2 w-[300px] py-2 rounded-md"
+    >
       <Image src={logo} width={30} height={30} alt="google icon" />
       <div>{name}</div>
       <Image src={chevron} alt="chevron right" width={30} height={30} />
@@ -73,7 +76,7 @@ function Login() {
   );
   useEffect(() => {
     if (data) {
-      console.log(data);
+      // console.log(data);
     }
     if (data?.status === 200) {
       router.push("/dashboard");
@@ -91,12 +94,14 @@ function Login() {
 
   const onSubmit = async (data) => {
     // console.log(data);
+
     await axios
       .post(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/token`, data)
       .then((response) => {
         // console.log(response);
 
         const { access_token } = response.data;
+        // console.log(access_token);
         Cookies.set("accessToken", access_token, { expires: 7, path: "" });
         dispatch(setAccessToken(access_token));
 
@@ -122,6 +127,26 @@ function Login() {
       });
 
     // console.log(data);
+  };
+
+  const handleGoogleLogin = async () => {
+    // console.log("login with google clicked");
+    localStorage.setItem('authMode', 'login');
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/auth/google`
+      );
+      console.log(response);
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error) {
+      console.error("Google Login error:", error);
+      Toast.fire({
+        icon: "error",
+        title: "Failed to initiate Google Login",
+      });
+    }
   };
 
   return (
@@ -185,7 +210,11 @@ function Login() {
       </div>
 
       <div className="flex flex-col gap-5 items-center justify-center">
-        <SocialSignIn name="LogIn in with Google" logo={googleIcon} />
+        <SocialSignIn
+          name="LogIn in with Google"
+          logo={googleIcon}
+          onClick={handleGoogleLogin}
+        />
         {/* <SocialSignIn name="LogIn in Facebook" logo={facebookIcon} /> */}
         {/* <SocialSignIn name="LogIn in Twitter" logo={xIcon} /> */}
       </div>

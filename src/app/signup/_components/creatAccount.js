@@ -12,7 +12,7 @@ import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
 import Swal from "sweetalert2";
 import Link from "next/link";
-import { setAccessToken } from "@/app/lib/features/auth/authSlice";
+import { setAccessToken, setAuthMode } from "@/app/lib/features/auth/authSlice";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { useFetchWithToken } from "@/app/hooks/useCustomHook";
@@ -62,7 +62,7 @@ function SocialSignIn({ name, logo, onClick }) {
   return (
     <div 
       onClick={onClick}
-      className="cursor-pointer text-p-text-darker flex justify-around items-center bg-off-white-100 border border-2 w-[300px] py-2 rounded-md hover:bg-gray-100 transition-colors">
+      className="cursor-pointer text-p-text-darker flex justify-around items-center bg-off-white-100 border-2 w-[300px] py-2 rounded-md hover:bg-gray-100 transition-colors">
       <Image src={logo} width={30} height={30} alt="google icon" />
       <div>{name}</div>
       <Image src={chevron} alt="chevron right" width={30} height={30} />
@@ -86,44 +86,45 @@ function CreateAccount() {
     }
   }, [router, data]);
 
-  useEffect(() => {
-    const handleGoogleCallback = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const userId = urlParams.get('userId');
+  // useEffect(() => {
+  //   const handleGoogleCallback = async () => {
+  //     const urlParams = new URLSearchParams(window.location.search);
+  //     const userId = urlParams.get('userId');
       
-      if (userId) {
-        try {
-          const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/callback`,
-            { userId }
-          );
+  //     if (userId) {
+  //       try {
+  //         const response = await axios.post(
+  //           `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/callback`,
+  //           { userId }
+  //         );
           
-          const { access_token } = response.data;
-          Cookies.set("accessToken", access_token, { expires: 7, path: "" });
-          dispatch(setAccessToken(access_token));
+  //         const { access_token } = response.data;
+  //         Cookies.set("accessToken", access_token, { expires: 7, path: "" });
+  //         dispatch(setAccessToken(access_token));
           
-          Toast.fire({
-            icon: "success",
-            title: "Signed in successfully with Google",
-          });
-          router.push("/dashboard");
-        } catch (error) {
-          console.error("Google callback error:", error);
-          Toast.fire({
-            icon: "error",
-            title: "Failed to sign in with Google",
-          });
-        }
-      }
-    };
+  //         Toast.fire({
+  //           icon: "success",
+  //           title: "Signed in successfully with Google",
+  //         });
+  //         router.push("/dashboard");
+  //       } catch (error) {
+  //         console.error("Google callback error:", error);
+  //         Toast.fire({
+  //           icon: "error",
+  //           title: "Failed to sign in with Google",
+  //         });
+  //       }
+  //     }
+  //   };
 
-    handleGoogleCallback();
-  }, [dispatch, router]);
+  //   handleGoogleCallback();
+  // }, [dispatch, router]);
 
   const handleGoogleSignup = async () => {
+    localStorage.setItem('authMode', 'signup');
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/signup`
+        `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/auth/google`
       );
       console.log(response);
       if (response.data.url) {
