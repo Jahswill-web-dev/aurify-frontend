@@ -39,7 +39,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { WelcomeSection } from './WelcomeSection';
+import { WelcomeSection } from './welcomeSection';
 import { RecentStudies } from './recentStudies';
 
 export const Dashboard = () => {

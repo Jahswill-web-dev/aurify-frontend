@@ -494,8 +494,8 @@ export const CreateStudyModal = ({ isOpen, onClose }) => {
                         Creating your study...
                       </p>
                       <p className="text-blue-600 text-sm">
-                        This may take a few moments. You can close this window
-                        and we'll notify you when it's ready.
+                        {`This may take a few moments. You can close this window
+                        and we'll notify you when it's ready.`}
                       </p>
                     </div>
                   </div>

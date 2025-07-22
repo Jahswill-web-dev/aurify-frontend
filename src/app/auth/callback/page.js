@@ -1,69 +1,10 @@
-"use client";
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
-import { useSelector } from "react-redux";
-import Cookies from "js-cookie";
+import { Suspense } from "react";
+import GoogleCallback from "./GoogleCallback";
 
-export default function GoogleCallback() {
-  const authMode = useSelector((store) => store.auth.authMode);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    // Get access_token from URL hash if present, else from search params
-    let accessToken = searchParams.get("access_token");
-
-    if (!accessToken && typeof window !== "undefined") {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      accessToken = params.get("access_token");
-    }
-    if (!accessToken) return;
-
-    const completeLogin = async () => {
-      //   if (!authMode) {
-      //     console.error("authMode is not set");
-      //     return;
-      //   }
-
-      try {
-        // Attempt sign in first
-        const mode = localStorage.getItem("authMode");
-        console.log(accessToken);
-        // console.log(authMode)
-        const endpoint =
-          mode === "signup"
-            ? `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/signup?access_token=${accessToken}`
-            : `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/signin?access_token=${accessToken}`;
-        const signinRes = await axios.get(endpoint);
-        // Save tokens
-        console.log(signinRes);
-        Cookies.set("accessToken", signinRes.data.access_token);
-        Cookies.set("refreshToken", signinRes.data.refresh_token);
-        // const token = Cookies.get("accessToken");
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 3000);
-      } catch (err) {
-        if (err.response?.status === 451) {
-          // User doesn't exist, so sign up
-          const signupRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/signup?access_token=${accessToken}`
-          );
-
-          Cookies.set("accessToken", signupRes.data.access_token);
-          Cookies.set("refreshToken", signupRes.data.refresh_token);
-
-          router.push("/dashboard");
-        } else {
-          console.error("Login/signup failed:", err);
-        }
-      }
-    };
-
-    completeLogin();
-  }, [authMode, searchParams, router]);
-
-  return <p className="text-center mt-10">Signing you in...</p>;
+export default function Page() {
+  return (
+    <Suspense fallback={<p className="text-center mt-10">Loading...</p>}>
+      <GoogleCallback />
+    </Suspense>
+  );
 }

@@ -55,8 +55,11 @@ export const MySummaries = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             My Summaries
           </h1>
-          <p className="text-gray-600">
+          {/* <p className="text-gray-600">
             Review and manage your study summaries
+          </p> */}
+          <p className="text-gray-600">
+            Refresh if summaries does not appear
           </p>
         </motion.div>
 

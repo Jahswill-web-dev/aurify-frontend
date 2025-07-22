@@ -84,7 +84,7 @@ export default function SummaryDetail({ params }) {
       setBlogContent(md.render(summaryText?.text));
       // console.log(summaryText?.text);
     }
-  }, [summaryText]);
+  }, [summaryText, md]);
 
   async function downloadAudioWithAuth() {
     // const url = `/api/download-audio?public_url=${summaryText.url}`;

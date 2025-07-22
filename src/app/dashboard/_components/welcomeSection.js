@@ -34,7 +34,7 @@ export const WelcomeSection = () => {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 max-w-2xl"
         >
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Latest Score: 85%</h2>
+          {/* <h2 className="text-xl font-bold text-gray-900 mb-2">Latest Score: 85%</h2> */}
           <p className="text-gray-600 leading-relaxed">
             Keep up the great work! Your dedication is paying off. Review your results for more insights.
           </p>
