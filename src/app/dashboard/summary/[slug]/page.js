@@ -202,16 +202,18 @@ export default function SummaryDetail({ params }) {
               whileTap={{ scale: 0.95 }}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <Link href="/dashboard">
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </Link>
             </motion.button>
             <div className="flex items-center space-x-3">
               <BookOpen className="w-6 h-6 text-blue-600" />
-              <h1 className="text-xl font-bold text-gray-900">StudySmart</h1>
+              <h1 className="text-xl font-bold text-gray-900">Aurify AI</h1>
             </div>
           </div>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <Link
+            {/* <Link
               href="/dashboard"
               className="text-gray-600 hover:text-gray-900 font-medium"
             >
@@ -225,7 +227,7 @@ export default function SummaryDetail({ params }) {
               className="text-gray-600 hover:text-gray-900 font-medium"
             >
               Practice
-            </Link>
+            </Link> */}
             {/* <Link
               href="#"
               className="text-gray-600 hover:text-gray-900 font-medium"
@@ -270,12 +272,12 @@ export default function SummaryDetail({ params }) {
           </h1>
           <div className="flex items-center space-x-4 text-gray-600">
             <div className="flex items-center space-x-1">
-              <Calendar className="w-4 h-4" />
-              <span className="text-sm">Uploaded on October 26, 2024</span>
+              {/* <Calendar className="w-4 h-4" /> */}
+              {/* <span className="text-sm">Uploaded on October 26, 2024</span> */}
             </div>
             <div className="flex items-center space-x-1">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm">15 min read</span>
+              {/* <Clock className="w-4 h-4" /> */}
+              {/* <span className="text-sm">15 min read</span> */}
             </div>
           </div>
         </motion.div>
@@ -293,7 +295,7 @@ export default function SummaryDetail({ params }) {
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-gray-900">
-               {summaryText?.title}
+                {summaryText?.title}
               </h3>
               <p className="text-gray-600">AI Summary</p>
             </div>
@@ -323,14 +325,14 @@ export default function SummaryDetail({ params }) {
                 onClick={handleSeek}
               >
                 <motion.div
-                  className="h-full bg-blue-600 rounded-full"
+                  className="h-full bg-primary-100 rounded-full"
                   style={{ width: `${progressPercentage}%` }}
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercentage}%` }}
                   transition={{ duration: 0.1 }}
                 />
                 <motion.div
-                  className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full shadow-lg"
+                  className="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary-50 rounded-full shadow-lg"
                   style={{ left: `calc(${progressPercentage}% - 8px)` }}
                   whileHover={{ scale: 1.2 }}
                 />
@@ -356,7 +358,7 @@ export default function SummaryDetail({ params }) {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={togglePlayPause}
-                className="p-4 bg-blue-600 hover:bg-blue-700 rounded-full transition-colors shadow-lg"
+                className="p-4 bg-primary-50 hover:bg-primary-100 rounded-full transition-colors shadow-lg"
               >
                 {isPlaying ? (
                   <Pause className="w-8 h-8 text-white" />
@@ -429,13 +431,13 @@ export default function SummaryDetail({ params }) {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="flex flex-col sm:flex-row gap-4"
         >
-          <motion.button
+          {/* <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-xl font-medium transition-colors shadow-lg"
           >
             View Practice Questions
-          </motion.button>
+          </motion.button> */}
           <Link href="/dashboard">
             <motion.button
               whileHover={{ scale: 1.02 }}
