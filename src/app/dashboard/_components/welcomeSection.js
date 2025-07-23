@@ -18,7 +18,7 @@ export const WelcomeSection = ({ onCreateStudy }) => {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={onCreateStudy}
-            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors mb-6 lg:hidden"
+            className="bg-primary-100 text-off-white-50 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors mb-6 lg:hidden"
           >
             Create Study
           </motion.button>
