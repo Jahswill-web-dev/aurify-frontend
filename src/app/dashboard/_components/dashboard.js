@@ -37,16 +37,16 @@
 
 // export default Dashboard;
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { WelcomeSection } from './welcomeSection';
-import { RecentStudies } from './recentStudies';
+import React from "react";
+import { motion } from "framer-motion";
+import { WelcomeSection } from "./welcomeSection";
+import { RecentStudies } from "./recentStudies";
 
-export const Dashboard = () => {
+export const Dashboard = ({ onCreateStudy }) => {
   return (
     <div className="h-full overflow-auto">
       <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
-        <WelcomeSection />
+        <WelcomeSection onCreateStudy={onCreateStudy} />
         <RecentStudies />
       </div>
     </div>
