@@ -12,8 +12,12 @@
     "@hookform/resolvers": "^3.4.2",
     "@reduxjs/toolkit": "^2.2.7",
     "axios": "^1.7.2",
+    "dompurify": "^3.2.6",
+    "framer-motion": "^10.16.16",
     "howler": "^2.2.4",
     "js-cookie": "^3.0.5",
+    "lucide-react": "^0.344.0",
+    "markdown-it": "^14.1.0",
     "moment": "^2.30.1",
     "next": "14.2.3",
     "react": "^18",
@@ -29,6 +33,7 @@
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16",
     "autoprefixer": "^10.4.19",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",

@@ -11,7 +11,7 @@ function SignUpPage() {
     <div>
       <div className="container">
         {/* Logo */}
-        <div className="text-center mb-5 mt-5 flex justify-center">
+        <div className="text-center mb-2 mt-2 flex justify-center">
           <Link href="/">
             <Image width={200} height={200} src={logo} alt="Aurify AI logo" />
           </Link>

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { LoginPopUp } from "./_components/loginPopUp";
 import { useFetchWithToken } from "../hooks/useCustomHook";
 import { useEffect } from "react";
+import Cookies from "js-cookie";
 import {
   setUserEmail,
   setUserLimit,
@@ -22,13 +23,15 @@ function DashboardLayout({ children }) {
   const isOverlayVisible = showOverlay || navOverlay;
   // console.log(navOverlay);
   const dispatch = useDispatch();
-  const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/me`
-  );
-  useEffect(() => {
-    if (data && !error && !loading) {
-      // console.log(data.data);
-      dispatch(setUserName(data.data.username));
+
+    const { data, error, loading } = useFetchWithToken(
+      `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/me`
+    );
+    
+    useEffect(() => {
+      if (data && !error && !loading) {
+        // console.log(data.data);
+        dispatch(setUserName(data.data.username));
       dispatch(setUserEmail(data.data.email));
       dispatch(setUserLimit(data.data.limit));
       dispatch(setUserSubscription(data.data.is_pro));
@@ -44,14 +47,14 @@ function DashboardLayout({ children }) {
   if (loading) return <Loading />;
   if (error)
     return <p className="text-center text-3xl mt-28">Error: {error.message}</p>;
-
+  
   return (
     <div className="">
       {/* <DashboardNav /> */}
       <div className="">{children}</div>
       <MobileDetails />
       <Upload />
-      <AudioControlls/>
+      <AudioControlls />
       {/* <DeleteBox/> */}
       {/* dark overlay */}
       {isOverlayVisible && (
