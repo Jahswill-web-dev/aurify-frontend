@@ -84,15 +84,15 @@ export const MySummaries = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-6 text-sm text-gray-500">
-                  <div className="flex items-center space-x-1">
+                  {/* <div className="flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
                     <span>{summary.date}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
+                  </div> */}
+                  {/* <div className="flex items-center space-x-1">
                     <BookOpen className="w-4 h-4" />
                     <span>{summary.pages} pages</span>
-                  </div>
-                  <span
+                  </div> */}
+                  {/* <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
                       summary.status === "completed"
                         ? "bg-green-100 text-green-800"
@@ -100,7 +100,7 @@ export const MySummaries = () => {
                     }`}
                   >
                     {summary.status}
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </motion.div>

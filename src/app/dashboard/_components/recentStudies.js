@@ -48,7 +48,7 @@ export const RecentStudies = () => {
         Coming soon...
       </motion.h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {studies.map((study, index) => (
           <motion.div
             key={study.id}
@@ -96,9 +96,9 @@ export const RecentStudies = () => {
             </div>
 
             {/* Content */}
-            <div className="p-4">
-              <h3 className="font-bold text-gray-900 mb-1">{study.title}</h3>
-              <p className="text-sm text-blue-600 mb-2">Created on {study.createdOn}</p>
+            <div className="p-3 sm:p-4">
+              <h3 className="font-bold text-gray-900 mb-1 text-sm sm:text-base">{study.title}</h3>
+              <p className="text-xs sm:text-sm text-blue-600 mb-2">Created on {study.createdOn}</p>
             </div>
           </motion.div>
         ))}

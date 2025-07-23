@@ -175,7 +175,7 @@ export const PracticeQuestions = ({ onSwitchView }) => {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors shadow-lg hover:shadow-xl"
+                      className="bg-primary-100 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-50 transition-colors shadow-lg hover:shadow-xl"
                     >
                       Start Quiz
                     </motion.button>

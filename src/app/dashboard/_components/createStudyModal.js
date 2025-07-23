@@ -465,7 +465,7 @@ export const CreateStudyModal = ({ isOpen, onClose }) => {
               className={`w-full py-4 rounded-xl font-medium text-white transition-all ${
                 isProcessing || isUploading
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-600 shadow-lg hover:shadow-xl"
+                  : "bg-primary-100 hover:bg-primary-50 shadow-lg hover:shadow-xl"
               }`}
             >
               {isProcessing ? (

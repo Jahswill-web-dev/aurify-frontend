@@ -272,21 +272,21 @@ export const QuizInterface = ({
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm font-bold">S</span>
-                </div>
-                <h1 className="text-xl font-bold text-gray-900">StudySmart</h1>
+                {/* <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-primary-100 text-sm font-bold">A</span>
+                </div> */}
+                <h1 className="text-xl font-bold text-gray-900">Aurify AI</h1>
               </div>
             </div>
 
             <nav className="hidden md:flex items-center space-x-8">
-              <a
-                href="#"
+              {/* <a
+                href="/dashboard"
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
                 Dashboard
-              </a>
-              <a href="#" className="text-blue-600 font-medium">
+              </a> */}
+              {/* <a href="#" className="text-blue-600 font-medium">
                 Practice
               </a>
               <a
@@ -300,7 +300,7 @@ export const QuizInterface = ({
                 className="text-gray-600 hover:text-gray-900 font-medium"
               >
                 Resources
-              </a>
+              </a> */}
             </nav>
 
             <div className="flex items-center space-x-4">

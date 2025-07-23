@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dashboard } from "./_components/dashboard";
 import { MySummaries } from "./_components/mySummaries";
@@ -9,30 +9,41 @@ import { Sidebar } from "./_components/sideNav";
 import { CreateStudyModal } from "./_components/createStudyModal";
 
 function App() {
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeSection, setActiveSection] = useState("dashboard");
   const [showSummaryDetail, setShowSummaryDetail] = useState(false);
   const [showCreateStudyModal, setShowCreateStudyModal] = useState(false);
 
-  const renderMainContent = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsCollapsed(window.innerWidth < 768);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  const renderMainContent = () => {
     switch (activeSection) {
-      case 'dashboard':
+      case "dashboard":
         return (
-          <Dashboard 
-            onViewSummary={() => setShowSummaryDetail(true)} 
+          <Dashboard
+            onViewSummary={() => setShowSummaryDetail(true)}
             onCreateStudy={() => setShowCreateStudyModal(true)}
           />
         );
-      case 'summaries':
+      case "summaries":
         return <MySummaries onViewSummary={() => setShowSummaryDetail(true)} />;
-      case 'practice':
+      case "practice":
         return <PracticeQuestions />;
-      case 'scores':
+      case "scores":
         return <ScoresResults />;
       default:
         return (
-          <Dashboard 
-            onViewSummary={() => setShowSummaryDetail(true)} 
+          <Dashboard
+            onViewSummary={() => setShowSummaryDetail(true)}
             onCreateStudy={() => setShowCreateStudyModal(true)}
           />
         );
@@ -46,13 +57,19 @@ function App() {
   return (
     <>
       <div className="min-h-screen bg-gray-50 flex">
-        <Sidebar 
-          activeSection={activeSection} 
+        <Sidebar
+          activeSection={activeSection}
           onSectionChange={setActiveSection}
           onCreateStudy={() => setShowCreateStudyModal(true)}
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
         />
-        
-        <div className="flex-1 min-w-0">
+
+        <div
+          className={`min-w-0 overflow-hidden transition-all duration-300 ${
+            isCollapsed ? "ml-16" : "ml-64 sm:ml-72 lg:ml-80"
+          }`}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={activeSection}
@@ -60,7 +77,7 @@ function App() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="h-full"
+              className="h-full min-h-screen sm:min-h-0"
             >
               {renderMainContent()}
             </motion.div>
@@ -69,7 +86,7 @@ function App() {
       </div>
 
       {/* Create Study Modal */}
-      <CreateStudyModal 
+      <CreateStudyModal
         isOpen={showCreateStudyModal}
         onClose={() => setShowCreateStudyModal(false)}
       />

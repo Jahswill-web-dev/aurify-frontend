@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   MinusCircle,
 } from "lucide-react";
+import Link from "next/link";
 
 export const QuizResultsOverview = ({
   onBack,
@@ -71,7 +72,7 @@ export const QuizResultsOverview = ({
       correctAnswer: questions && questions[parseInt(questionIndex)]?.answer,
     }));
 
-    if (questions.length > 0) {
+  if (questions.length > 0) {
     console.log(correctQuestionsList);
   }
 
@@ -89,7 +90,7 @@ export const QuizResultsOverview = ({
       userAnswer,
       correctAnswer: questions && questions[parseInt(questionIndex)]?.answer,
     }));
-    
+
   if (questions.length > 0) {
     console.log(incorrectQuestionsList);
   }
@@ -149,23 +150,26 @@ export const QuizResultsOverview = ({
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </motion.button>
+            <Link href="/dashboard">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onBack}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </motion.button>
+            </Link>
+
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              {/* <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white text-sm font-bold">S</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900">StudySmart</h1>
+              </div> */}
+              <h1 className="text-xl font-bold text-gray-900">Aurify AI</h1>
             </div>
           </div>
           <nav className="hidden md:flex items-center space-x-8">
-            <a
+            {/* <a
               href="#"
               className="text-gray-600 hover:text-gray-900 font-medium"
             >
@@ -185,7 +189,7 @@ export const QuizResultsOverview = ({
               className="text-gray-600 hover:text-gray-900 font-medium"
             >
               Resources
-            </a>
+            </a> */}
           </nav>
 
           <div className="flex items-center space-x-4">
@@ -599,11 +603,15 @@ export const QuizResultsOverview = ({
                           </h3>
                           <div className="mt-2 space-y-1">
                             <p className="text-sm text-red-600">
-                              Your Answer:✗	 {getAnswerLabel(item.userAnswer)}	
+                              Your Answer:✗ {getAnswerLabel(item.userAnswer)}
                             </p>
                             <p className="text-sm text-green-600">
-                              Correct Answer:{" "} ✓
-                              {getAnswerLabel(item.question.options.indexOf(item.correctAnswer))}
+                              Correct Answer: ✓
+                              {getAnswerLabel(
+                                item.question.options.indexOf(
+                                  item.correctAnswer
+                                )
+                              )}
                             </p>
                           </div>
                         </div>
@@ -657,8 +665,7 @@ export const QuizResultsOverview = ({
                                           <CheckCircle className="w-4 h-4 text-white" />
                                         )}
                                         {optionIndex === item.userAnswer &&
-                                          option !==
-                                            item.correctAnswer && (
+                                          option !== item.correctAnswer && (
                                             <XCircle className="w-4 h-4 text-white" />
                                           )}
                                         {option !== item.correctAnswer &&
@@ -734,7 +741,11 @@ export const QuizResultsOverview = ({
                             </p>
                             <p className="text-sm text-green-600">
                               Correct Answer:{" "}
-                              {getAnswerLabel(item.question.options.indexOf(item.correctAnswer))}
+                              {getAnswerLabel(
+                                item.question.options.indexOf(
+                                  item.correctAnswer
+                                )
+                              )}
                             </p>
                           </div>
                         </div>

@@ -18,7 +18,7 @@ export const ScoresResults = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Scores & Results</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Coming soon...</h1>
           <p className="text-gray-600">Track your progress and achievements</p>
         </motion.div>
 
