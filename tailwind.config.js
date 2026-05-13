@@ -27,6 +27,10 @@ module.exports = {
         "secondary": "#FEF2CF",
         "p-text": "#817474",
         "p-text-darker": "#5D4D4D",
+        "success": "#22C55E",
+        "success-light": "#DCFCE7",
+        "error": "#EF4444",
+        "error-light": "#FEE2E2",
       },
       fontSize:{
         "xl-head":"40px",
@@ -43,7 +47,39 @@ module.exports = {
         "h4":"20px",
         "h5":"16px",
         "h6":"12px",
-      }
+      },
+      borderRadius: {
+        'xs': '4px',
+        'sm': '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '24px',
+        '2xl': '32px',
+      },
+      boxShadow: {
+        'card': '0 2px 8px rgba(0, 0, 0, 0.06)',
+        'panel': '0 4px 16px rgba(0, 0, 0, 0.08)',
+        'modal': '0 8px 32px rgba(0, 0, 0, 0.12)',
+        'input-focus': '0 0 0 3px rgba(247, 147, 26, 0.2)',
+        'btn-primary': '0 2px 8px rgba(247, 147, 26, 0.35)',
+      },
+      spacing: {
+        '18': '72px',
+        '68': '272px',
+        '72': '288px',
+        '80': '320px',
+        '88': '352px',
+        '128': '512px',
+      },
+      transitionDuration: {
+        '175': '175ms',
+        '250': '250ms',
+        '350': '350ms',
+      },
+      transitionTimingFunction: {
+        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'bounce-in': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+      },
     },
   },
   plugins: [

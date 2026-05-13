@@ -1,0 +1,56 @@
+"use client";
+
+import Spinner from "./Spinner";
+
+const variantClasses = {
+  primary:
+    "bg-primary text-white rounded-sm shadow-btn-primary hover:bg-primary-200 active:bg-primary-200 transition-all duration-175 ease-smooth",
+  secondary:
+    "bg-accent-100 text-primary-200 rounded-sm hover:bg-accent-50 transition-all duration-175 ease-smooth",
+  ghost:
+    "bg-transparent border border-primary text-primary rounded-sm hover:bg-accent-25 transition-all duration-175 ease-smooth",
+  text:
+    "bg-transparent text-primary underline-offset-2 hover:underline text-h5 transition-all duration-175",
+};
+
+const sizeClasses = {
+  sm: "px-3 py-1.5 text-h6 font-medium",
+  md: "px-4 py-2 text-h5 font-medium",
+  lg: "px-6 py-3 text-h4 font-semibold",
+};
+
+const Button = ({
+  variant = "primary",
+  size = "md",
+  disabled = false,
+  loading = false,
+  onClick,
+  children,
+  className = "",
+  type = "button",
+}) => {
+  const isDisabled = disabled || loading;
+  const spinnerColor = variant === "primary" ? "white" : "orange";
+
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={isDisabled}
+      className={[
+        "inline-flex items-center justify-center gap-2 whitespace-nowrap",
+        variantClasses[variant] || variantClasses.primary,
+        sizeClasses[size] || sizeClasses.md,
+        isDisabled ? "opacity-50 cursor-not-allowed" : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {loading ? <Spinner size="sm" color={spinnerColor} /> : null}
+      {children}
+    </button>
+  );
+};
+
+export default Button;

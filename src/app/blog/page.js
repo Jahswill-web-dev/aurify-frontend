@@ -1,7 +1,4 @@
-import Footer from "@/components/footer/footer";
 import Navbar from "@/components/navbar/nav";
-import Image from "next/image";
-import Link from "next/link";
 import { Card, MainCard } from "./_components/cards";
 import axios from "axios";
 
@@ -14,11 +11,15 @@ async function getBlogs() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.BLOG_TOKEN}`,
         },
+        timeout: 5000,
       }
     );
     return res;
   } catch (error) {
-    console.log(error);
+    console.error(
+      "Unable to fetch blog posts:",
+      error.response?.status || error.code || error.message
+    );
     return { data: { data: [] } };
   }
 }
@@ -27,6 +28,25 @@ export default async function BlogPage() {
   const data = await getBlogs();
   const blogContent = data.data.data;
   const mainBlog = blogContent[2];
+
+  if (!mainBlog) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container">
+          <h2 className="text-x-head md:text-l-head roboto-font font-bold text-center mt-5 text-primary">
+            The Aurify Blog
+          </h2>
+          <div className="my-20 text-center">
+            <p className="text-lg text-p-text">
+              No blog posts are available right now.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const title = mainBlog.attributes.title;
   const description = mainBlog.attributes.description;
   const urlSlug = mainBlog.attributes.urlSlug;

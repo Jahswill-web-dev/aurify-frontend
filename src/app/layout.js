@@ -1,5 +1,4 @@
 import "./globals.css";
-import Footer from "@/components/footer/footer";
 import StoreProvider from "./lib/StoreProvider";
 
 export const metadata = {
@@ -10,12 +9,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <StoreProvider>
-      <html lang="en" className="scroll-smooth">
-        <body className="bg-off-white max-w-[1557px] mx-auto">
+    <html lang="en" className="scroll-smooth">
+      <body className="bg-off-white max-w-[1557px] mx-auto">
+        <StoreProvider>
           {children}
-        </body>
-      </html>
-    </StoreProvider>
+        </StoreProvider>
+      </body>
+    </html>
   );
 }

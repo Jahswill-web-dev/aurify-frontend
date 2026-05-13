@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Home, FileText, HelpCircle, BarChart3, UserPlus } from 'lucide-react';
+import { Sparkles, Home, FileText, HelpCircle, BarChart3, UserPlus } from 'lucide-react';
 
 const navigation = [
+  { id: 'learn', label: 'Learn', icon: Sparkles },
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'summaries', label: 'My Summaries', icon: FileText },
   { id: 'practice', label: 'Practice Questions', icon: HelpCircle },
