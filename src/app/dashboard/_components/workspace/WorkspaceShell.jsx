@@ -67,6 +67,8 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
   const [completedModules, setCompletedModules] = useState([]);
+  const [practiceAnswers, setPracticeAnswers] = useState({});
+  const [examAnswers, setExamAnswers] = useState({});
   const [selectedLevel, setSelectedLevel] = useState(() =>
     getInitialLevel(confirmedSetup?.level)
   );
@@ -100,6 +102,7 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
             activeModuleIndex={activeModuleIndex}
             onModuleChange={handleModuleSelect}
             onTabChange={setActiveTab}
+            onAnswersUpdate={handlePracticeAnswersUpdate}
           />
         );
       case "exam":
@@ -110,6 +113,7 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
             activeModuleIndex={activeModuleIndex}
             onModuleChange={handleModuleSelect}
             onTabChange={setActiveTab}
+            onExamAnswersUpdate={handleExamAnswersUpdate}
           />
         );
       case "ask-ai":
@@ -122,7 +126,17 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
           />
         );
       case "progress":
-        return <ProgressTab />;
+        return (
+          <ProgressTab
+            confirmedSetup={confirmedSetup}
+            learningPath={learningPath}
+            practiceAnswers={practiceAnswers}
+            examAnswers={examAnswers}
+            activeModuleIndex={activeModuleIndex}
+            onModuleChange={handleModuleSelect}
+            onTabChange={setActiveTab}
+          />
+        );
       default:
         return (
           <NotesTab
@@ -148,6 +162,17 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
         ? current.filter((moduleIndex) => moduleIndex !== index)
         : [...current, index]
     );
+  };
+
+  const handlePracticeAnswersUpdate = (moduleIndex, answers) => {
+    setPracticeAnswers((current) => ({
+      ...current,
+      [moduleIndex]: answers,
+    }));
+  };
+
+  const handleExamAnswersUpdate = (answers) => {
+    setExamAnswers(answers);
   };
 
   return (

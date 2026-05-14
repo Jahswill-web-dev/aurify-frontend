@@ -89,6 +89,7 @@ function PracticeTab({
   activeModuleIndex,
   onModuleChange,
   onTabChange,
+  onAnswersUpdate,
 }) {
   const [questions, setQuestions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -165,10 +166,14 @@ function PracticeTab({
     if (selectedOption === null || !question) return;
 
     setHasAnswered(true);
-    setAnswers((current) => ({
-      ...current,
-      [question.id]: selectedOption,
-    }));
+    setAnswers((current) => {
+      const nextAnswers = {
+        ...current,
+        [question.id]: selectedOption,
+      };
+      onAnswersUpdate?.(activeModuleIndex, nextAnswers);
+      return nextAnswers;
+    });
   };
 
   const handleNext = () => {
@@ -183,6 +188,7 @@ function PracticeTab({
 
   const handleTryAgain = () => {
     resetPracticeState();
+    onAnswersUpdate?.(activeModuleIndex, {});
   };
 
   const getOptionClassName = (index) => {

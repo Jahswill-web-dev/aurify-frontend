@@ -126,6 +126,7 @@ function ExamTab({
   activeModuleIndex,
   onModuleChange,
   onTabChange,
+  onExamAnswersUpdate,
 }) {
   const [questions, setQuestions] = useState([]);
   const [examTitle, setExamTitle] = useState("Exam");
@@ -200,6 +201,7 @@ function ExamTab({
   const handleAutoSubmit = () => {
     setShowSubmitConfirm(false);
     setExamSubmitted(true);
+    onExamAnswersUpdate?.(answers);
   };
 
   useEffect(() => {
@@ -241,6 +243,7 @@ function ExamTab({
 
   const handleRetakeExam = () => {
     setAnswers({});
+    onExamAnswersUpdate?.({});
     setCurrentIndex(0);
     setExamSubmitted(false);
     setExamStarted(false);
@@ -662,6 +665,7 @@ function ExamTab({
                 onClick={() => {
                   setShowSubmitConfirm(false);
                   setExamSubmitted(true);
+                  onExamAnswersUpdate?.(answers);
                 }}
               >
                 Submit
