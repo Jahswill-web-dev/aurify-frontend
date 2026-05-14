@@ -7,6 +7,7 @@ function ModuleItem({
   module,
   index,
   isActive,
+  isComplete = false,
   isCollapsed = false,
   onSelect,
 }) {
@@ -23,14 +24,28 @@ function ModuleItem({
         .join(" ")}
       aria-current={isActive ? "step" : undefined}
     >
-      <span className="mt-0.5 w-6 shrink-0 text-h6 font-bold text-primary poppins-font">
+      <span
+        className={[
+          "mt-0.5 w-6 shrink-0 text-h6 font-bold poppins-font",
+          isComplete ? "text-success" : "text-primary",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
         {String(index + 1).padStart(2, "0")}
       </span>
 
       {!isCollapsed ? (
         <span className="min-w-0">
-          <span className="block truncate text-h6 font-medium leading-snug text-grey-200 inter-font">
-            {module.title || `Module ${index + 1}`}
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="block min-w-0 truncate text-h6 font-medium leading-snug text-grey-200 inter-font">
+              {module.title || `Module ${index + 1}`}
+            </span>
+            {isComplete ? (
+              <span className="shrink-0 text-h6 font-semibold text-success">
+                ✓
+              </span>
+            ) : null}
           </span>
           <span className="mt-0.5 block truncate text-x-description capitalize text-p-text inter-font">
             {module.type || "concept"} - {module.estimatedMinutes || 5} min
@@ -49,6 +64,7 @@ function WorkspaceSidebar({
   goalOptions,
   selectedLevel,
   selectedGoal,
+  completedModules = [],
   onLevelChange,
   onGoalChange,
   onModuleSelect,
@@ -104,6 +120,7 @@ function WorkspaceSidebar({
             module={module}
             index={index}
             isActive={index === activeModuleIndex}
+            isComplete={completedModules.includes(index)}
             isCollapsed={isCollapsed}
             onSelect={onModuleSelect}
           />

@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Aurify
 
-## Getting Started
+Aurify is a Next.js learning app. The dashboard Learn flow guides a user from a raw topic request into a confirmed setup, generated learning path, and workspace shell for studying.
 
-First, run the development server:
+## Current Learn Flow
+
+1. `LearnScreen` collects the user's topic or learning request.
+2. `/api/parse-topic` extracts a structured setup.
+3. `ConfirmationCard` lets the user confirm or adjust the setup.
+4. `/api/generate-path` generates a module-based learning path.
+5. `LearningPath` previews modules and starts the session.
+6. `WorkspaceShell` hosts the study workspace with Notes, Practice, Exam, Ask AI, and Progress tabs.
+
+The workspace tab components are placeholders for now. Future work should fill the files in `src/app/dashboard/_components/workspace/tabs/`.
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Verification
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Run lint:
 
-## Learn More
+```bash
+npm run lint
+```
 
-To learn more about Next.js, take a look at the following resources:
+Run a production build:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Known note: the build currently compiles and passes lint/type checks, then fails while collecting page data for `/blog/[slug]` because that route times out during static generation. If a Next dev server is running on Windows, it can also lock `.next/trace`; stop the dev server before retrying `npm run build`.
 
-## Deploy on Vercel
+## Project Docs
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- `docs/AI_CONTEXT.md` is the main handoff file for AI collaborators.
+- `docs/PROJECT_STRUCTURE.md` documents folders, routes, and important files.
+- `docs/DESIGN_SYSTEM.md` documents the visual system and UI conventions.

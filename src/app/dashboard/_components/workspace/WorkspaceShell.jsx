@@ -66,6 +66,7 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
+  const [completedModules, setCompletedModules] = useState([]);
   const [selectedLevel, setSelectedLevel] = useState(() =>
     getInitialLevel(confirmedSetup?.level)
   );
@@ -81,23 +82,65 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
   const renderTab = () => {
     switch (activeTab) {
       case "notes":
-        return <NotesTab />;
+        return (
+          <NotesTab
+            confirmedSetup={confirmedSetup}
+            learningPath={learningPath}
+            activeModuleIndex={activeModuleIndex}
+            onModuleChange={handleModuleSelect}
+            onModuleComplete={handleModuleComplete}
+            completedModules={completedModules}
+          />
+        );
       case "practice":
-        return <PracticeTab />;
+        return (
+          <PracticeTab
+            confirmedSetup={confirmedSetup}
+            learningPath={learningPath}
+            activeModuleIndex={activeModuleIndex}
+            onModuleChange={handleModuleSelect}
+            onTabChange={setActiveTab}
+          />
+        );
       case "exam":
-        return <ExamTab />;
+        return (
+          <ExamTab
+            confirmedSetup={confirmedSetup}
+            learningPath={learningPath}
+            activeModuleIndex={activeModuleIndex}
+            onModuleChange={handleModuleSelect}
+            onTabChange={setActiveTab}
+          />
+        );
       case "ask-ai":
         return <AskAITab />;
       case "progress":
         return <ProgressTab />;
       default:
-        return <NotesTab />;
+        return (
+          <NotesTab
+            confirmedSetup={confirmedSetup}
+            learningPath={learningPath}
+            activeModuleIndex={activeModuleIndex}
+            onModuleChange={handleModuleSelect}
+            onModuleComplete={handleModuleComplete}
+            completedModules={completedModules}
+          />
+        );
     }
   };
 
   const handleModuleSelect = (index) => {
     setActiveModuleIndex(index);
     setIsSidebarOpen(false);
+  };
+
+  const handleModuleComplete = (index) => {
+    setCompletedModules((current) =>
+      current.includes(index)
+        ? current.filter((moduleIndex) => moduleIndex !== index)
+        : [...current, index]
+    );
   };
 
   return (
@@ -123,6 +166,7 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
           goalOptions={goalOptions}
           selectedLevel={selectedLevel}
           selectedGoal={selectedGoal}
+          completedModules={completedModules}
           onLevelChange={setSelectedLevel}
           onGoalChange={setSelectedGoal}
           onModuleSelect={handleModuleSelect}
@@ -198,6 +242,7 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
                   module={module}
                   index={index}
                   isActive={index === activeModuleIndex}
+                  isComplete={completedModules.includes(index)}
                   onSelect={handleModuleSelect}
                 />
               ))}

@@ -86,12 +86,17 @@ The custom Tailwind font sizes are defined in `tailwind.config.js`.
 - Use `.container` for main constrained page content: `max-width: 1200px`, centered, with horizontal padding.
 - The root body uses `bg-off-white`, `max-width: 1557px`, and centered layout.
 - Dashboard main panels use `.dashboard-main` for the shared light surface, border, rounded corners, padding, and vertical scroll behavior.
+- Learning path overview screens use a centered `max-w-[780px]` content column with `px-4 py-10`.
+- The learning workspace uses a full-height shell: fixed header, desktop left module sidebar, top tab bar, and scrollable main content.
+- On mobile, the workspace module list moves into a rounded top bottom drawer with a dim backdrop.
 
 ## Interaction Styles
 
 - Use `.zoom-in` for simple hover scale interactions where a clickable item needs subtle emphasis.
 - Primary interactive elements should use the orange brand range, with `primary` as the default action color.
 - Keep dashboard UI practical and scannable: restrained panels, clear labels, and consistent spacing.
+- Use `.scrollbar-hide` when horizontal scrolling is needed but the scrollbar would add visual noise, such as the workspace tab bar.
+- Workspace module navigation uses `bg-accent-100` plus `border-primary` to communicate the active module.
 
 ## Markdown Content Styling
 
@@ -148,3 +153,12 @@ The following tokens were added to support Aurify's learning interface screens. 
 - Use `duration-350` for larger transitions like tab switching and sidebar open/close
 - Use `ease-smooth` as the default easing across all transitions
 - Use `ease-bounce-in` only for playful confirmations like a correct answer ping
+
+## Learning Flow UI Patterns
+
+- Learning setup badges use `Badge`: subject as `accent`, level as `primary`, and goal as `neutral`.
+- Learning path module cards use white cards with subtle borders, hover border-primary, and shadow-panel hover feedback.
+- Workspace tab content transitions with a short fade/vertical motion using Framer Motion.
+- Workspace placeholder tabs should stay visually quiet until each tab is fully implemented.
+- Desktop workspace sidebar expands to `w-68` and collapses to `w-16`, showing only module numbers when collapsed.
+- Workspace mobile drawer uses `shadow-modal`, `rounded-t-xl`, and a small grey drag handle.

@@ -60,6 +60,8 @@ This file documents the main folders and files in the Aurify project, with a bri
 | Path | Description |
 | --- | --- |
 | `src/app/api/route.js` | App-level API route. |
+| `src/app/api/parse-topic/route.js` | Parses a user's learning request into topic, subject, level, goal, and clarification metadata. |
+| `src/app/api/generate-path/route.js` | Generates a structured module-based learning path from a confirmed learning setup. |
 | `src/app/blog/api/route.js` | Blog-specific API route. |
 
 ## Auth Routes
@@ -96,6 +98,12 @@ This file documents the main folders and files in the Aurify project, with a bri
 | `src/app/dashboard/layout.js` | Dashboard route layout. |
 | `src/app/dashboard/page.js` | Dashboard route entry point. |
 | `src/app/dashboard/_components/` | Dashboard UI components for navigation, summaries, uploads, studies, modals, loading states, and audio controls. |
+| `src/app/dashboard/_components/LearnScreen.jsx` | Topic input screen for the dashboard Learn flow. |
+| `src/app/dashboard/_components/AnalysisLoader.jsx` | Transitional analysis screen that calls topic parsing before confirmation. |
+| `src/app/dashboard/_components/ConfirmationCard.jsx` | Confirms or adjusts parsed topic setup before generating a learning path. |
+| `src/app/dashboard/_components/LearningPath.jsx` | Shows the generated learning path overview, skeleton loading state, and Start Learning CTA. |
+| `src/app/dashboard/_components/workspace/` | Main learning workspace shell components: header, sidebar, tab bar, mobile drawer behavior, and tab placeholders. |
+| `src/app/dashboard/_components/workspace/tabs/` | Placeholder tab components for Notes, Practice, Exam, Ask AI, and Progress. |
 | `src/app/dashboard/summary/page.js` | Summary listing route. |
 | `src/app/dashboard/summary/[slug]/page.js` | Dynamic summary detail route. |
 | `src/app/dashboard/questions/page.js` | Questions route entry point. |
