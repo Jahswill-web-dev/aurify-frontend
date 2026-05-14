@@ -167,7 +167,6 @@ function App() {
         </div>
       </div>
 
-      {/* Create Study Modal */}
       <CreateStudyModal
         isOpen={showCreateStudyModal}
         onClose={() => setShowCreateStudyModal(false)}
