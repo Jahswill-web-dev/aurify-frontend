@@ -1,78 +1,18 @@
-Browserslist: caniuse-lite is outdated. Please run:
-  npx update-browserslist-db@latest
-  Why you should do it regularly: https://github.com/browserslist/update-db#readme
-Parse topic error: Anthropic request failed with 401
-Parse topic error: Anthropic request failed with 401
-Generate path error: Anthropic request failed with 401
-Generate path error: Anthropic request failed with 401
-Parse topic error: Anthropic request failed with 401
-Parse topic error: Anthropic request failed with 401
-Generate path error: Anthropic request failed with 401
-Generate path error: Anthropic request failed with 401
-Generate path error: Anthropic request failed with 401
-Generate path error: Anthropic request failed with 401
- ⨯ Error: Cannot find module './vendor-chunks/mdast-util-to-hast.js'
-Require stack:
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\.next\server\webpack-runtime.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\.next\server\app\page.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\require.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\load-components.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\build\utils.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\dev\hot-middleware.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\dev\hot-reloader-webpack.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\lib\router-server.js
-- C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\lib\start-server.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1144:15)
-    at C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\require-hook.js:55:36
-    at Module._load (node:internal/modules/cjs/loader:985:27)
-    at Module.require (node:internal/modules/cjs/loader:1235:19)
-    at mod.require (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\require-hook.js:65:28)
-    at require (node:internal/modules/helpers:176:18)
-    at __webpack_require__.f.require (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\.next\server\webpack-runtime.js:203:28)
-    at C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\.next\server\webpack-runtime.js:111:40
-    at Array.reduce (<anonymous>)
-    at __webpack_require__.e (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\.next\server\webpack-runtime.js:110:67)
-    at Array.map (<anonymous>)
-    at __webpack_require__.X (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\.next\server\webpack-runtime.js:162:22)
-    at C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\.next\server\app\dashboard\page.js:1073:47
-    at Object.<anonymous> (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\.next\server\app\dashboard\page.js:1076:3)
-    at Module._compile (node:internal/modules/cjs/loader:1376:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)
-    at Module.load (node:internal/modules/cjs/loader:1207:32)
-    at Module._load (node:internal/modules/cjs/loader:1023:12)
-    at Module.require (node:internal/modules/cjs/loader:1235:19)
-    at mod.require (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\require-hook.js:65:28)
-    at require (node:internal/modules/helpers:176:18)
-    at requirePage (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\require.js:109:84)
-    at C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\load-components.js:98:84
-    at async loadComponentsImpl (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\load-components.js:98:26)
-    at async DevServer.findPageComponentsImpl (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\next-server.js:710:36)
-    at async DevServer.findPageComponents (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\dev\next-dev-server.js:577:20)
-    at async DevServer.renderPageComponent (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\base-server.js:1910:24)
-    at async DevServer.renderToResponseImpl (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\base-server.js:1962:32)
-    at async DevServer.pipeImpl (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\base-server.js:920:25)
-    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\next-server.js:272:17)
-    at async DevServer.handleRequestImpl (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\base-server.js:816:17)
-    at async C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\dev\next-dev-server.js:339:20
-    at async Span.traceAsyncFn (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\trace\trace.js:154:20)
-    at async DevServer.handleRequest (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\dev\next-dev-server.js:336:24)
-    at async invokeRender (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\lib\router-server.js:174:21)
-    at async handleRequest (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\lib\router-server.js:353:24)
-    at async requestHandlerImpl (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\lib\router-server.js:377:13)
-    at async Server.requestListener (C:\Users\ISAAC ONUEGBU\Documents\Jahswill_space\aurify\node_modules\next\dist\server\lib\start-server.js:141:13) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\.next\\server\\webpack-runtime.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\.next\\server\\app\\page.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\node_modules\\next\\dist\\server\\require.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\node_modules\\next\\dist\\server\\load-components.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\node_modules\\next\\dist\\build\\utils.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\node_modules\\next\\dist\\server\\dev\\hot-middleware.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\node_modules\\next\\dist\\server\\dev\\hot-reloader-webpack.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\node_modules\\next\\dist\\server\\lib\\router-utils\\setup-dev-bundler.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\node_modules\\next\\dist\\server\\lib\\router-server.js',
-    'C:\\Users\\ISAAC ONUEGBU\\Documents\\Jahswill_space\\aurify\\node_modules\\next\\dist\\server\\lib\\start-server.js'
-  ],
-  page: '/dashboard'
+node:internal/fs/utils:353
+    throw err;
+    ^
+
+Error: EPERM: operation not permitted, lstat 'C:\Users\ISAAC ONUEGBU'
+    at Object.realpathSync (node:fs:2689:7)
+    at toRealPath (node:internal/modules/helpers:55:13)
+    at Module._findPath (node:internal/modules/cjs/loader:697:22)
+    at resolveMainPath (node:internal/modules/run_main:26:23)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:24)
+    at node:internal/main/run_main_module:28:49 {
+  errno: -4048,
+  syscall: 'lstat',
+  code: 'EPERM',
+  path: 'C:\\Users\\ISAAC ONUEGBU'
 }
+
+Node.js v20.10.0

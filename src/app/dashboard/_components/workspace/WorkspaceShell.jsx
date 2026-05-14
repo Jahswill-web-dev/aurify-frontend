@@ -113,7 +113,14 @@ function WorkspaceShell({ learningPath, confirmedSetup, onExit }) {
           />
         );
       case "ask-ai":
-        return <AskAITab />;
+        return (
+          <AskAITab
+            confirmedSetup={confirmedSetup}
+            learningPath={learningPath}
+            activeModuleIndex={activeModuleIndex}
+            onTabChange={setActiveTab}
+          />
+        );
       case "progress":
         return <ProgressTab />;
       default:
