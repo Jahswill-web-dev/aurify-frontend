@@ -1,12 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { Dashboard } from "./_components/dashboard";
 import { MySummaries } from "./_components/mySummaries";
 import { PracticeQuestions } from "./_components/practiceQuestions";
 import { ScoresResults } from "./_components/scoresResults";
 import { Sidebar } from "./_components/sideNav";
-import { CreateStudyModal } from "./_components/createStudyModal";
 import LearnScreen from "./_components/LearnScreen";
 import AnalysisLoader from "./_components/AnalysisLoader";
 import ConfirmationCard from "./_components/ConfirmationCard";
@@ -14,6 +14,7 @@ import LearningPath from "./_components/LearningPath";
 import WorkspaceShell from "./_components/workspace/WorkspaceShell";
 
 function App() {
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState("learn");
   const [learnInput, setLearnInput] = useState("");
   const [learnDraftInput, setLearnDraftInput] = useState("");
@@ -21,7 +22,6 @@ function App() {
   const [learningPath, setLearningPath] = useState(null);
   const [workspaceActive, setWorkspaceActive] = useState(false);
   const [showSummaryDetail, setShowSummaryDetail] = useState(false);
-  const [showCreateStudyModal, setShowCreateStudyModal] = useState(false);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -113,7 +113,7 @@ function App() {
         return (
           <Dashboard
             onViewSummary={() => setShowSummaryDetail(true)}
-            onCreateStudy={() => setShowCreateStudyModal(true)}
+            onCreateStudy={() => router.push("/studies/new")}
           />
         );
       case "summaries":
@@ -126,7 +126,7 @@ function App() {
         return (
           <Dashboard
             onViewSummary={() => setShowSummaryDetail(true)}
-            onCreateStudy={() => setShowCreateStudyModal(true)}
+            onCreateStudy={() => router.push("/studies/new")}
           />
         );
     }
@@ -138,18 +138,18 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-off-white-100 flex">
         <Sidebar
           activeSection={activeSection}
           onSectionChange={setActiveSection}
-          onCreateStudy={() => setShowCreateStudyModal(true)}
+          onCreateStudy={() => router.push("/studies/new")}
           isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}
         />
 
         <div
           className={`min-w-0 flex-1 overflow-hidden transition-all duration-300 ${
-            isCollapsed ? "ml-16" : "ml-64 sm:ml-72 lg:ml-80"
+            isCollapsed ? "ml-16" : "ml-64 sm:ml-72"
           }`}
         >
           <AnimatePresence mode="wait">
@@ -167,10 +167,6 @@ function App() {
         </div>
       </div>
 
-      <CreateStudyModal
-        isOpen={showCreateStudyModal}
-        onClose={() => setShowCreateStudyModal(false)}
-      />
     </>
   );
 }

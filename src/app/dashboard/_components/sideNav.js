@@ -1,9 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Home, FileText, HelpCircle, BarChart3, UserPlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import {
+  BarChart3,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  HelpCircle,
+  Home,
+  Plus,
+  Sparkles,
+} from 'lucide-react';
 
 const navigation = [
   { id: 'learn', label: 'Learn', icon: Sparkles },
+  { id: 'studies', label: 'Studies', icon: BookOpen, href: '/studies' },
   { id: 'dashboard', label: 'Dashboard', icon: Home },
   { id: 'summaries', label: 'My Summaries', icon: FileText },
   { id: 'practice', label: 'Practice Questions', icon: HelpCircle },
@@ -11,56 +23,85 @@ const navigation = [
 ];
 
 export const Sidebar = ({ activeSection, onSectionChange, onCreateStudy, onShowSignup, isCollapsed, setIsCollapsed }) => {
+  const router = useRouter();
 
   return (
-    <div className={`${isCollapsed ? 'w-16' : 'w-64 sm:w-72 lg:w-80'} bg-white border-r border-gray-200 flex flex-col h-screen transition-all duration-300 fixed left-0 top-0 z-50`}>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-64 sm:w-72'} bg-off-white border-r border-grey-25 flex flex-col h-screen transition-all duration-300 fixed left-0 top-0 z-50`}>
       {/* Header */}
-      <div className={`${isCollapsed ? 'p-2' : 'p-4 sm:p-6'} border-b border-gray-200 flex items-center justify-center`}>
+      <div className={`${isCollapsed ? 'p-2' : 'p-4'} border-b border-grey-25 flex items-center gap-3`}>
         {isCollapsed ? (
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">S</span>
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-white">
+            <span className="text-h5 font-bold">A</span>
           </div>
         ) : (
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Aurify AI</h1>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-h4 font-bold text-grey-200 poppins-font">
+              Aurify AI
+            </h1>
+            <p className="truncate text-h6 text-grey-100 inter-font">
+              Study workspace
+            </p>
+          </div>
         )}
+
+        <button
+          type="button"
+          onClick={() => setIsCollapsed((current) => !current)}
+          className="ml-auto flex h-9 w-9 items-center justify-center rounded-sm border border-grey-25 bg-white text-grey-100 transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+          )}
+        </button>
       </div>
 
       {/* Navigation */}
-      <nav className={`flex-1 ${isCollapsed ? 'p-2' : 'p-3 sm:p-4'} space-y-1 sm:space-y-2`}>
+      <nav className={`flex-1 ${isCollapsed ? 'p-2' : 'p-3'} space-y-1.5`}>
         {navigation.map((item) => (
           <motion.button
             key={item.id}
-            onClick={() => onSectionChange(item.id)}
-            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2 py-3' : 'space-x-3 px-4 py-3'} rounded-lg text-left transition-all ${
+            onClick={() => {
+              if (item.href) {
+                router.push(item.href);
+                return;
+              }
+              onSectionChange(item.id);
+            }}
+            className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-3 py-3'} rounded-md text-left transition-all ${
               activeSection === item.id
-                ? 'bg-gray-100 text-gray-900 font-medium'
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            } text-sm sm:text-base`}
+                ? 'bg-accent-25 text-primary font-semibold'
+                : 'text-p-text-darker hover:bg-white hover:text-grey-200'
+            } text-h5`}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             title={isCollapsed ? item.label : undefined}
           >
-            <item.icon className="w-4 sm:w-5 h-4 sm:h-5" />
-            {!isCollapsed && <span>{item.label}</span>}
+            <item.icon className="h-5 w-5 shrink-0" />
+            {!isCollapsed && <span className="truncate">{item.label}</span>}
           </motion.button>
         ))}
       </nav>
 
       {/* Action Buttons */}
-      <div className={`${isCollapsed ? 'p-2' : 'p-3 sm:p-4'} border-t border-gray-200 space-y-2 sm:space-y-3`}>
+      <div className={`${isCollapsed ? 'p-2' : 'p-3'} border-t border-grey-25`}>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onCreateStudy}
-          className={`w-full bg-primary-100 text-white ${isCollapsed ? 'py-2 px-2' : 'py-2 sm:py-3 px-3 sm:px-4'} rounded-lg font-medium hover:bg-primary-50  transition-colors text-sm sm:text-base flex items-center justify-center`}
+          className={`w-full bg-primary text-white ${isCollapsed ? 'px-2 py-2.5' : 'gap-2 px-3 py-3'} rounded-md font-semibold hover:bg-primary-200 transition-colors text-h5 flex items-center justify-center`}
           title={isCollapsed ? "Create Study" : undefined}
         >
           {isCollapsed ? (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+            <Plus className="h-4 w-4" aria-hidden="true" />
           ) : (
-            "Create Study"
+            <>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              <span>Create Study</span>
+            </>
           )}
         </motion.button>
         
@@ -75,6 +116,6 @@ export const Sidebar = ({ activeSection, onSectionChange, onCreateStudy, onShowS
           {!isCollapsed && <span>Sign Up</span>}
         </motion.button> */}
       </div>
-    </div>
+    </aside>
   );
 };
