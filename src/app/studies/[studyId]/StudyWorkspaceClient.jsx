@@ -15,6 +15,7 @@ import {
   Target,
 } from "lucide-react";
 import { Badge, Button, Card, Tabs } from "@/components/ui";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 const workspaceTabs = [
   { id: "overview", label: "Overview" },
@@ -66,13 +67,16 @@ function StudyWorkspaceHeader({ study, activeTab, progress }) {
             <ArrowLeft size={16} aria-hidden="true" />
             Back to Studies
           </Link>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-sm border border-grey-25 bg-off-white-100 px-3 py-2 text-h6 font-medium text-p-text-darker transition-colors hover:border-primary hover:text-primary"
-          >
-            <LayoutDashboard size={16} aria-hidden="true" />
-            Dashboard
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center gap-2 rounded-sm border border-grey-25 bg-off-white-100 px-3 text-h6 font-medium text-p-text-darker transition-colors hover:border-primary hover:text-primary"
+            >
+              <LayoutDashboard size={16} aria-hidden="true" />
+              Dashboard
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

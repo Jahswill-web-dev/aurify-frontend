@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LayoutDashboard, Plus } from "lucide-react";
 import { getStudies } from "@/data/mockStudies";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import EmptyStudiesState from "./_components/EmptyStudiesState";
 import StudiesGrid from "./_components/StudiesGrid";
 
@@ -10,7 +11,8 @@ export default function StudiesPage() {
   return (
     <main className="min-h-screen bg-off-white-100 px-4 py-8 sm:px-6 lg:px-10">
       <div className="mx-auto max-w-[1180px]">
-        <div className="mb-6 flex justify-end">
+        <div className="mb-6 flex justify-end gap-2">
+          <ThemeToggle />
           <Link
             href="/dashboard"
             className="inline-flex items-center gap-2 rounded-sm border border-grey-25 bg-white px-3 py-2 text-h6 font-medium text-p-text-darker shadow-card transition-colors hover:border-primary hover:text-primary"

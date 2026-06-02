@@ -3,24 +3,12 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Dashboard } from "./_components/dashboard";
-import { MySummaries } from "./_components/mySummaries";
-import { PracticeQuestions } from "./_components/practiceQuestions";
 import { ScoresResults } from "./_components/scoresResults";
 import { Sidebar } from "./_components/sideNav";
-import LearnScreen from "./_components/LearnScreen";
-import AnalysisLoader from "./_components/AnalysisLoader";
-import ConfirmationCard from "./_components/ConfirmationCard";
-import LearningPath from "./_components/LearningPath";
-import WorkspaceShell from "./_components/workspace/WorkspaceShell";
 
 function App() {
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState("learn");
-  const [learnInput, setLearnInput] = useState("");
-  const [learnDraftInput, setLearnDraftInput] = useState("");
-  const [parsedTopic, setParsedTopic] = useState(null);
-  const [learningPath, setLearningPath] = useState(null);
-  const [workspaceActive, setWorkspaceActive] = useState(false);
+  const [activeSection, setActiveSection] = useState("dashboard");
   const [showSummaryDetail, setShowSummaryDetail] = useState(false);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -37,78 +25,6 @@ function App() {
 
   const renderMainContent = () => {
     switch (activeSection) {
-      case "learn":
-        if (!learnInput) {
-          return (
-            <LearnScreen
-              initialValue={learnDraftInput}
-              onSubmit={(value) => {
-                setLearnInput(value);
-                setParsedTopic(null);
-                setLearningPath(null);
-                setWorkspaceActive(false);
-              }}
-            />
-          );
-        }
-
-        if (!parsedTopic) {
-          return (
-            <AnalysisLoader
-              input={learnInput}
-              onComplete={(parsed) => setParsedTopic(parsed)}
-            />
-          );
-        }
-
-        if (learningPath) {
-          if (workspaceActive && learningPath !== "loading") {
-            return (
-              <WorkspaceShell
-                learningPath={learningPath}
-                confirmedSetup={parsedTopic}
-                onExit={() => setWorkspaceActive(false)}
-              />
-            );
-          }
-
-          return (
-            <LearningPath
-              confirmedSetup={parsedTopic}
-              initialPath={learningPath !== "loading" ? learningPath : null}
-              onBack={() => setLearningPath(null)}
-              onStart={(path) => {
-                setLearningPath(path);
-                setWorkspaceActive(true);
-              }}
-            />
-          );
-        }
-
-        return (
-          <ConfirmationCard
-            parsed={parsedTopic}
-            onGenerate={(confirmedSetup) => {
-              setParsedTopic(confirmedSetup);
-              setLearningPath("loading");
-              setWorkspaceActive(false);
-            }}
-            onEditTopic={(currentSetup) => {
-              setLearnDraftInput(currentSetup.topic || learnInput);
-              setLearnInput("");
-              setParsedTopic(null);
-              setLearningPath(null);
-              setWorkspaceActive(false);
-            }}
-            onReset={() => {
-              setLearnInput("");
-              setLearnDraftInput("");
-              setParsedTopic(null);
-              setLearningPath(null);
-              setWorkspaceActive(false);
-            }}
-          />
-        );
       case "dashboard":
         return (
           <Dashboard
@@ -116,10 +32,6 @@ function App() {
             onCreateStudy={() => router.push("/studies/new")}
           />
         );
-      case "summaries":
-        return <MySummaries onViewSummary={() => setShowSummaryDetail(true)} />;
-      case "practice":
-        return <PracticeQuestions />;
       case "scores":
         return <ScoresResults />;
       default:

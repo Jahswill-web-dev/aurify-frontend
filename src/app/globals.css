@@ -5,6 +5,69 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html.dark body {
+    background: #0f1115;
+    color: #f5f7fb;
+  }
+}
+
+@layer utilities {
+  .dark .bg-white,
+  .dark .bg-off-white {
+    background-color: #17191f !important;
+  }
+
+  .dark .bg-off-white-100 {
+    background-color: #0f1115 !important;
+  }
+
+  .dark .bg-off-white-50 {
+    background-color: #232733 !important;
+  }
+
+  .dark .bg-accent-100,
+  .dark .bg-accent-25 {
+    background-color: rgba(247, 147, 26, 0.13) !important;
+  }
+
+  .dark .border-grey-25 {
+    border-color: #343844 !important;
+  }
+
+  .dark .border-accent-200 {
+    border-color: rgba(247, 147, 26, 0.35) !important;
+  }
+
+  .dark .text-grey-200,
+  .dark .text-p-text-darker {
+    color: #f5f7fb !important;
+  }
+
+  .dark .text-p-text,
+  .dark .text-grey-100 {
+    color: #aab1bf !important;
+  }
+
+  .dark .text-primary-200 {
+    color: #ffb457 !important;
+  }
+
+  .dark .shadow-card,
+  .dark .shadow-panel,
+  .dark .shadow-modal {
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28) !important;
+  }
+}
+
 
 .poppins-font {
   font-family: "Poppins", sans-serif;

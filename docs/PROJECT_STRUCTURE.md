@@ -60,8 +60,6 @@ This file documents the main folders and files in the Aurify project, with a bri
 | Path | Description |
 | --- | --- |
 | `src/app/api/route.js` | App-level API route. |
-| `src/app/api/parse-topic/route.js` | Parses a user's learning request into topic, subject, level, goal, and clarification metadata. |
-| `src/app/api/generate-path/route.js` | Generates a structured module-based learning path from a confirmed learning setup. |
 | `src/app/blog/api/route.js` | Blog-specific API route. |
 
 ## Auth Routes
@@ -98,12 +96,6 @@ This file documents the main folders and files in the Aurify project, with a bri
 | `src/app/dashboard/layout.js` | Dashboard route layout. |
 | `src/app/dashboard/page.js` | Dashboard route entry point. |
 | `src/app/dashboard/_components/` | Dashboard UI components for navigation, summaries, uploads, studies, modals, loading states, and audio controls. |
-| `src/app/dashboard/_components/LearnScreen.jsx` | Topic input screen for the dashboard Learn flow. |
-| `src/app/dashboard/_components/AnalysisLoader.jsx` | Transitional analysis screen that calls topic parsing before confirmation. |
-| `src/app/dashboard/_components/ConfirmationCard.jsx` | Confirms or adjusts parsed topic setup before generating a learning path. |
-| `src/app/dashboard/_components/LearningPath.jsx` | Shows the generated learning path overview, skeleton loading state, and Start Learning CTA. |
-| `src/app/dashboard/_components/workspace/` | Main learning workspace shell components: header, sidebar, tab bar, mobile drawer behavior, and tab placeholders. |
-| `src/app/dashboard/_components/workspace/tabs/` | Placeholder tab components for Notes, Practice, Exam, Ask AI, and Progress. |
 | `src/app/dashboard/summary/page.js` | Summary listing route. |
 | `src/app/dashboard/summary/[slug]/page.js` | Dynamic summary detail route. |
 | `src/app/dashboard/questions/page.js` | Questions route entry point. |
@@ -111,6 +103,19 @@ This file documents the main folders and files in the Aurify project, with a bri
 | `src/app/dashboard/questions/_components/` | Quiz and practice question components, including results and interface views. |
 | `src/app/dashboard/audiobooks/page.js` | Audiobooks route entry point. |
 | `src/app/dashboard/audiobooks/_components/audios.js` | Audiobook/audio listing or playback component. |
+
+## Studies Routes
+
+| Path | Description |
+| --- | --- |
+| `src/app/studies/layout.js` | Studies route layout and metadata. |
+| `src/app/studies/page.js` | Studies listing route with links back to dashboard and new study creation. |
+| `src/app/studies/new/page.js` | New Study route entry point. |
+| `src/app/studies/new/CreateStudyClient.jsx` | Client-side Study creation prompt and study plan preview flow. |
+| `src/app/studies/[studyId]/page.js` | Dynamic Study workspace route. |
+| `src/app/studies/[studyId]/StudyWorkspaceClient.jsx` | Study workspace tabs for overview, material, practice, exam mode, and analytics. |
+| `src/app/studies/_components/` | Studies list cards, grid, and empty state components. |
+| `src/data/mockStudies.js` | Mock Study data and helpers used by the current Studies flow. |
 
 ## App State And Hooks
 

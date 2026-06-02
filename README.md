@@ -1,17 +1,14 @@
 # Aurify
 
-Aurify is a Next.js learning app. The dashboard Learn flow guides a user from a raw topic request into a confirmed setup, generated learning path, and workspace shell for studying.
+Aurify is a Next.js learning app. The current product direction uses the Studies flow: users create a Study from a prompt, preview a generated plan, then continue in a dedicated study workspace with material, practice, exam mode, and analytics.
 
-## Current Learn Flow
+## Current Studies Flow
 
-1. `LearnScreen` collects the user's topic or learning request.
-2. `/api/parse-topic` extracts a structured setup.
-3. `ConfirmationCard` lets the user confirm or adjust the setup.
-4. `/api/generate-path` generates a module-based learning path.
-5. `LearningPath` previews modules and starts the session.
-6. `WorkspaceShell` hosts the study workspace with Notes, Practice, Exam, Ask AI, and Progress tabs.
-
-The workspace tab components are placeholders for now. Future work should fill the files in `src/app/dashboard/_components/workspace/tabs/`.
+1. `/dashboard` opens the main Dashboard tab by default.
+2. Dashboard actions can send users to `/studies/new`.
+3. `/studies/new` collects a study prompt and previews the generated study plan.
+4. Generating the study routes to `/studies/[studyId]`.
+5. The study workspace hosts Overview, Material, Practice, Exam Mode, and Analytics tabs.
 
 ## Development
 

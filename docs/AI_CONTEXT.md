@@ -4,34 +4,30 @@ This file is a working handoff document for AI collaborators entering the projec
 
 ## Project Snapshot
 
-Aurify is a Next.js 14 App Router learning app. The current product direction is centered on a guided "Learn" flow inside the dashboard:
+Aurify is a Next.js 14 App Router learning app. The current product direction is centered on the Studies flow:
 
-1. User enters a topic in `LearnScreen`.
-2. `/api/parse-topic` extracts topic, subject, level, and goal.
-3. `ConfirmationCard` lets the user confirm or adjust the setup.
-4. `/api/generate-path` creates a structured module-based learning path.
-5. `LearningPath` previews the full path before study begins.
-6. `WorkspaceShell` opens the main learning workspace, where future Notes, Practice, Exam, Ask AI, and Progress tabs will live.
+1. `/dashboard` opens the main Dashboard tab by default.
+2. Users create a Study from `/studies/new`.
+3. The create flow infers title, subject, level, goal, timing, sections, practice count, and exam count from the prompt.
+4. Generating a Study routes to `/studies/[studyId]`.
+5. The Study workspace provides Overview, Material, Practice, Exam Mode, and Analytics tabs.
 
 ## Current Goals
 
-- Build out the learning workspace progressively while preserving the shell structure.
-- Keep workspace state local to `WorkspaceShell` until there is a clear need for shared or persisted state.
-- Avoid building real tab content before its planned step; current tab components are placeholders only.
+- Keep `/studies` as the primary learning and study workspace flow.
+- Keep `/dashboard` focused on overview, recent studies, summaries, practice, scores, and navigation into Studies.
+- Avoid reintroducing the removed dashboard Learn path flow unless product direction changes explicitly.
 
 ## Completed Work
 
-- Topic parsing route and confirmation flow exist for the dashboard Learn section.
-- Learning path generation route exists at `src/app/api/generate-path/route.js`.
-- Learning path overview exists at `src/app/dashboard/_components/LearningPath.jsx`, including skeleton loading and animated module cards.
-- Main workspace shell exists under `src/app/dashboard/_components/workspace/`.
-- Workspace includes header, desktop module sidebar, mobile bottom drawer, tab bar, local dropdown state, active module state, and placeholder tab content.
-- `LearningPath` supports `initialPath` so exiting the workspace returns to the existing overview without re-fetching the path.
-- `getInitialLevel` and `getInitialGoal` in `WorkspaceShell` are null-safe because parsed setup values can be `null`.
+- The old dashboard Learn tab and generated learning-path flow were removed.
+- `/dashboard` now defaults to the Dashboard section.
+- `/studies`, `/studies/new`, and `/studies/[studyId]` provide the active study creation and workspace experience.
+- Study workspace content is currently backed by `src/data/mockStudies.js`.
 
 ## Current Phase
 
-Learning flow foundation. Step 8, the main learning workspace shell, is complete. Future steps should fill tab content inside the existing shell rather than replacing the shell.
+Studies flow foundation. Future work should improve study creation, persistence, generation, and workspace behavior inside the existing Studies routes.
 
 ## Active Work
 
@@ -39,34 +35,27 @@ No active implementation task is in progress at the time of this update.
 
 ## Next Steps
 
-- Step 9: build the Notes tab inside `workspace/tabs/NotesTab.jsx`.
-- Step 10: build Practice tab content inside `workspace/tabs/PracticeTab.jsx`.
-- Step 11: build Exam tab content inside `workspace/tabs/ExamTab.jsx`.
-- Step 12: build Ask AI tab content inside `workspace/tabs/AskAITab.jsx`.
-- Step 13: build Progress tab content inside `workspace/tabs/ProgressTab.jsx`.
+- Connect Study creation to the intended backend or generation service when ready.
+- Persist created Studies instead of relying only on mock data.
+- Improve Study workspace behavior while keeping the existing Overview, Material, Practice, Exam Mode, and Analytics structure.
 - Investigate the existing `npm run build` failure caused by `/blog/[slug]` static page-data collection timing out after two attempts.
 
 ## Important Decisions
 
-- Workspace state is intentionally local to `WorkspaceShell`; do not add Redux for this flow until persistence or cross-route sharing is required.
-- Workspace tab files are placeholders only for now. Future work should replace their contents, not create parallel tab locations.
-- The dashboard's existing main sidebar/navbar should not be modified for workspace tab work unless a future task explicitly asks for it.
-- `learningPath === "loading"` is used as a transition trigger while the Learning Path overview fetches the generated path. Once Start Learning is clicked, `learningPath` becomes the full path object.
-- Exiting the workspace sets `workspaceActive` to false and returns to `LearningPath` with `initialPath`, avoiding another generation request.
-- Anthropic is used for topic parsing and path generation through server routes, relying on `ANTHROPIC_API_KEY` and optional `ANTHROPIC_MODEL`.
+- The dashboard Learn tab is no longer part of the product surface.
+- The old dashboard learning-path API routes and workspace components were removed because Studies owns the learning workflow.
+- The dashboard main sidebar should link users to Studies and Create Study instead of offering a separate Learn flow.
 
 ## Project Structure Notes
 
 - `src/app/` contains the Next.js app routes, layouts, global styles, dashboard routes, auth callback, and API routes.
+- `src/app/studies/` contains the active studies list, create study page, and study workspace route.
+- `src/data/mockStudies.js` provides mock study data and plan generation helpers for the current Studies flow.
 - `src/components/` contains shared and page-specific UI components.
 - `public/images/` contains image assets.
 - `public/icons/` contains icon and logo assets.
 - `tailwind.config.js` defines the custom color and font-size tokens.
 - `src/app/globals.css` defines global Tailwind layers, font imports, helper classes, dashboard styling, and markdown styling.
-- `src/app/api/parse-topic/route.js` parses a raw learning request into a structured setup.
-- `src/app/api/generate-path/route.js` generates a module-based learning path from confirmed setup values.
-- `src/app/dashboard/_components/workspace/` contains the main learning workspace shell and tab placeholders.
-- `src/app/dashboard/_components/workspace/tabs/` is the planned home for workspace tab content.
 
 ## Styling Reference
 
@@ -93,6 +82,6 @@ Use `docs/DESIGN_SYSTEM.md` as the source of truth for the current website color
 
 ## Open Questions
 
-- Should workspace level/goal dropdown changes eventually regenerate notes/path content, or are they session-only preferences?
-- Should learning path progress persist across sessions, and if so should it use Redux, backend storage, or local storage?
+- How should generated Studies be persisted once mock data is replaced?
+- Which backend or AI service should own Study material, practice, exam, and analytics generation?
 - Should `/blog/[slug]` be made dynamic or optimized to avoid the current static generation timeout?

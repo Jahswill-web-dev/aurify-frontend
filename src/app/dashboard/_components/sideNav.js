@@ -6,19 +6,13 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
-  FileText,
-  HelpCircle,
   Home,
   Plus,
-  Sparkles,
 } from 'lucide-react';
 
 const navigation = [
-  { id: 'learn', label: 'Learn', icon: Sparkles },
   { id: 'studies', label: 'Studies', icon: BookOpen, href: '/studies' },
   { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'summaries', label: 'My Summaries', icon: FileText },
-  { id: 'practice', label: 'Practice Questions', icon: HelpCircle },
   { id: 'scores', label: 'Scores & Results', icon: BarChart3 },
 ];
 
