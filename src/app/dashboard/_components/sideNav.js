@@ -20,19 +20,19 @@ export const Sidebar = ({ activeSection, onSectionChange, onCreateStudy, onShowS
   const router = useRouter();
 
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-64 sm:w-72'} bg-off-white border-r border-grey-25 flex flex-col h-screen transition-all duration-300 fixed left-0 top-0 z-50`}>
+    <aside className={`${isCollapsed ? 'w-16' : 'w-64 sm:w-72'} bg-off-white border-r border-grey-25 flex flex-col h-screen transition-all duration-300 fixed left-0 top-0 z-50 dark:border-dark-border dark:bg-dark-surface`}>
       {/* Header */}
       <div className={`${isCollapsed ? 'p-2' : 'p-4'} border-b border-grey-25 flex items-center gap-3`}>
         {isCollapsed ? (
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-white dark:bg-dark-accent dark:text-[#16110a]">
             <span className="text-h5 font-bold">A</span>
           </div>
         ) : (
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-h4 font-bold text-grey-200 poppins-font">
+            <h1 className="truncate text-h4 font-bold text-grey-200 poppins-font dark:text-dark-text">
               Aurify AI
             </h1>
-            <p className="truncate text-h6 text-grey-100 inter-font">
+            <p className="truncate text-h6 text-grey-100 inter-font dark:text-dark-muted">
               Study workspace
             </p>
           </div>
@@ -41,7 +41,7 @@ export const Sidebar = ({ activeSection, onSectionChange, onCreateStudy, onShowS
         <button
           type="button"
           onClick={() => setIsCollapsed((current) => !current)}
-          className="ml-auto flex h-9 w-9 items-center justify-center rounded-sm border border-grey-25 bg-white text-grey-100 transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="ml-auto flex h-9 w-9 items-center justify-center rounded-sm border border-grey-25 bg-white text-grey-100 transition-colors hover:border-primary hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted dark:hover:border-primary-25 dark:hover:text-primary-25 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
@@ -67,8 +67,8 @@ export const Sidebar = ({ activeSection, onSectionChange, onCreateStudy, onShowS
             }}
             className={`w-full flex items-center ${isCollapsed ? 'justify-center px-2 py-3' : 'gap-3 px-3 py-3'} rounded-md text-left transition-all ${
               activeSection === item.id
-                ? 'bg-accent-25 text-primary font-semibold'
-                : 'text-p-text-darker hover:bg-white hover:text-grey-200'
+                ? 'bg-accent-25 text-primary font-semibold dark:bg-dark-surface-soft dark:text-primary-25'
+                : 'text-p-text-darker hover:bg-white hover:text-grey-200 dark:text-dark-muted dark:hover:bg-dark-surface-soft dark:hover:text-dark-text'
             } text-h5`}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
@@ -86,7 +86,7 @@ export const Sidebar = ({ activeSection, onSectionChange, onCreateStudy, onShowS
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={onCreateStudy}
-          className={`w-full bg-primary text-white ${isCollapsed ? 'px-2 py-2.5' : 'gap-2 px-3 py-3'} rounded-md font-semibold hover:bg-primary-200 transition-colors text-h5 flex items-center justify-center`}
+          className={`w-full bg-primary text-white ${isCollapsed ? 'px-2 py-2.5' : 'gap-2 px-3 py-3'} rounded-md font-semibold hover:bg-primary-200 transition-colors text-h5 flex items-center justify-center dark:bg-dark-accent dark:text-[#16110a] dark:hover:bg-primary-25`}
           title={isCollapsed ? "Create Study" : undefined}
         >
           {isCollapsed ? (

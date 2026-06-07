@@ -4,13 +4,13 @@ import Spinner from "./Spinner";
 
 const variantClasses = {
   primary:
-    "bg-primary text-white rounded-sm shadow-btn-primary hover:bg-primary-200 active:bg-primary-200 transition-all duration-175 ease-smooth",
+    "bg-primary text-white rounded-sm shadow-btn-primary hover:bg-primary-200 active:bg-primary-200 transition-all duration-175 ease-smooth dark:bg-dark-accent dark:text-[#16110a] dark:shadow-none dark:hover:bg-primary-25 dark:active:bg-primary-25",
   secondary:
-    "bg-accent-100 text-primary-200 rounded-sm hover:bg-accent-50 transition-all duration-175 ease-smooth",
+    "bg-accent-100 text-primary-200 rounded-sm hover:bg-accent-50 transition-all duration-175 ease-smooth dark:border dark:border-dark-border dark:bg-dark-surface-soft dark:text-primary-25 dark:hover:border-primary-25 dark:hover:bg-dark-surface",
   ghost:
-    "bg-transparent border border-primary text-primary rounded-sm hover:bg-accent-25 transition-all duration-175 ease-smooth",
+    "bg-transparent border border-primary text-primary rounded-sm hover:bg-accent-25 transition-all duration-175 ease-smooth dark:border-primary-25 dark:text-primary-25 dark:hover:bg-dark-surface-soft",
   text:
-    "bg-transparent text-primary underline-offset-2 hover:underline text-h5 transition-all duration-175",
+    "bg-transparent text-primary underline-offset-2 hover:underline text-h5 transition-all duration-175 dark:text-primary-25",
 };
 
 const sizeClasses = {
@@ -41,6 +41,7 @@ const Button = ({
         "inline-flex items-center justify-center gap-2 whitespace-nowrap",
         variantClasses[variant] || variantClasses.primary,
         sizeClasses[size] || sizeClasses.md,
+        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
         isDisabled ? "opacity-50 cursor-not-allowed" : "",
         className,
       ]

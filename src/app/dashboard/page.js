@@ -50,7 +50,7 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen bg-off-white-100 flex">
+      <div className="min-h-screen bg-off-white-100 flex dark:bg-dark-bg">
         <Sidebar
           activeSection={activeSection}
           onSectionChange={setActiveSection}

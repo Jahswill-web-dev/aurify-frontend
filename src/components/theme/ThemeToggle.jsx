@@ -3,7 +3,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
-function ThemeToggle({ className = "" }) {
+function ThemeToggle({ className = "", showLabel = true }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
 
@@ -12,7 +12,7 @@ function ThemeToggle({ className = "" }) {
       type="button"
       onClick={toggleTheme}
       className={[
-        "inline-flex h-9 items-center gap-2 rounded-sm border border-grey-25 bg-white px-3 text-h6 font-medium text-p-text-darker shadow-card transition-colors hover:border-primary hover:text-primary dark:border-[#343844] dark:bg-[#17191f] dark:text-[#d6dae2] dark:hover:border-primary dark:hover:text-primary",
+        "inline-flex h-9 items-center justify-center gap-2 rounded-sm border border-grey-25 bg-white px-3 text-h6 font-semibold text-grey-200 shadow-card transition-colors hover:border-primary hover:bg-accent-25 hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text dark:shadow-none dark:hover:border-primary-25 dark:hover:bg-dark-surface-soft dark:hover:text-primary-25 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
         className,
       ]
         .filter(Boolean)
@@ -25,7 +25,7 @@ function ThemeToggle({ className = "" }) {
       ) : (
         <Moon size={16} aria-hidden="true" />
       )}
-      <span>{isDark ? "Light" : "Dark"}</span>
+      {showLabel ? <span>{isDark ? "Light" : "Dark"}</span> : null}
     </button>
   );
 }

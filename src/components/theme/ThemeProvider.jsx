@@ -7,13 +7,6 @@ const ThemeContext = createContext({
   toggleTheme: () => {},
 });
 
-const getSystemTheme = () => {
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-};
-
 const applyTheme = (theme) => {
   if (typeof document === "undefined") return;
   document.documentElement.classList.toggle("dark", theme === "dark");
@@ -28,7 +21,7 @@ export function ThemeProvider({ children }) {
     const initialTheme =
       storedTheme === "light" || storedTheme === "dark"
         ? storedTheme
-        : getSystemTheme();
+        : "light";
 
     setTheme(initialTheme);
     applyTheme(initialTheme);

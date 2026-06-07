@@ -30,8 +30,8 @@ function ChatBubble({ role, children }) {
         className={[
           "max-w-[92%] rounded-md px-4 py-3 shadow-card sm:max-w-[78%]",
           isUser
-            ? "bg-primary text-white"
-            : "border border-grey-25 bg-off-white-100 text-grey-200",
+            ? "bg-primary text-white dark:bg-dark-accent dark:text-[#16110a]"
+            : "border border-grey-25 bg-off-white-100 text-grey-200 dark:border-dark-border dark:bg-dark-bg dark:text-dark-text",
         ].join(" ")}
       >
         {children}
@@ -44,7 +44,7 @@ function ErrorMessage({ message }) {
   if (!message) return null;
 
   return (
-    <div className="mb-4 flex items-start gap-3 rounded-md border border-error bg-error-light px-4 py-3 text-error">
+    <div className="mb-4 flex items-start gap-3 rounded-md border border-error bg-error-light px-4 py-3 text-error dark:bg-error/15 dark:text-red-300">
       <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <p className="text-h5 leading-6 inter-font">{message}</p>
     </div>
@@ -67,10 +67,10 @@ function CreateStudyChat({ prompt, onPromptChange, onSubmit, loading }) {
 
   return (
     <div className="mx-auto w-full max-w-[760px]">
-      <div className="rounded-lg border border-grey-25 bg-white p-3 shadow-panel transition-all duration-175 focus-within:border-primary focus-within:shadow-input-focus">
+      <div className="rounded-lg border border-grey-25 bg-white p-3 shadow-panel transition-all duration-175 focus-within:border-primary focus-within:shadow-input-focus dark:border-dark-border dark:bg-dark-surface dark:shadow-none dark:focus-within:border-primary-25">
         <div className="relative">
           {!isValid ? (
-            <div className="pointer-events-none absolute inset-x-2 top-2 text-h5 leading-7 text-grey-100 inter-font sm:text-h4">
+            <div className="pointer-events-none absolute inset-x-2 top-2 text-h5 leading-7 text-grey-100 inter-font sm:text-h4 dark:text-dark-muted">
               <AnimatePresence mode="wait">
                 <motion.p
                   key={examplePrompts[exampleIndex]}
@@ -90,11 +90,11 @@ function CreateStudyChat({ prompt, onPromptChange, onSubmit, loading }) {
             onChange={(event) => onPromptChange(event.target.value)}
             rows={5}
             aria-label="Study prompt"
-            className="relative z-10 min-h-[152px] w-full resize-none border-0 bg-transparent px-2 py-2 text-h5 leading-7 text-grey-200 outline-none inter-font sm:text-h4"
+            className="relative z-10 min-h-[152px] w-full resize-none border-0 bg-transparent px-2 py-2 text-h5 leading-7 text-grey-200 outline-none inter-font sm:text-h4 dark:text-dark-text dark:placeholder:text-dark-muted"
           />
         </div>
 
-        <div className="mt-2 flex items-center justify-end border-t border-grey-25 pt-3">
+        <div className="mt-2 flex items-center justify-end border-t border-grey-25 pt-3 dark:border-dark-border">
           <Button
             variant="primary"
             size="md"
@@ -125,7 +125,7 @@ function ClarificationCard({
 
   return (
     <div className="mx-auto w-full max-w-[760px]">
-      <div className="rounded-lg border border-grey-25 bg-white p-3 shadow-panel">
+      <div className="rounded-lg border border-grey-25 bg-white p-3 shadow-panel dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
         <div className="grid gap-4">
           <ChatBubble role="user">
             <p className="text-h5 leading-7 inter-font">{prompt}</p>
@@ -138,7 +138,7 @@ function ClarificationCard({
             </p>
           </ChatBubble>
 
-          <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card">
+          <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card dark:border-dark-border dark:bg-dark-surface-soft dark:shadow-none">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-h4 font-semibold text-grey-200 poppins-font">
                 {clarification?.clarificationQuestion || "Clarify your Study"}
@@ -159,16 +159,16 @@ function ClarificationCard({
                     className={[
                       "flex w-full items-start gap-3 rounded-md border px-3 py-3 text-left text-h5 transition-all duration-175 inter-font",
                       isSelected
-                        ? "border-primary bg-accent-25 text-primary"
-                        : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25",
+                        ? "border-primary bg-accent-25 text-primary dark:border-primary-25 dark:bg-dark-surface dark:text-primary-25"
+                        : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text dark:hover:border-primary-25 dark:hover:bg-dark-bg dark:hover:text-primary-25",
                     ].join(" ")}
                   >
                     <span
                       className={[
                         "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
                         isSelected
-                          ? "border-primary bg-primary text-white"
-                          : "border-grey-25 bg-white",
+                          ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
+                          : "border-grey-25 bg-white dark:border-dark-border dark:bg-dark-surface-soft",
                       ].join(" ")}
                     >
                       {isSelected ? <Check size={13} aria-hidden="true" /> : null}
@@ -181,7 +181,7 @@ function ClarificationCard({
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col-reverse gap-3 border-t border-grey-25 pt-3 sm:flex-row sm:justify-between">
+        <div className="mt-4 flex flex-col-reverse gap-3 border-t border-grey-25 pt-3 sm:flex-row sm:justify-between dark:border-dark-border">
           <Button variant="ghost" size="md" onClick={onEditPrompt}>
             Edit Prompt
           </Button>
@@ -326,13 +326,13 @@ export default function CreateStudyClient() {
   };
 
   return (
-    <main className="min-h-screen bg-off-white-100 px-4 py-8 sm:px-6 lg:px-10">
+    <main className="min-h-screen bg-off-white-100 px-4 py-8 sm:px-6 lg:px-10 dark:bg-dark-bg">
       <div className="mx-auto max-w-[920px]">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => router.push("/studies")}
-            className="inline-flex items-center gap-2 text-h6 font-medium text-p-text transition-colors hover:text-primary"
+            className="inline-flex items-center gap-2 text-h6 font-medium text-p-text transition-colors hover:text-primary dark:text-dark-muted dark:hover:text-primary-25"
           >
             <ArrowLeft size={16} aria-hidden="true" />
             Back to Studies
@@ -342,7 +342,7 @@ export default function CreateStudyClient() {
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="inline-flex h-9 items-center gap-2 rounded-sm border border-grey-25 bg-white px-3 text-h6 font-medium text-p-text-darker shadow-card transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex h-9 items-center gap-2 rounded-sm border border-grey-25 bg-white px-3 text-h6 font-medium text-p-text-darker shadow-card transition-colors hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-text dark:shadow-none dark:hover:border-primary-25 dark:hover:text-primary-25"
             >
               <LayoutDashboard size={16} aria-hidden="true" />
               Dashboard

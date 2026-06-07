@@ -7,7 +7,7 @@ export default function ResumeCard({ session, onResume }) {
   return (
     <button
       type="button"
-      className="shrink-0 w-64 p-4 rounded-md border-2 border-grey-25 bg-white text-left hover:border-primary hover:shadow-sm transition-all duration-175 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      className="shrink-0 w-64 p-4 rounded-md border-2 border-grey-25 bg-white text-left hover:border-primary hover:shadow-sm transition-all duration-175 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-dark-border dark:bg-dark-surface dark:hover:border-primary-25 dark:hover:shadow-none dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg"
       onClick={onResume}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -24,9 +24,9 @@ export default function ResumeCard({ session, onResume }) {
         </Badge>
       </div>
 
-      <div className="w-full h-1.5 bg-off-white-50 rounded-full overflow-hidden mb-2">
+      <div className="w-full h-1.5 bg-off-white-50 rounded-full overflow-hidden mb-2 dark:bg-dark-surface-soft">
         <div
-          className="h-full bg-primary rounded-full transition-all duration-350"
+          className="h-full bg-primary rounded-full transition-all duration-350 dark:bg-dark-accent"
           style={{ width: `${progress}%` }}
         />
       </div>

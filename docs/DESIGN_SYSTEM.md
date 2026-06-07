@@ -17,6 +17,18 @@ Aurify should feel clear, helpful, study-focused, and modern. The current visual
 | `primary-50` | `#FBB040` | Secondary orange accent |
 | `primary-200` | `#C97516` | Dark orange for stronger contrast or pressed states |
 
+### Dark Mode Colors
+
+| Token | Hex | Usage |
+| --- | --- | --- |
+| `dark-bg` | `#0E1117` | Main dark page background |
+| `dark-surface` | `#171B23` | Cards, nav bars, modals, and elevated panels |
+| `dark-surface-soft` | `#202632` | Secondary panels, active nav states, and subtle hover fills |
+| `dark-border` | `#323A49` | Borders and dividers on dark surfaces |
+| `dark-text` | `#F4F7FB` | High-emphasis text in dark mode |
+| `dark-muted` | `#AAB3C2` | Secondary text in dark mode |
+| `dark-accent` | `#FFB457` | Accessible warm accent for dark primary actions and highlights |
+
 ### Accent Colors
 
 | Token | Hex | Usage |

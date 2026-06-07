@@ -11,7 +11,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <body className="bg-off-white max-w-[1557px] mx-auto">
+      <body className="bg-off-white text-grey-200 max-w-[1557px] mx-auto dark:bg-dark-bg dark:text-dark-text">
         <StoreProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </StoreProvider>

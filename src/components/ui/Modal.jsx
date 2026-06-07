@@ -67,7 +67,7 @@ const Modal = ({ isOpen, onClose, title, children, className = "" }) => {
         aria-label={title}
         onClick={(event) => event.stopPropagation()}
         className={[
-          "relative bg-white rounded-lg shadow-modal p-6 w-full max-w-md mx-4 transition-transform duration-250 ease-bounce-in",
+          "relative bg-white rounded-lg shadow-modal p-6 w-full max-w-md mx-4 transition-transform duration-250 ease-bounce-in dark:border dark:border-dark-border dark:bg-dark-surface dark:text-dark-text dark:shadow-none",
           className,
         ]
           .filter(Boolean)
@@ -76,13 +76,13 @@ const Modal = ({ isOpen, onClose, title, children, className = "" }) => {
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-grey-100 hover:text-grey-200 transition-colors duration-175"
+          className="absolute top-4 right-4 text-grey-100 hover:text-grey-200 transition-colors duration-175 dark:text-dark-muted dark:hover:text-dark-text"
           aria-label="Close modal"
         >
           x
         </button>
         {title ? (
-          <h2 className="text-h3 font-semibold text-grey-200 poppins-font mb-4 pr-8">
+          <h2 className="text-h3 font-semibold text-grey-200 poppins-font mb-4 pr-8 dark:text-dark-text">
             {title}
           </h2>
         ) : null}

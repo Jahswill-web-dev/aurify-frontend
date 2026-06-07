@@ -1,9 +1,9 @@
 const variantClasses = {
-  primary: "bg-primary text-white",
-  accent: "bg-accent-100 text-primary-200",
-  success: "bg-success-light text-success",
-  error: "bg-error-light text-error",
-  neutral: "bg-off-white-50 text-grey-100",
+  primary: "bg-primary text-white dark:bg-dark-accent dark:text-[#16110a]",
+  accent: "bg-accent-100 text-primary-200 dark:bg-dark-surface-soft dark:text-primary-25",
+  success: "bg-success-light text-success dark:bg-success/15 dark:text-green-300",
+  error: "bg-error-light text-error dark:bg-error/15 dark:text-red-300",
+  neutral: "bg-off-white-50 text-grey-100 dark:bg-dark-surface-soft dark:text-dark-muted",
 };
 
 const Badge = ({ variant = "neutral", children, className = "" }) => {

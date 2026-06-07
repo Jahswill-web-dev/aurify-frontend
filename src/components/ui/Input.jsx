@@ -14,7 +14,7 @@ const Input = forwardRef(function Input({
   rows = 3,
 }, ref) {
   const inputClasses = [
-    "w-full bg-off-white-100 border rounded-sm px-4 py-2.5 text-h5 text-grey-200 placeholder:text-grey-100 outline-none transition-all duration-175 ease-smooth focus:border-primary focus:shadow-input-focus",
+    "w-full bg-off-white-100 border rounded-sm px-4 py-2.5 text-h5 text-grey-200 placeholder:text-grey-100 outline-none transition-all duration-175 ease-smooth focus:border-primary focus:shadow-input-focus dark:bg-dark-surface dark:text-dark-text dark:placeholder:text-dark-muted dark:focus:border-primary-25 dark:focus:shadow-none",
     error ? "border-error" : "border-grey-25",
     disabled ? "opacity-50 cursor-not-allowed bg-off-white-50" : "",
     variant === "textarea" ? "resize-none" : "",
@@ -26,7 +26,7 @@ const Input = forwardRef(function Input({
   return (
     <label className="flex flex-col gap-1.5">
       {label ? (
-        <span className="text-h6 font-medium text-p-text-darker poppins-font">
+        <span className="text-h6 font-medium text-p-text-darker poppins-font dark:text-dark-text">
           {label}
         </span>
       ) : null}

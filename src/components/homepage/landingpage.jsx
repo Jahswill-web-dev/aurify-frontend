@@ -66,8 +66,8 @@ function Pill({ children, variant = "default" }) {
       className={[
         "inline-flex items-center rounded-sm border px-3 py-1 text-h6 font-semibold inter-font",
         variant === "primary"
-          ? "border-primary bg-accent-100 text-primary-200"
-          : "border-grey-25 bg-white text-p-text-darker",
+          ? "border-primary bg-accent-100 text-primary-200 dark:border-primary-25 dark:bg-dark-surface-soft dark:text-primary-25"
+          : "border-grey-25 bg-white text-p-text-darker dark:border-dark-border dark:bg-dark-surface dark:text-dark-text",
       ].join(" ")}
     >
       {children}
@@ -77,10 +77,10 @@ function Pill({ children, variant = "default" }) {
 
 function HeroProductMockup() {
   return (
-    <div className="relative mx-auto w-full max-w-[560px] rounded-md border border-grey-25 bg-white p-3 shadow-panel">
+    <div className="relative mx-auto w-full max-w-[560px] rounded-md border border-grey-25 bg-white p-3 shadow-panel dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
       <div className="mb-3 flex items-center justify-between border-b border-grey-25 pb-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-primary text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-sm bg-primary text-white dark:bg-dark-accent dark:text-[#16110a]">
             <BookOpen size={18} aria-hidden="true" />
           </div>
           <div>
@@ -101,7 +101,7 @@ function HeroProductMockup() {
             <Pill>Professional</Pill>
             <Pill>Intermediate</Pill>
           </div>
-          <h3 className="text-h4 font-bold leading-tight text-grey-200 poppins-font">
+          <h3 className="text-h4 font-bold leading-tight text-grey-200 poppins-font dark:text-dark-text">
             Learn scalable systems with guided notes, practice, and timed review.
           </h3>
           <div className="mt-5 space-y-3">
@@ -111,7 +111,7 @@ function HeroProductMockup() {
                   <span className="font-semibold text-grey-200">{step.label}</span>
                   <span className="text-p-text-darker">{step.value}</span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-white">
+                <div className="h-2 overflow-hidden rounded-full bg-white dark:bg-dark-surface-soft">
                   <div
                     className={[
                       "h-full rounded-full",
@@ -126,7 +126,7 @@ function HeroProductMockup() {
         </div>
 
         <div className="grid gap-3">
-          <div className="rounded-sm border border-grey-25 bg-white p-4 shadow-card">
+          <div className="rounded-sm border border-grey-25 bg-white p-4 shadow-card dark:border-dark-border dark:bg-dark-surface-soft dark:shadow-none">
             <div className="mb-3 flex items-center gap-2 text-primary">
               <Target size={18} aria-hidden="true" />
               <p className="text-h6 font-semibold uppercase poppins-font">
@@ -159,9 +159,9 @@ function HeroProductMockup() {
 
 function CreateStudyPreview() {
   return (
-    <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card">
+    <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-accent-100 text-primary">
+        <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-accent-100 text-primary dark:bg-dark-surface-soft dark:text-primary-25">
           <Sparkles size={20} aria-hidden="true" />
         </div>
         <div>
@@ -173,7 +173,7 @@ function CreateStudyPreview() {
           </h3>
         </div>
       </div>
-      <div className="rounded-sm border border-grey-25 bg-off-white-100 p-4 text-h5 leading-7 text-p-text-darker inter-font">
+      <div className="rounded-sm border border-grey-25 bg-off-white-100 p-4 text-h5 leading-7 text-p-text-darker inter-font dark:border-dark-border dark:bg-dark-bg dark:text-dark-muted">
         Teach me financial modeling for a junior analyst role. Include valuation
         concepts, Excel-style examples, and interview questions.
       </div>
@@ -190,9 +190,9 @@ function MaterialPreview() {
   const outline = ["Core concept", "Worked example", "Common mistake"];
 
   return (
-    <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card">
+    <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-accent-100 text-primary">
+        <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-accent-100 text-primary dark:bg-dark-surface-soft dark:text-primary-25">
           <FileText size={20} aria-hidden="true" />
         </div>
         <div>
@@ -206,9 +206,9 @@ function MaterialPreview() {
       </div>
       <div className="space-y-3">
         {outline.map((item, index) => (
-          <div key={item} className="rounded-sm border border-grey-25 bg-off-white-100 p-3">
+          <div key={item} className="rounded-sm border border-grey-25 bg-off-white-100 p-3 dark:border-dark-border dark:bg-dark-bg">
             <div className="mb-2 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-white text-h6 font-bold text-primary">
+              <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-white text-h6 font-bold text-primary dark:bg-dark-surface-soft dark:text-primary-25">
                 {index + 1}
               </span>
               <p className="text-h5 font-semibold text-grey-200 inter-font">
@@ -226,7 +226,7 @@ function MaterialPreview() {
 
 function PracticePreview() {
   return (
-    <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card">
+    <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <p className="text-h6 font-semibold uppercase text-primary poppins-font">
@@ -249,8 +249,8 @@ function PracticePreview() {
               className={[
                 "flex items-center gap-3 rounded-sm border px-3 py-3 text-h5 inter-font",
                 index === 1
-                  ? "border-primary bg-accent-100 text-primary-200"
-                  : "border-grey-25 bg-off-white-100 text-p-text-darker",
+                  ? "border-primary bg-accent-100 text-primary-200 dark:border-primary-25 dark:bg-dark-surface-soft dark:text-primary-25"
+                  : "border-grey-25 bg-off-white-100 text-p-text-darker dark:border-dark-border dark:bg-dark-bg dark:text-dark-muted",
               ].join(" ")}
             >
               <span
@@ -270,9 +270,9 @@ function PracticePreview() {
 
 function ExamAnalyticsPreview() {
   return (
-    <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card">
+    <div className="rounded-md border border-grey-25 bg-white p-4 shadow-card dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-sm border border-grey-25 bg-off-white-100 p-4">
+        <div className="rounded-sm border border-grey-25 bg-off-white-100 p-4 dark:border-dark-border dark:bg-dark-bg">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2 text-primary">
               <PlayCircle size={18} aria-hidden="true" />
@@ -289,8 +289,8 @@ function ExamAnalyticsPreview() {
                 className={[
                   "flex aspect-square items-center justify-center rounded-sm border text-h6 font-bold",
                   index < 7
-                    ? "border-primary bg-primary text-white"
-                    : "border-grey-25 bg-white text-p-text",
+                    ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
+                    : "border-grey-25 bg-white text-p-text dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted",
                 ].join(" ")}
               >
                 {index + 1}
@@ -299,7 +299,7 @@ function ExamAnalyticsPreview() {
           </div>
         </div>
 
-        <div className="rounded-sm border border-grey-25 bg-accent-100 p-4">
+        <div className="rounded-sm border border-grey-25 bg-accent-100 p-4 dark:border-primary-200/40 dark:bg-dark-surface-soft">
           <div className="mb-4 flex items-center gap-2 text-primary-200">
             <LineChart size={18} aria-hidden="true" />
             <span className="text-h6 font-semibold uppercase poppins-font">
@@ -312,8 +312,8 @@ function ExamAnalyticsPreview() {
                 <span className="font-semibold text-grey-200">Overall progress</span>
                 <span className="text-p-text-darker">74%</span>
               </div>
-              <div className="h-2 rounded-full bg-white">
-                <div className="h-full w-[74%] rounded-full bg-primary" />
+              <div className="h-2 rounded-full bg-white dark:bg-dark-surface">
+                <div className="h-full w-[74%] rounded-full bg-primary dark:bg-dark-accent" />
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -331,8 +331,8 @@ function FeatureCard({ feature }) {
   const Icon = feature.icon;
 
   return (
-    <article className="rounded-md border border-grey-25 bg-white p-5 shadow-card transition-all duration-175 hover:border-primary hover:shadow-panel">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-sm bg-accent-100 text-primary">
+    <article className="rounded-md border border-grey-25 bg-white p-5 shadow-card transition-all duration-175 hover:border-primary hover:shadow-panel dark:border-dark-border dark:bg-dark-surface dark:shadow-none dark:hover:border-primary-25">
+      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-sm bg-accent-100 text-primary dark:bg-dark-surface-soft dark:text-primary-25">
         <Icon size={22} aria-hidden="true" />
       </div>
       <h3 className="text-h4 font-bold text-grey-200 poppins-font">
@@ -368,14 +368,14 @@ function LandingPage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-6 py-3 text-h5 font-semibold text-white shadow-btn-primary transition-all duration-175 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-6 py-3 text-h5 font-semibold text-white shadow-btn-primary transition-all duration-175 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:bg-dark-accent dark:text-[#16110a] dark:shadow-none dark:hover:bg-primary-25 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg"
             >
               Sign Up Free
               <ArrowRight size={18} aria-hidden="true" />
             </Link>
             <Link
               href="#features"
-              className="inline-flex items-center justify-center gap-2 rounded-sm border border-primary px-6 py-3 text-h5 font-semibold text-primary transition-all duration-175 hover:bg-accent-25 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="inline-flex items-center justify-center gap-2 rounded-sm border border-primary px-6 py-3 text-h5 font-semibold text-primary transition-all duration-175 hover:bg-accent-25 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-primary-25 dark:text-primary-25 dark:hover:bg-dark-surface-soft dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg"
             >
               See features
             </Link>
@@ -398,7 +398,7 @@ function LandingPage() {
         <HeroProductMockup />
       </section>
 
-      <section className="border-y border-grey-25 py-8">
+      <section className="border-y border-grey-25 py-8 dark:border-dark-border">
         <div className="grid gap-5 text-center sm:grid-cols-3">
           {[
             ["Create", "Describe what you want to learn"],
@@ -415,7 +415,7 @@ function LandingPage() {
 
       <section id="features" className="scroll-mt-10 py-16">
         <div className="mx-auto max-w-[760px] text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-sm border border-primary bg-accent-100 px-3 py-1 text-h6 font-semibold uppercase text-primary-200 poppins-font">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-sm border border-primary bg-accent-100 px-3 py-1 text-h6 font-semibold uppercase text-primary-200 poppins-font dark:border-primary-25 dark:bg-dark-surface-soft dark:text-primary-25">
             <GraduationCap size={16} aria-hidden="true" />
             Built for lifelong learning
           </div>
@@ -442,9 +442,9 @@ function LandingPage() {
         <ExamAnalyticsPreview />
       </section>
 
-      <section className="mt-16 rounded-md border border-grey-25 bg-grey-200 px-5 py-8 text-center shadow-panel sm:px-8">
+      <section className="mt-16 rounded-md border border-grey-25 bg-grey-200 px-5 py-8 text-center shadow-panel sm:px-8 dark:border-primary-200/30 dark:bg-dark-surface-soft dark:shadow-none">
         <div className="mx-auto max-w-[720px]">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-sm bg-primary text-white">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-sm bg-primary text-white dark:bg-dark-accent dark:text-[#16110a]">
             <CheckCircle2 size={24} aria-hidden="true" />
           </div>
           <h2 className="text-h2 font-bold leading-tight text-white poppins-font">
@@ -457,7 +457,7 @@ function LandingPage() {
           </p>
           <Link
             href="/signup"
-            className="mt-7 inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-6 py-3 text-h5 font-semibold text-white shadow-btn-primary transition-all duration-175 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            className="mt-7 inline-flex items-center justify-center gap-2 rounded-sm bg-primary px-6 py-3 text-h5 font-semibold text-white shadow-btn-primary transition-all duration-175 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:bg-dark-accent dark:text-[#16110a] dark:shadow-none dark:hover:bg-primary-25 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg"
           >
             Sign Up Free
             <ArrowRight size={18} aria-hidden="true" />

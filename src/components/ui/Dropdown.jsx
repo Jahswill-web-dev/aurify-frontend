@@ -40,7 +40,7 @@ const Dropdown = ({
         .join(" ")}
     >
       {label ? (
-        <span className="text-h6 font-medium text-p-text-darker poppins-font">
+        <span className="text-h6 font-medium text-p-text-darker poppins-font dark:text-dark-text">
           {label}
         </span>
       ) : null}
@@ -48,7 +48,7 @@ const Dropdown = ({
         type="button"
         onClick={() => setIsOpen((current) => !current)}
         className={[
-          "flex items-center gap-2 px-3 py-1.5 bg-accent-100 border border-accent-200 rounded-sm text-h5 text-primary-200 font-medium cursor-pointer hover:bg-accent-50 transition-all duration-175 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+          "flex items-center gap-2 px-3 py-1.5 bg-accent-100 border border-accent-200 rounded-sm text-h5 text-primary-200 font-medium cursor-pointer hover:bg-accent-50 transition-all duration-175 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:border-dark-border dark:bg-dark-surface-soft dark:text-primary-25 dark:hover:border-primary-25 dark:hover:bg-dark-surface dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
           buttonClassName,
         ]
           .filter(Boolean)
@@ -62,7 +62,7 @@ const Dropdown = ({
       {isOpen ? (
         <div
           className={[
-            "absolute z-50 top-full mt-1 bg-white rounded-md shadow-modal border border-grey-25 py-1 min-w-40",
+            "absolute z-50 top-full mt-1 bg-white rounded-md shadow-modal border border-grey-25 py-1 min-w-40 dark:border-dark-border dark:bg-dark-surface dark:shadow-none",
             menuClassName,
           ]
             .filter(Boolean)
@@ -83,8 +83,8 @@ const Dropdown = ({
                   setIsOpen(false);
                 }}
                 className={[
-                  "block w-full text-left px-4 py-2 text-h5 text-grey-200 cursor-pointer hover:bg-accent-25 hover:text-primary transition-colors duration-175",
-                  isActive ? "bg-accent-100 text-primary font-medium" : "",
+                  "block w-full text-left px-4 py-2 text-h5 text-grey-200 cursor-pointer hover:bg-accent-25 hover:text-primary transition-colors duration-175 dark:text-dark-text dark:hover:bg-dark-surface-soft dark:hover:text-primary-25",
+                  isActive ? "bg-accent-100 text-primary font-medium dark:bg-dark-surface-soft dark:text-primary-25" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}

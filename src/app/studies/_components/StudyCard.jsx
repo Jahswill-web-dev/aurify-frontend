@@ -43,12 +43,12 @@ function StudyCard({ study }) {
   return (
     <Card
       variant="default"
-      className="flex h-full flex-col p-0 transition-all duration-175 hover:border-primary hover:shadow-panel"
+      className="flex h-full flex-col p-0 transition-all duration-175 hover:border-primary hover:shadow-panel dark:hover:border-primary-25 dark:hover:shadow-none"
     >
       <div className="flex flex-1 flex-col p-5">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-md bg-accent-100 text-primary">
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-md bg-accent-100 text-primary dark:bg-dark-surface-soft dark:text-primary-25">
               <BookOpen size={20} aria-hidden="true" />
             </div>
             <h2 className="truncate text-h4 font-semibold text-grey-200 poppins-font">
@@ -78,9 +78,9 @@ function StudyCard({ study }) {
             <span className="text-p-text">Progress</span>
             <span className="font-semibold text-grey-200">{progress}%</span>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-off-white-50">
+          <div className="h-2 overflow-hidden rounded-full bg-off-white-50 dark:bg-dark-surface-soft">
             <div
-              className="h-full rounded-full bg-primary"
+              className="h-full rounded-full bg-primary dark:bg-dark-accent"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -92,10 +92,10 @@ function StudyCard({ study }) {
         </div>
       </div>
 
-      <div className="border-t border-grey-25 px-5 py-4">
+      <div className="border-t border-grey-25 px-5 py-4 dark:border-dark-border">
         <Link
           href={`/studies/${study.id}`}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2 text-h5 font-medium text-white shadow-btn-primary transition-all duration-175 ease-smooth hover:bg-primary-200"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2 text-h5 font-medium text-white shadow-btn-primary transition-all duration-175 ease-smooth hover:bg-primary-200 dark:bg-dark-accent dark:text-[#16110a] dark:shadow-none dark:hover:bg-primary-25"
         >
           Continue
           <ArrowRight size={16} aria-hidden="true" />

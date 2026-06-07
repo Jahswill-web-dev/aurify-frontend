@@ -18,8 +18,8 @@ export const ScoresResults = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Coming soon...</h1>
-          <p className="text-gray-600">Track your progress and achievements</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 dark:text-dark-text">Coming soon...</h1>
+          <p className="text-gray-600 dark:text-dark-muted">Track your progress and achievements</p>
         </motion.div>
 
         {/* Stats Overview */}
@@ -28,12 +28,12 @@ export const ScoresResults = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
+            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 dark:border-dark-border dark:bg-dark-surface dark:shadow-none"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Average Score</p>
-                <p className="text-3xl font-bold text-gray-900">85.8%</p>
+                <p className="text-gray-600 text-sm dark:text-dark-muted">Average Score</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-dark-text">85.8%</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-lg">
                 <BarChart3 className="w-6 h-6 text-blue-600" />
@@ -45,11 +45,11 @@ export const ScoresResults = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
+            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 dark:border-dark-border dark:bg-dark-surface dark:shadow-none"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Improvement</p>
+                <p className="text-gray-600 text-sm dark:text-dark-muted">Improvement</p>
                 <p className="text-3xl font-bold text-green-600">+12%</p>
               </div>
               <div className="p-3 bg-green-100 rounded-lg">
@@ -62,11 +62,11 @@ export const ScoresResults = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
+            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 dark:border-dark-border dark:bg-dark-surface dark:shadow-none"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm">Achievements</p>
+                <p className="text-gray-600 text-sm dark:text-dark-muted">Achievements</p>
                 <p className="text-3xl font-bold text-purple-600">7</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-lg">
@@ -77,22 +77,22 @@ export const ScoresResults = () => {
         </div>
 
         {/* Recent Scores */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-bold text-gray-900">Recent Scores</h3>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
+          <div className="p-6 border-b border-gray-200 dark:border-dark-border">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-dark-text">Recent Scores</h3>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-gray-200 dark:divide-dark-border">
             {recentScores.map((score, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors dark:hover:bg-dark-surface-soft"
               >
                 <div>
-                  <h4 className="font-medium text-gray-900">{score.subject}</h4>
-                  <p className="text-sm text-gray-600">{score.date}</p>
+                  <h4 className="font-medium text-gray-900 dark:text-dark-text">{score.subject}</h4>
+                  <p className="text-sm text-gray-600 dark:text-dark-muted">{score.date}</p>
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className={`text-2xl font-bold ${

@@ -119,9 +119,9 @@ function getProgressValue(progress) {
 
 function ProgressBar({ value, className = "" }) {
   return (
-    <div className={["h-2 overflow-hidden rounded-full bg-off-white-50", className].join(" ")}>
+    <div className={["h-2 overflow-hidden rounded-full bg-off-white-50 dark:bg-dark-surface-soft", className].join(" ")}>
       <div
-        className="h-full rounded-full bg-primary transition-all duration-350 ease-smooth"
+        className="h-full rounded-full bg-primary transition-all duration-350 ease-smooth dark:bg-dark-accent"
         style={{ width: `${clamp(value)}%` }}
       />
     </div>
@@ -132,12 +132,12 @@ function WorkspaceHeader({ study, progress }) {
   const status = statusConfig[study?.status] || statusConfig.queued;
 
   return (
-    <header className="border-b border-grey-25 bg-white px-4 py-4 sm:px-6 lg:px-8">
+    <header className="border-b border-grey-25 bg-white px-4 py-4 sm:px-6 lg:px-8 dark:border-dark-border dark:bg-dark-surface">
       <div className="mx-auto max-w-[1180px]">
         <div className="mb-4 flex items-center justify-between gap-3">
           <Link
             href="/studies"
-            className="inline-flex items-center gap-2 text-h6 font-medium text-p-text transition-colors hover:text-primary"
+            className="inline-flex items-center gap-2 text-h6 font-medium text-p-text transition-colors hover:text-primary dark:text-dark-muted dark:hover:text-primary-25"
           >
             <ArrowLeft size={16} aria-hidden="true" />
             Back to Studies
@@ -146,7 +146,7 @@ function WorkspaceHeader({ study, progress }) {
             <ThemeToggle />
             <Link
               href="/dashboard"
-              className="inline-flex h-9 items-center gap-2 rounded-sm border border-grey-25 bg-off-white-100 px-3 text-h6 font-medium text-p-text-darker transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex h-9 items-center gap-2 rounded-sm border border-grey-25 bg-off-white-100 px-3 text-h6 font-medium text-p-text-darker transition-colors hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text dark:hover:border-primary-25 dark:hover:text-primary-25"
             >
               <LayoutDashboard size={16} aria-hidden="true" />
               Dashboard
@@ -181,7 +181,7 @@ function WorkspaceHeader({ study, progress }) {
 
 function LoadingState() {
   return (
-    <main className="min-h-screen bg-off-white-100 px-4 py-10">
+    <main className="min-h-screen bg-off-white-100 px-4 py-10 dark:bg-dark-bg">
       <Card variant="default" className="mx-auto max-w-[640px] p-8 text-center">
         <p className="text-h4 font-semibold text-grey-200 poppins-font">
           Loading Study...
@@ -193,7 +193,7 @@ function LoadingState() {
 
 function ErrorState({ message, onRetry }) {
   return (
-    <main className="min-h-screen bg-off-white-100 px-4 py-10">
+    <main className="min-h-screen bg-off-white-100 px-4 py-10 dark:bg-dark-bg">
       <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
         <AlertCircle className="mx-auto h-8 w-8 text-error" aria-hidden="true" />
         <h1 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
@@ -208,7 +208,7 @@ function ErrorState({ message, onRetry }) {
           </Button>
           <Link
             href="/studies"
-            className="inline-flex items-center justify-center rounded-sm border border-primary px-4 py-2 text-h5 font-medium text-primary transition-colors hover:bg-accent-25"
+            className="inline-flex items-center justify-center rounded-sm border border-primary px-4 py-2 text-h5 font-medium text-primary transition-colors hover:bg-accent-25 dark:border-primary-25 dark:text-primary-25 dark:hover:bg-dark-surface-soft"
           >
             Back to Studies
           </Link>
@@ -576,7 +576,7 @@ function MaterialTab({ material }) {
               onClick={() => setMobileOutlineOpen((isOpen) => !isOpen)}
               aria-label="Show material outline"
               aria-expanded={mobileOutlineOpen}
-              className="mt-3 flex h-28 w-9 items-center justify-center rounded-l-md border border-r-0 border-grey-25 bg-white text-primary shadow-card transition-colors duration-175 ease-smooth hover:border-primary hover:bg-accent-25 focus:border-primary focus:bg-accent-25 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 group-hover:border-primary group-hover:bg-accent-25 group-focus-within:border-primary group-focus-within:bg-accent-25"
+              className="mt-3 flex h-28 w-9 items-center justify-center rounded-l-md border border-r-0 border-grey-25 bg-white text-primary shadow-card transition-colors duration-175 ease-smooth hover:border-primary hover:bg-accent-25 focus:border-primary focus:bg-accent-25 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 group-hover:border-primary group-hover:bg-accent-25 group-focus-within:border-primary group-focus-within:bg-accent-25 dark:border-dark-border dark:bg-dark-surface dark:text-primary-25 dark:shadow-none dark:hover:border-primary-25 dark:hover:bg-dark-surface-soft dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg dark:group-hover:border-primary-25 dark:group-hover:bg-dark-surface-soft"
             >
               <span className="-rotate-90 whitespace-nowrap text-h6 font-semibold uppercase poppins-font">
                 Outline
@@ -593,7 +593,7 @@ function MaterialTab({ material }) {
                 .filter(Boolean)
                 .join(" ")}
             >
-              <div className="rounded-md border border-grey-25 bg-white p-4 shadow-modal">
+              <div className="rounded-md border border-grey-25 bg-white p-4 shadow-modal dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
                 <MaterialOutline
                   items={outlineItems}
                   activeHeadingId={activeHeadingId}
@@ -782,12 +782,12 @@ function PracticeTab({
                   type="button"
                   onClick={() => onActiveIndexChange(index)}
                   className={[
-                    "flex aspect-square items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                    "flex aspect-square items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
                     isActive
-                      ? "border-primary bg-primary text-white"
+                      ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
                       : isAnswered
-                        ? "border-success bg-success-light text-success"
-                        : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary",
+                        ? "border-success bg-success-light text-success dark:bg-success/15 dark:text-green-300"
+                        : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted dark:hover:border-primary-25 dark:hover:text-primary-25",
                   ].join(" ")}
                 >
                   {index + 1}
@@ -831,14 +831,14 @@ function PracticeTab({
                 disabled={hasAnswered}
                 onClick={() => onAnswer(question.id, option)}
                 className={[
-                  "flex min-h-[52px] w-full items-start gap-3 rounded-md border px-4 py-3 text-left text-h5 leading-6 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-default inter-font",
+                  "flex min-h-[52px] w-full items-start gap-3 rounded-md border px-4 py-3 text-left text-h5 leading-6 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-default inter-font dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
                   showCorrect
-                    ? "border-success bg-success-light text-success"
+                    ? "border-success bg-success-light text-success dark:bg-success/15 dark:text-green-300"
                     : showIncorrect
-                      ? "border-error bg-error-light text-error"
+                      ? "border-error bg-error-light text-error dark:bg-error/15 dark:text-red-300"
                       : isSelected
-                        ? "border-primary bg-accent-25 text-primary"
-                        : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25",
+                        ? "border-primary bg-accent-25 text-primary dark:border-primary-25 dark:bg-dark-surface-soft dark:text-primary-25"
+                        : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text dark:hover:border-primary-25 dark:hover:bg-dark-bg dark:hover:text-primary-25",
                 ].join(" ")}
               >
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
@@ -881,7 +881,7 @@ function PracticeTab({
           </div>
         ) : null}
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-grey-25 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-3 border-t border-grey-25 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-dark-border">
           <div className="flex gap-2">
             <Button
               variant="ghost"
@@ -980,7 +980,7 @@ function ExamSetup({ questions, selectedTimer, onTimerChange, onStart }) {
   return (
     <div className="grid gap-5 lg:grid-cols-[0.75fr_1.25fr]">
       <Card variant="default" className="p-5">
-        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-accent-100 text-primary">
+        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-accent-100 text-primary dark:bg-dark-surface-soft dark:text-primary-25">
           <ClipboardCheck size={20} aria-hidden="true" />
         </div>
         <p className="text-h6 font-semibold uppercase text-primary poppins-font">
@@ -1013,10 +1013,10 @@ function ExamSetup({ questions, selectedTimer, onTimerChange, onStart }) {
                 onClick={() => onTimerChange(option.minutes)}
                 aria-pressed={isSelected}
                 className={[
-                  "min-h-[48px] rounded-sm border px-3 py-2 text-h5 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inter-font",
+                  "min-h-[48px] rounded-sm border px-3 py-2 text-h5 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inter-font dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
                   isSelected
-                    ? "border-primary bg-primary text-white"
-                    : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25 hover:text-primary",
+                    ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
+                    : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25 hover:text-primary dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text dark:hover:border-primary-25 dark:hover:bg-dark-bg dark:hover:text-primary-25",
                 ].join(" ")}
               >
                 {option.label}
@@ -1194,7 +1194,7 @@ function ExamTab({
           </h2>
           <ProgressBar value={progress} className="mt-4" />
 
-          <div className="mt-4 flex items-center justify-between rounded-md border border-grey-25 bg-off-white-100 px-4 py-3">
+          <div className="mt-4 flex items-center justify-between rounded-md border border-grey-25 bg-off-white-100 px-4 py-3 dark:border-dark-border dark:bg-dark-bg">
             <div className="flex items-center gap-2 text-h5 font-semibold text-grey-200 inter-font">
               <Clock size={16} aria-hidden="true" />
               {hasTimer ? formatDuration(secondsRemaining) : "No timer"}
@@ -1217,12 +1217,12 @@ function ExamTab({
                   type="button"
                   onClick={() => onActiveIndexChange(index)}
                   className={[
-                    "flex aspect-square items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                    "flex aspect-square items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
                     isActive
-                      ? "border-primary bg-primary text-white"
+                      ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
                       : isAnswered
-                        ? "border-primary bg-accent-25 text-primary"
-                        : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary",
+                        ? "border-primary bg-accent-25 text-primary dark:border-primary-25 dark:bg-dark-surface-soft dark:text-primary-25"
+                        : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted dark:hover:border-primary-25 dark:hover:text-primary-25",
                   ].join(" ")}
                 >
                   {index + 1}
@@ -1290,10 +1290,10 @@ function ExamTab({
                 disabled={isAnsweringLocked}
                 onClick={() => onAnswer(question.id, option)}
                 className={[
-                  "flex min-h-[52px] w-full items-start gap-3 rounded-md border px-4 py-3 text-left text-h5 leading-6 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed inter-font",
+                  "flex min-h-[52px] w-full items-start gap-3 rounded-md border px-4 py-3 text-left text-h5 leading-6 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed inter-font dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
                   isSelected
-                    ? "border-primary bg-accent-25 text-primary"
-                    : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25",
+                    ? "border-primary bg-accent-25 text-primary dark:border-primary-25 dark:bg-dark-surface-soft dark:text-primary-25"
+                    : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text dark:hover:border-primary-25 dark:hover:bg-dark-bg dark:hover:text-primary-25",
                   isAnsweringLocked && !isSelected ? "opacity-60" : "",
                 ].join(" ")}
               >
@@ -1318,7 +1318,7 @@ function ExamTab({
           </div>
         ) : null}
 
-        <div className="mt-6 flex flex-col gap-3 border-t border-grey-25 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-3 border-t border-grey-25 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-dark-border">
           <div className="flex gap-2">
             <Button
               variant="ghost"
@@ -1769,9 +1769,9 @@ export default function StudyWorkspaceClient({ studyId }) {
   };
 
   return (
-    <main className="min-h-screen bg-off-white-100">
+    <main className="min-h-screen bg-off-white-100 dark:bg-dark-bg">
       <WorkspaceHeader study={study} progress={progress} />
-      <div className="sticky top-0 z-20 border-b border-grey-25 bg-white px-4 sm:px-6 lg:px-8">
+      <div className="sticky top-0 z-20 border-b border-grey-25 bg-white px-4 sm:px-6 lg:px-8 dark:border-dark-border dark:bg-dark-surface">
         <div className="mx-auto max-w-[1180px]">
           <Tabs
             tabs={workspaceTabs}

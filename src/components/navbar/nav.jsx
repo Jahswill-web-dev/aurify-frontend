@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import aurifyLogo from "../../../public/icons/aurify-new-logo.png";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 function Navbar() {
   return (
@@ -13,18 +14,19 @@ function Navbar() {
         {/* Desktop Nav Links */}
         <div
           className="hidden px-8 py-3
-        min-[610px]:flex gap-[2.8125rem] text-grey-100 text-h5 inter-font font-bold"
+        min-[710px]:flex gap-[2.8125rem] text-grey-100 text-h5 inter-font font-bold dark:text-dark-muted"
         >
-          <Link href="#features" className="hover:text-primary-25">
+          <Link href="#features" className="hover:text-primary dark:hover:text-primary-25">
             Features
           </Link>
-          <Link href="/login" className="hover:text-primary-25">
+          <Link href="/login" className="hover:text-primary dark:hover:text-primary-25">
             Login
           </Link>
         </div>
         {/* signup button */}
-        <div className="flex gap-2">
-          <div className="flex  min-[600px]:gap-[1rem] items-center">
+        <div className="flex items-center gap-2">
+          <ThemeToggle className="px-2 sm:px-3" showLabel={false} />
+          <div className="flex min-[600px]:gap-[1rem] items-center">
             {/* <Link
               href="/blogs"
               className="px-5 py-2 rounded-[50px] bg-primary-25 text-accent-25 
@@ -34,8 +36,8 @@ function Navbar() {
             </Link> */}
             <Link
               href="/signup"
-              className="px-5 py-2 rounded-[6px] bg-primary-50 text-off-white-100
-            text-h5 poppins-font"
+              className="px-4 py-2 sm:px-5 rounded-[6px] bg-primary text-white
+            text-h5 poppins-font transition-colors hover:bg-primary-200 dark:bg-dark-accent dark:text-[#16110a] dark:hover:bg-primary-25"
             >
               Sign Up Free
             </Link>

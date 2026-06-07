@@ -1,9 +1,12 @@
 "use client";
 
 const variantClasses = {
-  default: "bg-white rounded-md shadow-card border border-grey-25 p-5",
-  accent: "bg-accent-100 rounded-md shadow-panel border border-accent-200 p-5",
-  flat: "bg-off-white-100 rounded-md border border-grey-25 p-4",
+  default:
+    "bg-white rounded-md shadow-card border border-grey-25 p-5 dark:border-dark-border dark:bg-dark-surface dark:text-dark-text dark:shadow-none",
+  accent:
+    "bg-accent-100 rounded-md shadow-panel border border-accent-200 p-5 dark:border-primary-200/40 dark:bg-dark-surface-soft dark:text-dark-text dark:shadow-none",
+  flat:
+    "bg-off-white-100 rounded-md border border-grey-25 p-4 dark:border-dark-border dark:bg-dark-bg dark:text-dark-text",
 };
 
 const Card = ({ variant = "default", children, className = "", onClick, ...props }) => {

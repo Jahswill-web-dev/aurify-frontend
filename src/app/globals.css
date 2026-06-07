@@ -15,56 +15,68 @@
   }
 
   html.dark body {
-    background: #0f1115;
-    color: #f5f7fb;
+    background: #0E1117;
+    color: #F4F7FB;
   }
 }
 
 @layer utilities {
   .dark .bg-white,
   .dark .bg-off-white {
-    background-color: #17191f !important;
+    background-color: #171B23;
   }
 
   .dark .bg-off-white-100 {
-    background-color: #0f1115 !important;
+    background-color: #0E1117;
   }
 
   .dark .bg-off-white-50 {
-    background-color: #232733 !important;
+    background-color: #202632;
   }
 
   .dark .bg-accent-100,
   .dark .bg-accent-25 {
-    background-color: rgba(247, 147, 26, 0.13) !important;
+    background-color: rgba(255, 180, 87, 0.14);
   }
 
   .dark .border-grey-25 {
-    border-color: #343844 !important;
+    border-color: #323A49;
   }
 
   .dark .border-accent-200 {
-    border-color: rgba(247, 147, 26, 0.35) !important;
+    border-color: rgba(255, 180, 87, 0.32);
   }
 
   .dark .text-grey-200,
   .dark .text-p-text-darker {
-    color: #f5f7fb !important;
+    color: #F4F7FB;
   }
 
   .dark .text-p-text,
   .dark .text-grey-100 {
-    color: #aab1bf !important;
+    color: #AAB3C2;
   }
 
   .dark .text-primary-200 {
-    color: #ffb457 !important;
+    color: #FFB457;
   }
 
   .dark .shadow-card,
   .dark .shadow-panel,
   .dark .shadow-modal {
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28) !important;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  }
+
+  .dark .prose {
+    color: #DCE3EE;
+  }
+
+  .dark .prose :where(h1, h2, h3, h4, strong) {
+    color: #F4F7FB;
+  }
+
+  .dark .prose a {
+    color: #FFB457;
   }
 }
 

@@ -21,7 +21,7 @@ export const RecentStudies = () => {
 
         <Link
           href="/studies"
-          className="inline-flex items-center gap-2 text-h5 font-semibold text-primary transition-colors hover:text-primary-200"
+          className="inline-flex items-center gap-2 text-h5 font-semibold text-primary transition-colors hover:text-primary-200 dark:text-primary-25 dark:hover:text-dark-accent"
         >
           View all studies
           <ArrowRight size={16} aria-hidden="true" />

@@ -37,13 +37,13 @@ export default function StudiesPage() {
   }, [fetchStudies]);
 
   return (
-    <main className="min-h-screen bg-off-white-100 px-4 py-8 sm:px-6 lg:px-10">
+    <main className="min-h-screen bg-off-white-100 px-4 py-8 sm:px-6 lg:px-10 dark:bg-dark-bg">
       <div className="mx-auto max-w-[1180px]">
         <div className="mb-6 flex justify-end gap-2">
           <ThemeToggle />
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-sm border border-grey-25 bg-white px-3 py-2 text-h6 font-medium text-p-text-darker shadow-card transition-colors hover:border-primary hover:text-primary"
+            className="inline-flex items-center gap-2 rounded-sm border border-grey-25 bg-white px-3 py-2 text-h6 font-medium text-p-text-darker shadow-card transition-colors hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-text dark:shadow-none dark:hover:border-primary-25 dark:hover:text-primary-25"
           >
             <LayoutDashboard size={16} aria-hidden="true" />
             Dashboard
@@ -63,7 +63,7 @@ export default function StudiesPage() {
 
           <Link
             href="/studies/new"
-            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-3 text-h5 font-semibold text-white shadow-btn-primary transition-all duration-175 hover:bg-primary-200"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-3 text-h5 font-semibold text-white shadow-btn-primary transition-all duration-175 hover:bg-primary-200 dark:bg-dark-accent dark:text-[#16110a] dark:shadow-none dark:hover:bg-primary-25"
           >
             <Plus size={18} aria-hidden="true" />
             Create New Study
@@ -91,7 +91,7 @@ export default function StudiesPage() {
               </Button>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center rounded-sm border border-primary px-4 py-2 text-h5 font-medium text-primary transition-colors hover:bg-accent-25"
+                className="inline-flex items-center justify-center rounded-sm border border-primary px-4 py-2 text-h5 font-medium text-primary transition-colors hover:bg-accent-25 dark:border-primary-25 dark:text-primary-25 dark:hover:bg-dark-surface-soft"
               >
                 Log in
               </Link>
