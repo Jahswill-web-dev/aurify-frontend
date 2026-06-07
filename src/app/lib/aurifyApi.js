@@ -91,6 +91,11 @@ export const submitPracticeAttempt = (studyId, answers) =>
     method: "POST",
     body: JSON.stringify({ answers }),
   });
+export const submitExamAttempt = (studyId, answers) =>
+  apiRequest(`/studies/${studyId}/exam-attempts`, {
+    method: "POST",
+    body: JSON.stringify({ answers }),
+  });
 
 const parseSsePayload = (raw) => {
   const events = [];

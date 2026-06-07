@@ -10,20 +10,25 @@ import {
   BookOpen,
   CheckCircle2,
   ClipboardCheck,
+  Clock,
   FileText,
   LayoutDashboard,
+  Play,
   RotateCcw,
   RefreshCw,
   Target,
+  Trophy,
   XCircle,
 } from "lucide-react";
 import { Badge, Button, Card, Tabs } from "@/components/ui";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import {
+  getExamQuestions,
   getPracticeQuestions,
   getStudy,
   getStudyMaterial,
   resumeStudyGeneration,
+  submitExamAttempt,
   submitPracticeAttempt,
 } from "@/app/lib/aurifyApi";
 
@@ -44,7 +49,31 @@ const pollingStatuses = new Set([
   "generating_material",
   "material_ready",
   "generating_practice_questions",
+  "practice_ready",
+  "generating_exam_questions",
 ]);
+
+const materialReadyStatuses = new Set([
+  "material_ready",
+  "generating_practice_questions",
+  "practice_ready",
+  "generating_exam_questions",
+  "exam_ready",
+]);
+
+const practiceReadyStatuses = new Set([
+  "practice_ready",
+  "generating_exam_questions",
+  "exam_ready",
+]);
+
+const examTimerOptions = [
+  { label: "No timer", minutes: 0 },
+  { label: "10 min", minutes: 10 },
+  { label: "20 min", minutes: 20 },
+  { label: "30 min", minutes: 30 },
+  { label: "60 min", minutes: 60 },
+];
 
 const statusConfig = {
   queued: { label: "Queued", variant: "accent" },
@@ -56,6 +85,8 @@ const statusConfig = {
   material_ready: { label: "Material ready", variant: "accent" },
   generating_practice_questions: { label: "Generating practice", variant: "accent" },
   practice_ready: { label: "Practice ready", variant: "primary" },
+  generating_exam_questions: { label: "Generating exam", variant: "accent" },
+  exam_ready: { label: "Exam ready", variant: "primary" },
   failed: { label: "Failed", variant: "error" },
 };
 
@@ -63,6 +94,14 @@ const clamp = (value) => Math.max(0, Math.min(100, value));
 
 function getTitle(study) {
   return study?.title || study?.topic || "Untitled Study";
+}
+
+function formatDuration(totalSeconds) {
+  const safeSeconds = Math.max(0, totalSeconds || 0);
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
 function getProgressValue(progress) {
@@ -180,7 +219,7 @@ function ErrorState({ message, onRetry }) {
 }
 
 function GenerationNotice({ study, polling, onResume, resumeLoading }) {
-  if (study.status === "practice_ready") return null;
+  if (study.status === "exam_ready") return null;
 
   if (study.status === "failed") {
     return (
@@ -569,28 +608,6 @@ function MaterialTab({ material }) {
   );
 }
 
-function EmptyQuestionTab({ mode }) {
-  const isExam = mode === "exam";
-
-  return (
-    <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
-      {isExam ? (
-        <ClipboardCheck className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
-      ) : (
-        <BookOpen className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
-      )}
-      <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
-        {isExam ? "Exam mode is not ready yet" : "Practice is not ready yet"}
-      </h2>
-      <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
-        {isExam
-          ? "Exam questions are a backend child feature for this Study. This tab is ready for those responses when they are available."
-          : "Practice questions are a backend child feature for this Study. This tab is ready for those responses when they are available."}
-      </p>
-    </Card>
-  );
-}
-
 function PracticeLoadingState() {
   return (
     <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
@@ -606,9 +623,9 @@ function PracticeLoadingState() {
 }
 
 function PracticeUnavailableState({ study, error, onRetry, onResume, resumeLoading }) {
-  const isReady = study?.status === "practice_ready";
+  const isReady = practiceReadyStatuses.has(study?.status);
   const canResumePractice =
-    study?.status === "material_ready" || study?.status === "practice_ready";
+    study?.status === "material_ready" || practiceReadyStatuses.has(study?.status);
   const resumeLabel =
     study?.status === "material_ready"
       ? "Generate Practice Questions"
@@ -705,7 +722,7 @@ function PracticeTab({
   onSubmit,
   onReset,
 }) {
-  if (study.status !== "practice_ready") {
+  if (!practiceReadyStatuses.has(study.status)) {
     return (
       <PracticeUnavailableState
         study={study}
@@ -898,6 +915,444 @@ function PracticeTab({
   );
 }
 
+function ExamLoadingState() {
+  return (
+    <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
+      <ClipboardCheck className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
+      <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
+        Exam is loading
+      </h2>
+      <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+        The Study is ready. Exam questions will appear here in a moment.
+      </p>
+    </Card>
+  );
+}
+
+function ExamUnavailableState({ study, error, onRetry, onResume, resumeLoading }) {
+  const canResumeExam =
+    study?.status === "practice_ready" ||
+    study?.status === "generating_exam_questions" ||
+    study?.status === "exam_ready";
+  const resumeLabel =
+    study?.status === "practice_ready"
+      ? "Generate Exam Questions"
+      : "Resume Generation";
+
+  return (
+    <Card variant="default" className="mx-auto max-w-[680px] p-6 text-center">
+      <ClipboardCheck className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
+      <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
+        {study?.status === "exam_ready"
+          ? "Exam questions are not available"
+          : "Exam mode is not ready yet"}
+      </h2>
+      <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+        {error ||
+          (study?.status === "practice_ready"
+            ? "Practice is ready, but exam questions have not been generated yet."
+            : study?.status === "generating_exam_questions"
+              ? "The backend is preparing exam questions for this Study."
+              : "The backend is still preparing this Study for exam mode.")}
+      </p>
+      <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+        <Button variant="primary" size="md" onClick={onRetry}>
+          <RefreshCw size={16} aria-hidden="true" />
+          Refresh
+        </Button>
+        {canResumeExam ? (
+          <Button
+            variant="ghost"
+            size="md"
+            loading={resumeLoading}
+            onClick={onResume}
+          >
+            <RotateCcw size={16} aria-hidden="true" />
+            {resumeLabel}
+          </Button>
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
+function ExamSetup({ questions, selectedTimer, onTimerChange, onStart }) {
+  return (
+    <div className="grid gap-5 lg:grid-cols-[0.75fr_1.25fr]">
+      <Card variant="default" className="p-5">
+        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-accent-100 text-primary">
+          <ClipboardCheck size={20} aria-hidden="true" />
+        </div>
+        <p className="text-h6 font-semibold uppercase text-primary poppins-font">
+          Exam setup
+        </p>
+        <h2 className="mt-1 text-h2 font-bold text-grey-200 poppins-font">
+          {questions.length} questions
+        </h2>
+        <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+          Choose a timer option, then start when you are ready.
+        </p>
+      </Card>
+
+      <Card variant="default" className="p-5 sm:p-6">
+        <div className="mb-4 flex items-center gap-3">
+          <Clock className="h-5 w-5 text-primary" aria-hidden="true" />
+          <h2 className="text-h3 font-semibold text-grey-200 poppins-font">
+            Timer
+          </h2>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-5">
+          {examTimerOptions.map((option) => {
+            const isSelected = selectedTimer === option.minutes;
+
+            return (
+              <button
+                key={option.label}
+                type="button"
+                onClick={() => onTimerChange(option.minutes)}
+                aria-pressed={isSelected}
+                className={[
+                  "min-h-[48px] rounded-sm border px-3 py-2 text-h5 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 inter-font",
+                  isSelected
+                    ? "border-primary bg-primary text-white"
+                    : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25 hover:text-primary",
+                ].join(" ")}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <Button variant="primary" size="lg" onClick={onStart} className="mt-6 w-full">
+          <Play size={18} aria-hidden="true" />
+          Start Exam
+        </Button>
+      </Card>
+    </div>
+  );
+}
+
+function ExamResultSummary({ result, onReset }) {
+  if (!result) return null;
+
+  const score = Math.round(Number(result.score || 0));
+  const weakAreas = result.weak_areas || [];
+  const feedback = result.feedback || [];
+
+  return (
+    <div className="grid gap-5">
+      <Card variant="accent" className="p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-h6 font-semibold uppercase text-primary poppins-font">
+              Exam submitted
+            </p>
+            <h2 className="mt-1 text-h2 font-bold text-grey-200 poppins-font">
+              {score}%
+            </h2>
+            <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+              {result.correct_count} of {result.total_questions} questions correct.
+            </p>
+          </div>
+          <Button variant="ghost" size="md" onClick={onReset}>
+            <RotateCcw size={16} aria-hidden="true" />
+            Retake Exam
+          </Button>
+        </div>
+        {weakAreas.length ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {weakAreas.map((area) => (
+              <Badge key={area} variant="error">
+                {area}
+              </Badge>
+            ))}
+          </div>
+        ) : null}
+      </Card>
+
+      {feedback.length ? (
+        <div className="grid gap-3">
+          {feedback.map((item, index) => (
+            <Card key={item.question_id || index} variant="default" className="p-5">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <Badge variant="neutral">Question {index + 1}</Badge>
+                <Badge variant={item.is_correct ? "success" : "error"}>
+                  {item.is_correct ? "Correct" : "Review"}
+                </Badge>
+              </div>
+              <h3 className="text-h4 font-semibold leading-7 text-grey-200 poppins-font">
+                {item.question}
+              </h3>
+              <div className="mt-4 grid gap-2 text-h5 leading-7 inter-font">
+                <p className="text-p-text-darker">
+                  <span className="font-semibold text-grey-200">Your answer:</span>{" "}
+                  {item.selected_answer || "Not answered"}
+                </p>
+                <p className="text-p-text-darker">
+                  <span className="font-semibold text-grey-200">Correct answer:</span>{" "}
+                  {item.correct_answer}
+                </p>
+                {item.explanation ? (
+                  <p className="text-p-text-darker">{item.explanation}</p>
+                ) : null}
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ExamTab({
+  study,
+  questions,
+  loading,
+  error,
+  activeIndex,
+  answers,
+  started,
+  selectedTimer,
+  secondsRemaining,
+  timedOut,
+  submitError,
+  submitLoading,
+  attemptResult,
+  resumeLoading,
+  onRetry,
+  onResume,
+  onTimerChange,
+  onStart,
+  onAddTime,
+  onAnswer,
+  onActiveIndexChange,
+  onSubmit,
+  onReset,
+}) {
+  if (study.status !== "exam_ready") {
+    return (
+      <ExamUnavailableState
+        study={study}
+        error={error}
+        onRetry={onRetry}
+        onResume={onResume}
+        resumeLoading={resumeLoading}
+      />
+    );
+  }
+
+  if (loading) return <ExamLoadingState />;
+
+  if (error || !questions.length) {
+    return (
+      <ExamUnavailableState
+        study={study}
+        error={error}
+        onRetry={onRetry}
+        onResume={onResume}
+        resumeLoading={resumeLoading}
+      />
+    );
+  }
+
+  if (attemptResult) {
+    return <ExamResultSummary result={attemptResult} onReset={onReset} />;
+  }
+
+  if (!started) {
+    return (
+      <ExamSetup
+        questions={questions}
+        selectedTimer={selectedTimer}
+        onTimerChange={onTimerChange}
+        onStart={onStart}
+      />
+    );
+  }
+
+  const safeActiveIndex = Math.min(activeIndex, questions.length - 1);
+  const question = questions[safeActiveIndex];
+  const selectedAnswer = answers[question.id];
+  const answeredCount = Object.keys(answers).filter((questionId) =>
+    questions.some((item) => item.id === questionId)
+  ).length;
+  const progress = Math.round((answeredCount / questions.length) * 100);
+  const hasTimer = selectedTimer > 0;
+  const isAnsweringLocked = timedOut || submitLoading;
+
+  return (
+    <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
+      <div className="grid gap-5">
+        <Card variant="default" className="p-5">
+          <p className="text-h6 font-semibold uppercase text-primary poppins-font">
+            Exam attempt
+          </p>
+          <h2 className="mt-1 text-h3 font-bold text-grey-200 poppins-font">
+            {answeredCount} of {questions.length} answered
+          </h2>
+          <ProgressBar value={progress} className="mt-4" />
+
+          <div className="mt-4 flex items-center justify-between rounded-md border border-grey-25 bg-off-white-100 px-4 py-3">
+            <div className="flex items-center gap-2 text-h5 font-semibold text-grey-200 inter-font">
+              <Clock size={16} aria-hidden="true" />
+              {hasTimer ? formatDuration(secondsRemaining) : "No timer"}
+            </div>
+            {hasTimer ? (
+              <Badge variant={timedOut ? "error" : "accent"}>
+                {timedOut ? "Time up" : "Running"}
+              </Badge>
+            ) : null}
+          </div>
+
+          <div className="mt-4 grid grid-cols-5 gap-2 sm:grid-cols-8 lg:grid-cols-5">
+            {questions.map((item, index) => {
+              const isActive = index === safeActiveIndex;
+              const isAnswered = Boolean(answers[item.id]);
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onActiveIndexChange(index)}
+                  className={[
+                    "flex aspect-square items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                    isActive
+                      ? "border-primary bg-primary text-white"
+                      : isAnswered
+                        ? "border-primary bg-accent-25 text-primary"
+                        : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary",
+                  ].join(" ")}
+                >
+                  {index + 1}
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+
+        {timedOut ? (
+          <Card variant="default" className="border-error bg-error-light p-5">
+            <AlertCircle className="h-6 w-6 text-error" aria-hidden="true" />
+            <h3 className="mt-2 text-h4 font-semibold text-grey-200 poppins-font">
+              Time is up
+            </h3>
+            <p className="mt-1 text-h5 leading-7 text-p-text-darker inter-font">
+              Add more time to continue this attempt, or submit your selected answers now.
+            </p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <Button variant="ghost" size="md" onClick={() => onAddTime(5)}>
+                Add 5 min
+              </Button>
+              <Button variant="ghost" size="md" onClick={() => onAddTime(10)}>
+                Add 10 min
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                disabled={!answeredCount}
+                loading={submitLoading}
+                onClick={onSubmit}
+              >
+                Submit Now
+              </Button>
+            </div>
+          </Card>
+        ) : null}
+      </div>
+
+      <Card variant="default" className="p-5 sm:p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <Badge variant="neutral">Question {safeActiveIndex + 1}</Badge>
+          <div className="flex flex-wrap gap-2">
+            {question.difficulty ? (
+              <Badge variant="accent">{question.difficulty}</Badge>
+            ) : null}
+            {question.weak_area ? (
+              <Badge variant="neutral">{question.weak_area}</Badge>
+            ) : null}
+          </div>
+        </div>
+
+        <h2 className="text-h3 font-semibold leading-snug text-grey-200 poppins-font">
+          {question.question}
+        </h2>
+
+        <div className="mt-5 grid gap-3">
+          {(question.options || []).map((option) => {
+            const isSelected = selectedAnswer === option;
+
+            return (
+              <button
+                key={option}
+                type="button"
+                disabled={isAnsweringLocked}
+                onClick={() => onAnswer(question.id, option)}
+                className={[
+                  "flex min-h-[52px] w-full items-start gap-3 rounded-md border px-4 py-3 text-left text-h5 leading-6 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed inter-font",
+                  isSelected
+                    ? "border-primary bg-accent-25 text-primary"
+                    : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25",
+                  isAnsweringLocked && !isSelected ? "opacity-60" : "",
+                ].join(" ")}
+              >
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                  <span
+                    className={[
+                      "h-4 w-4 rounded-full border",
+                      isSelected ? "border-primary bg-primary" : "border-current",
+                    ].join(" ")}
+                  />
+                </span>
+                <span>{option}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {submitError ? (
+          <div className="mt-5 flex items-start gap-3 rounded-md border border-error bg-error-light px-4 py-3 text-error">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <p className="text-h5 leading-6 inter-font">{submitError}</p>
+          </div>
+        ) : null}
+
+        <div className="mt-6 flex flex-col gap-3 border-t border-grey-25 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="md"
+              disabled={safeActiveIndex === 0}
+              onClick={() => onActiveIndexChange(safeActiveIndex - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="ghost"
+              size="md"
+              disabled={safeActiveIndex === questions.length - 1}
+              onClick={() => onActiveIndexChange(safeActiveIndex + 1)}
+            >
+              Next
+            </Button>
+          </div>
+          <Button
+            variant="primary"
+            size="md"
+            disabled={!answeredCount || timedOut}
+            loading={submitLoading}
+            onClick={onSubmit}
+          >
+            <Trophy size={16} aria-hidden="true" />
+            Submit Exam
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 function AnalyticsTab({ study, progress }) {
   const weakAreas = study.progress?.aggregate_weak_areas || [];
 
@@ -964,6 +1419,18 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [practiceSubmitLoading, setPracticeSubmitLoading] = useState(false);
   const [practiceSubmitError, setPracticeSubmitError] = useState("");
   const [practiceAttemptResult, setPracticeAttemptResult] = useState(null);
+  const [examQuestions, setExamQuestions] = useState([]);
+  const [examLoading, setExamLoading] = useState(false);
+  const [examError, setExamError] = useState("");
+  const [activeExamIndex, setActiveExamIndex] = useState(0);
+  const [examAnswers, setExamAnswers] = useState({});
+  const [examStarted, setExamStarted] = useState(false);
+  const [selectedExamTimer, setSelectedExamTimer] = useState(0);
+  const [examSecondsRemaining, setExamSecondsRemaining] = useState(0);
+  const [examTimedOut, setExamTimedOut] = useState(false);
+  const [examSubmitLoading, setExamSubmitLoading] = useState(false);
+  const [examSubmitError, setExamSubmitError] = useState("");
+  const [examAttemptResult, setExamAttemptResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [resumeLoading, setResumeLoading] = useState(false);
@@ -995,6 +1462,30 @@ export default function StudyWorkspaceClient({ studyId }) {
     }
   }, [studyId]);
 
+  const loadExamQuestions = useCallback(async () => {
+    setExamLoading(true);
+    setExamError("");
+
+    try {
+      const data = await getExamQuestions(studyId);
+      const nextQuestions = Array.isArray(data) ? data : [];
+      setExamQuestions(nextQuestions);
+
+      if (!nextQuestions.length) {
+        setExamError("No exam questions were returned for this Study.");
+      }
+    } catch (err) {
+      if (err.status === 404) {
+        setExamQuestions([]);
+        setExamError("Exam questions are not available yet.");
+      } else {
+        setExamError(err.message || "Could not load exam questions.");
+      }
+    } finally {
+      setExamLoading(false);
+    }
+  }, [studyId]);
+
   const loadStudy = useCallback(
     async ({ showLoading = false } = {}) => {
       if (showLoading) setLoading(true);
@@ -1004,7 +1495,7 @@ export default function StudyWorkspaceClient({ studyId }) {
         const nextStudy = await getStudy(studyId);
         setStudy(nextStudy);
 
-        if (nextStudy.status === "material_ready" || nextStudy.status === "practice_ready") {
+        if (materialReadyStatuses.has(nextStudy.status)) {
           try {
             const nextMaterial = await getStudyMaterial(studyId);
             setMaterial(nextMaterial);
@@ -1016,8 +1507,16 @@ export default function StudyWorkspaceClient({ studyId }) {
           setMaterial(null);
         }
 
-        if (nextStudy.status === "practice_ready") {
+        if (practiceReadyStatuses.has(nextStudy.status)) {
           await loadPracticeQuestions();
+        } else {
+          setPracticeQuestions([]);
+        }
+
+        if (nextStudy.status === "exam_ready") {
+          await loadExamQuestions();
+        } else {
+          setExamQuestions([]);
         }
       } catch (err) {
         if (err.status === 401 || err.status === 403) {
@@ -1031,7 +1530,7 @@ export default function StudyWorkspaceClient({ studyId }) {
         setLoading(false);
       }
     },
-    [loadPracticeQuestions, studyId]
+    [loadExamQuestions, loadPracticeQuestions, studyId]
   );
 
   useEffect(() => {
@@ -1048,16 +1547,49 @@ export default function StudyWorkspaceClient({ studyId }) {
     return () => window.clearInterval(interval);
   }, [loadStudy, shouldPoll]);
 
+  useEffect(() => {
+    if (
+      !examStarted ||
+      !selectedExamTimer ||
+      examTimedOut ||
+      examAttemptResult ||
+      examSubmitLoading
+    ) {
+      return undefined;
+    }
+
+    const interval = window.setInterval(() => {
+      setExamSecondsRemaining((current) => {
+        if (current <= 1) {
+          setExamTimedOut(true);
+          return 0;
+        }
+
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [
+    examAttemptResult,
+    examStarted,
+    examSubmitLoading,
+    examTimedOut,
+    selectedExamTimer,
+  ]);
+
   const handleResume = async () => {
     setResumeLoading(true);
     setError("");
     setPracticeError("");
+    setExamError("");
 
     try {
       const nextStudy = await resumeStudyGeneration(studyId);
       setStudy(nextStudy);
       setMaterial(null);
       setPracticeQuestions([]);
+      setExamQuestions([]);
     } catch (err) {
       setError(err.message || "Could not resume generation. Please try again.");
     } finally {
@@ -1107,6 +1639,63 @@ export default function StudyWorkspaceClient({ studyId }) {
     setPracticeAttemptResult(null);
   };
 
+  const handleStartExam = () => {
+    setExamStarted(true);
+    setExamSubmitError("");
+    setExamTimedOut(false);
+    setExamSecondsRemaining(selectedExamTimer * 60);
+  };
+
+  const handleAddExamTime = (minutes) => {
+    setExamSecondsRemaining((current) => current + minutes * 60);
+    setExamTimedOut(false);
+    setExamSubmitError("");
+  };
+
+  const handleExamAnswer = (questionId, answer) => {
+    setExamSubmitError("");
+    setExamAnswers((current) => ({
+      ...current,
+      [questionId]: answer,
+    }));
+  };
+
+  const handleExamSubmit = async () => {
+    const answers = examQuestions
+      .map((question) => ({
+        question_id: question.id,
+        answer: examAnswers[question.id],
+      }))
+      .filter((item) => item.question_id && item.answer);
+
+    if (!answers.length) return;
+
+    setExamSubmitLoading(true);
+    setExamSubmitError("");
+
+    try {
+      const result = await submitExamAttempt(studyId, answers);
+      setExamAttemptResult(result);
+      setExamTimedOut(false);
+      await loadStudy();
+    } catch (err) {
+      setExamSubmitError(err.message || "Could not submit this exam attempt.");
+    } finally {
+      setExamSubmitLoading(false);
+    }
+  };
+
+  const handleExamReset = () => {
+    setActiveExamIndex(0);
+    setExamAnswers({});
+    setExamStarted(false);
+    setSelectedExamTimer(0);
+    setExamSecondsRemaining(0);
+    setExamTimedOut(false);
+    setExamSubmitError("");
+    setExamAttemptResult(null);
+  };
+
   if (loading) return <LoadingState />;
   if (error && !study) return <ErrorState message={error} onRetry={() => loadStudy({ showLoading: true })} />;
 
@@ -1145,7 +1734,33 @@ export default function StudyWorkspaceClient({ studyId }) {
           />
         );
       case "exam":
-        return <EmptyQuestionTab mode="exam" />;
+        return (
+          <ExamTab
+            study={study}
+            questions={examQuestions}
+            loading={examLoading}
+            error={examError}
+            activeIndex={activeExamIndex}
+            answers={examAnswers}
+            started={examStarted}
+            selectedTimer={selectedExamTimer}
+            secondsRemaining={examSecondsRemaining}
+            timedOut={examTimedOut}
+            submitError={examSubmitError}
+            submitLoading={examSubmitLoading}
+            attemptResult={examAttemptResult}
+            resumeLoading={resumeLoading}
+            onRetry={() => loadStudy()}
+            onResume={handleResume}
+            onTimerChange={setSelectedExamTimer}
+            onStart={handleStartExam}
+            onAddTime={handleAddExamTime}
+            onAnswer={handleExamAnswer}
+            onActiveIndexChange={setActiveExamIndex}
+            onSubmit={handleExamSubmit}
+            onReset={handleExamReset}
+          />
+        );
       case "analytics":
         return <AnalyticsTab study={study} progress={progress} />;
       default:
