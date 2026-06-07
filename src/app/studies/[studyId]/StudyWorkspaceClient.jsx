@@ -607,6 +607,12 @@ function PracticeLoadingState() {
 
 function PracticeUnavailableState({ study, error, onRetry, onResume, resumeLoading }) {
   const isReady = study?.status === "practice_ready";
+  const canResumePractice =
+    study?.status === "material_ready" || study?.status === "practice_ready";
+  const resumeLabel =
+    study?.status === "material_ready"
+      ? "Generate Practice Questions"
+      : "Resume Generation";
 
   return (
     <Card variant="default" className="mx-auto max-w-[680px] p-6 text-center">
@@ -618,14 +624,16 @@ function PracticeUnavailableState({ study, error, onRetry, onResume, resumeLoadi
         {error ||
           (isReady
             ? "The backend marked this Study ready, but no practice questions were returned."
+            : study?.status === "material_ready"
+              ? "Material is ready, but practice questions have not been generated yet."
             : "The backend is still preparing practice questions for this Study.")}
       </p>
       <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
         <Button variant="primary" size="md" onClick={onRetry}>
           <RefreshCw size={16} aria-hidden="true" />
-          Retry
+          Refresh
         </Button>
-        {isReady ? (
+        {canResumePractice ? (
           <Button
             variant="ghost"
             size="md"
@@ -633,7 +641,7 @@ function PracticeUnavailableState({ study, error, onRetry, onResume, resumeLoadi
             onClick={onResume}
           >
             <RotateCcw size={16} aria-hidden="true" />
-            Resume Generation
+            {resumeLabel}
           </Button>
         ) : null}
       </div>
