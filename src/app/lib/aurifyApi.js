@@ -75,12 +75,21 @@ export const listStudies = () => apiRequest("/studies");
 export const getStudy = (studyId) => apiRequest(`/studies/${studyId}`);
 export const getStudyMaterial = (studyId) =>
   apiRequest(`/studies/${studyId}/material`);
+export const getPracticeQuestions = (studyId) =>
+  apiRequest(`/studies/${studyId}/practice-questions`);
+export const getExamQuestions = (studyId) =>
+  apiRequest(`/studies/${studyId}/exam-questions`);
 export const resumeStudyGeneration = (studyId) =>
   apiRequest(`/studies/${studyId}/generation/resume`, { method: "POST" });
 export const createStudy = (payload) =>
   apiRequest("/studies", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+export const submitPracticeAttempt = (studyId, answers) =>
+  apiRequest(`/studies/${studyId}/practice-attempts`, {
+    method: "POST",
+    body: JSON.stringify({ answers }),
   });
 
 const parseSsePayload = (raw) => {

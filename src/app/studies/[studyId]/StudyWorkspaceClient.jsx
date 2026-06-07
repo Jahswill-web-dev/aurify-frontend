@@ -8,18 +8,23 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpen,
+  CheckCircle2,
   ClipboardCheck,
   FileText,
   LayoutDashboard,
+  RotateCcw,
   RefreshCw,
   Target,
+  XCircle,
 } from "lucide-react";
 import { Badge, Button, Card, Tabs } from "@/components/ui";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import {
+  getPracticeQuestions,
   getStudy,
   getStudyMaterial,
   resumeStudyGeneration,
+  submitPracticeAttempt,
 } from "@/app/lib/aurifyApi";
 
 const workspaceTabs = [
@@ -37,6 +42,8 @@ const pollingStatuses = new Set([
   "generating_outline",
   "outline_ready",
   "generating_material",
+  "material_ready",
+  "generating_practice_questions",
 ]);
 
 const statusConfig = {
@@ -46,7 +53,9 @@ const statusConfig = {
   generating_outline: { label: "Outlining", variant: "accent" },
   outline_ready: { label: "Outline ready", variant: "accent" },
   generating_material: { label: "Generating material", variant: "accent" },
-  material_ready: { label: "Ready", variant: "primary" },
+  material_ready: { label: "Material ready", variant: "accent" },
+  generating_practice_questions: { label: "Generating practice", variant: "accent" },
+  practice_ready: { label: "Practice ready", variant: "primary" },
   failed: { label: "Failed", variant: "error" },
 };
 
@@ -171,7 +180,7 @@ function ErrorState({ message, onRetry }) {
 }
 
 function GenerationNotice({ study, polling, onResume, resumeLoading }) {
-  if (study.status === "material_ready") return null;
+  if (study.status === "practice_ready") return null;
 
   if (study.status === "failed") {
     return (
@@ -582,6 +591,305 @@ function EmptyQuestionTab({ mode }) {
   );
 }
 
+function PracticeLoadingState() {
+  return (
+    <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
+      <BookOpen className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
+      <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
+        Practice is loading
+      </h2>
+      <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+        The Study is ready. Questions will appear here in a moment.
+      </p>
+    </Card>
+  );
+}
+
+function PracticeUnavailableState({ study, error, onRetry, onResume, resumeLoading }) {
+  const isReady = study?.status === "practice_ready";
+
+  return (
+    <Card variant="default" className="mx-auto max-w-[680px] p-6 text-center">
+      <BookOpen className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
+      <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
+        {isReady ? "Practice questions are not available" : "Practice is not ready yet"}
+      </h2>
+      <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+        {error ||
+          (isReady
+            ? "The backend marked this Study ready, but no practice questions were returned."
+            : "The backend is still preparing practice questions for this Study.")}
+      </p>
+      <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+        <Button variant="primary" size="md" onClick={onRetry}>
+          <RefreshCw size={16} aria-hidden="true" />
+          Retry
+        </Button>
+        {isReady ? (
+          <Button
+            variant="ghost"
+            size="md"
+            loading={resumeLoading}
+            onClick={onResume}
+          >
+            <RotateCcw size={16} aria-hidden="true" />
+            Resume Generation
+          </Button>
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
+function PracticeResultSummary({ result, onReset }) {
+  if (!result) return null;
+
+  const score = Math.round(Number(result.score || 0));
+  const weakAreas = result.weak_areas || [];
+
+  return (
+    <Card variant="accent" className="p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-h6 font-semibold uppercase text-primary poppins-font">
+            Practice submitted
+          </p>
+          <h2 className="mt-1 text-h2 font-bold text-grey-200 poppins-font">
+            {score}%
+          </h2>
+          <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+            {result.correct_count} of {result.total_questions} questions correct.
+          </p>
+        </div>
+        <Button variant="ghost" size="md" onClick={onReset}>
+          <RotateCcw size={16} aria-hidden="true" />
+          Practice Again
+        </Button>
+      </div>
+      {weakAreas.length ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {weakAreas.map((area) => (
+            <Badge key={area} variant="error">
+              {area}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
+    </Card>
+  );
+}
+
+function PracticeTab({
+  study,
+  questions,
+  loading,
+  error,
+  activeIndex,
+  answers,
+  submitError,
+  submitLoading,
+  attemptResult,
+  resumeLoading,
+  onRetry,
+  onResume,
+  onAnswer,
+  onActiveIndexChange,
+  onSubmit,
+  onReset,
+}) {
+  if (study.status !== "practice_ready") {
+    return (
+      <PracticeUnavailableState
+        study={study}
+        error={error}
+        onRetry={onRetry}
+        onResume={onResume}
+        resumeLoading={resumeLoading}
+      />
+    );
+  }
+
+  if (loading) return <PracticeLoadingState />;
+
+  if (error || !questions.length) {
+    return (
+      <PracticeUnavailableState
+        study={study}
+        error={error}
+        onRetry={onRetry}
+        onResume={onResume}
+        resumeLoading={resumeLoading}
+      />
+    );
+  }
+
+  const safeActiveIndex = Math.min(activeIndex, questions.length - 1);
+  const question = questions[safeActiveIndex];
+  const selectedAnswer = answers[question.id];
+  const correctAnswer = question.correct_answer || question.correctAnswer || question.answer;
+  const hasAnswered = Boolean(selectedAnswer);
+  const isCorrect = hasAnswered && selectedAnswer === correctAnswer;
+  const answeredCount = Object.keys(answers).filter((questionId) =>
+    questions.some((item) => item.id === questionId)
+  ).length;
+  const allAnswered = answeredCount === questions.length;
+  const progress = Math.round((answeredCount / questions.length) * 100);
+
+  return (
+    <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
+      <div className="grid gap-5">
+        <Card variant="default" className="p-5">
+          <p className="text-h6 font-semibold uppercase text-primary poppins-font">
+            Practice trainer
+          </p>
+          <h2 className="mt-1 text-h3 font-bold text-grey-200 poppins-font">
+            {answeredCount} of {questions.length} answered
+          </h2>
+          <ProgressBar value={progress} className="mt-4" />
+          <div className="mt-4 grid grid-cols-5 gap-2 sm:grid-cols-8 lg:grid-cols-5">
+            {questions.map((item, index) => {
+              const isActive = index === safeActiveIndex;
+              const isAnswered = Boolean(answers[item.id]);
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onActiveIndexChange(index)}
+                  className={[
+                    "flex aspect-square items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                    isActive
+                      ? "border-primary bg-primary text-white"
+                      : isAnswered
+                        ? "border-success bg-success-light text-success"
+                        : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary",
+                  ].join(" ")}
+                >
+                  {index + 1}
+                </button>
+              );
+            })}
+          </div>
+        </Card>
+
+        <PracticeResultSummary result={attemptResult} onReset={onReset} />
+      </div>
+
+      <Card variant="default" className="p-5 sm:p-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <Badge variant="neutral">Question {safeActiveIndex + 1}</Badge>
+          <div className="flex flex-wrap gap-2">
+            {question.difficulty ? (
+              <Badge variant="accent">{question.difficulty}</Badge>
+            ) : null}
+            {question.weak_area ? (
+              <Badge variant="neutral">{question.weak_area}</Badge>
+            ) : null}
+          </div>
+        </div>
+
+        <h2 className="text-h3 font-semibold leading-snug text-grey-200 poppins-font">
+          {question.question}
+        </h2>
+
+        <div className="mt-5 grid gap-3">
+          {(question.options || []).map((option) => {
+            const isSelected = selectedAnswer === option;
+            const isCorrectOption = option === correctAnswer;
+            const showCorrect = hasAnswered && isCorrectOption;
+            const showIncorrect = hasAnswered && isSelected && !isCorrectOption;
+
+            return (
+              <button
+                key={option}
+                type="button"
+                disabled={hasAnswered}
+                onClick={() => onAnswer(question.id, option)}
+                className={[
+                  "flex min-h-[52px] w-full items-start gap-3 rounded-md border px-4 py-3 text-left text-h5 leading-6 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-default inter-font",
+                  showCorrect
+                    ? "border-success bg-success-light text-success"
+                    : showIncorrect
+                      ? "border-error bg-error-light text-error"
+                      : isSelected
+                        ? "border-primary bg-accent-25 text-primary"
+                        : "border-grey-25 bg-white text-grey-200 hover:border-primary hover:bg-accent-25",
+                ].join(" ")}
+              >
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                  {showCorrect ? (
+                    <CheckCircle2 size={18} aria-hidden="true" />
+                  ) : showIncorrect ? (
+                    <XCircle size={18} aria-hidden="true" />
+                  ) : (
+                    <span className="h-4 w-4 rounded-full border border-current" />
+                  )}
+                </span>
+                <span>{option}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {hasAnswered ? (
+          <div
+            className={[
+              "mt-5 rounded-md border px-4 py-3",
+              isCorrect
+                ? "border-success bg-success-light text-success"
+                : "border-error bg-error-light text-error",
+            ].join(" ")}
+          >
+            <p className="text-h5 font-semibold inter-font">
+              {isCorrect ? "Correct" : "Not quite"}
+            </p>
+            <p className="mt-1 text-h5 leading-7 inter-font">
+              {question.explanation || `Correct answer: ${correctAnswer}`}
+            </p>
+          </div>
+        ) : null}
+
+        {submitError ? (
+          <div className="mt-5 flex items-start gap-3 rounded-md border border-error bg-error-light px-4 py-3 text-error">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <p className="text-h5 leading-6 inter-font">{submitError}</p>
+          </div>
+        ) : null}
+
+        <div className="mt-6 flex flex-col gap-3 border-t border-grey-25 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="md"
+              disabled={safeActiveIndex === 0}
+              onClick={() => onActiveIndexChange(safeActiveIndex - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="ghost"
+              size="md"
+              disabled={safeActiveIndex === questions.length - 1}
+              onClick={() => onActiveIndexChange(safeActiveIndex + 1)}
+            >
+              Next
+            </Button>
+          </div>
+          <Button
+            variant="primary"
+            size="md"
+            disabled={!allAnswered}
+            loading={submitLoading}
+            onClick={onSubmit}
+          >
+            Submit Practice
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 function AnalyticsTab({ study, progress }) {
   const weakAreas = study.progress?.aggregate_weak_areas || [];
 
@@ -640,12 +948,44 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [study, setStudy] = useState(null);
   const [material, setMaterial] = useState(null);
+  const [practiceQuestions, setPracticeQuestions] = useState([]);
+  const [practiceLoading, setPracticeLoading] = useState(false);
+  const [practiceError, setPracticeError] = useState("");
+  const [activePracticeIndex, setActivePracticeIndex] = useState(0);
+  const [practiceAnswers, setPracticeAnswers] = useState({});
+  const [practiceSubmitLoading, setPracticeSubmitLoading] = useState(false);
+  const [practiceSubmitError, setPracticeSubmitError] = useState("");
+  const [practiceAttemptResult, setPracticeAttemptResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [resumeLoading, setResumeLoading] = useState(false);
 
   const progress = useMemo(() => getProgressValue(study?.progress), [study]);
   const shouldPoll = study ? pollingStatuses.has(study.status) : false;
+
+  const loadPracticeQuestions = useCallback(async () => {
+    setPracticeLoading(true);
+    setPracticeError("");
+
+    try {
+      const data = await getPracticeQuestions(studyId);
+      const nextQuestions = Array.isArray(data) ? data : [];
+      setPracticeQuestions(nextQuestions);
+
+      if (!nextQuestions.length) {
+        setPracticeError("No practice questions were returned for this Study.");
+      }
+    } catch (err) {
+      if (err.status === 404) {
+        setPracticeQuestions([]);
+        setPracticeError("Practice questions are not available yet.");
+      } else {
+        setPracticeError(err.message || "Could not load practice questions.");
+      }
+    } finally {
+      setPracticeLoading(false);
+    }
+  }, [studyId]);
 
   const loadStudy = useCallback(
     async ({ showLoading = false } = {}) => {
@@ -656,7 +996,7 @@ export default function StudyWorkspaceClient({ studyId }) {
         const nextStudy = await getStudy(studyId);
         setStudy(nextStudy);
 
-        if (nextStudy.status === "material_ready") {
+        if (nextStudy.status === "material_ready" || nextStudy.status === "practice_ready") {
           try {
             const nextMaterial = await getStudyMaterial(studyId);
             setMaterial(nextMaterial);
@@ -664,6 +1004,12 @@ export default function StudyWorkspaceClient({ studyId }) {
             if (err.status !== 404) throw err;
             setMaterial(null);
           }
+        } else {
+          setMaterial(null);
+        }
+
+        if (nextStudy.status === "practice_ready") {
+          await loadPracticeQuestions();
         }
       } catch (err) {
         if (err.status === 401 || err.status === 403) {
@@ -677,7 +1023,7 @@ export default function StudyWorkspaceClient({ studyId }) {
         setLoading(false);
       }
     },
-    [studyId]
+    [loadPracticeQuestions, studyId]
   );
 
   useEffect(() => {
@@ -697,16 +1043,60 @@ export default function StudyWorkspaceClient({ studyId }) {
   const handleResume = async () => {
     setResumeLoading(true);
     setError("");
+    setPracticeError("");
 
     try {
       const nextStudy = await resumeStudyGeneration(studyId);
       setStudy(nextStudy);
       setMaterial(null);
+      setPracticeQuestions([]);
     } catch (err) {
       setError(err.message || "Could not resume generation. Please try again.");
     } finally {
       setResumeLoading(false);
     }
+  };
+
+  const handlePracticeAnswer = (questionId, answer) => {
+    setPracticeSubmitError("");
+    setPracticeAnswers((current) => {
+      if (current[questionId]) return current;
+      return {
+        ...current,
+        [questionId]: answer,
+      };
+    });
+  };
+
+  const handlePracticeSubmit = async () => {
+    const answers = practiceQuestions
+      .map((question) => ({
+        question_id: question.id,
+        answer: practiceAnswers[question.id],
+      }))
+      .filter((item) => item.question_id && item.answer);
+
+    if (answers.length !== practiceQuestions.length) return;
+
+    setPracticeSubmitLoading(true);
+    setPracticeSubmitError("");
+
+    try {
+      const result = await submitPracticeAttempt(studyId, answers);
+      setPracticeAttemptResult(result);
+      await loadStudy();
+    } catch (err) {
+      setPracticeSubmitError(err.message || "Could not submit this practice attempt.");
+    } finally {
+      setPracticeSubmitLoading(false);
+    }
+  };
+
+  const handlePracticeReset = () => {
+    setActivePracticeIndex(0);
+    setPracticeAnswers({});
+    setPracticeSubmitError("");
+    setPracticeAttemptResult(null);
   };
 
   if (loading) return <LoadingState />;
@@ -726,7 +1116,26 @@ export default function StudyWorkspaceClient({ studyId }) {
       case "material":
         return <MaterialTab material={material} />;
       case "practice":
-        return <EmptyQuestionTab mode="practice" />;
+        return (
+          <PracticeTab
+            study={study}
+            questions={practiceQuestions}
+            loading={practiceLoading}
+            error={practiceError}
+            activeIndex={activePracticeIndex}
+            answers={practiceAnswers}
+            submitError={practiceSubmitError}
+            submitLoading={practiceSubmitLoading}
+            attemptResult={practiceAttemptResult}
+            resumeLoading={resumeLoading}
+            onRetry={() => loadStudy()}
+            onResume={handleResume}
+            onAnswer={handlePracticeAnswer}
+            onActiveIndexChange={setActivePracticeIndex}
+            onSubmit={handlePracticeSubmit}
+            onReset={handlePracticeReset}
+          />
+        );
       case "exam":
         return <EmptyQuestionTab mode="exam" />;
       case "analytics":
