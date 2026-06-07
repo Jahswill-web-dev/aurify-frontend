@@ -12,11 +12,10 @@ import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
 import Swal from "sweetalert2";
 import Link from "next/link";
-import { setAccessToken, setAuthMode } from "@/app/lib/features/auth/authSlice";
+import { setAccessToken } from "@/app/lib/features/auth/authSlice";
 import { useDispatch } from "react-redux";
-import { useEffect } from "react";
-import { useFetchWithToken } from "@/app/hooks/useCustomHook";
 import Cookies from "js-cookie";
+import { API_BASE_URL } from "@/app/lib/aurifyApi";
 
 const Toast = Swal.mixin({
   toast: true,
@@ -73,18 +72,6 @@ function SocialSignIn({ name, logo, onClick }) {
 function CreateAccount() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/me`
-  );
-
-  useEffect(() => {
-    if (data) {
-      // console.log(data);
-    }
-    if (data?.status === 200) {
-      router.push("/dashboard");
-    }
-  }, [router, data]);
 
   // useEffect(() => {
   //   const handleGoogleCallback = async () => {
@@ -124,7 +111,7 @@ function CreateAccount() {
     localStorage.setItem('authMode', 'signup');
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/auth/google`
+        `${API_BASE_URL}/auth/google`
       );
       console.log(response);
       if (response.data.url) {
@@ -149,13 +136,21 @@ function CreateAccount() {
 
   const onSubmit = async (data) => {
     await axios
-      .post(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/signup`, data)
-      .then((response) => {
+      .post(`${API_BASE_URL}/signup`, data)
+      .then(async (response) => {
         console.log(response);
 
-        const { access_token } = response.data;
-        Cookies.set("accessToken", access_token, {expires: 7, path:""});
+        const { access_token, refresh_token } = response.data;
+        Cookies.set("accessToken", access_token, { expires: 7, path: "/" });
+        if (refresh_token) {
+          Cookies.set("refreshToken", refresh_token, { expires: 7, path: "/" });
+        }
         dispatch(setAccessToken(access_token));
+        await axios.get(`${API_BASE_URL}/me`, {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        });
 
         Toast.fire({
           icon: "success",
@@ -165,8 +160,9 @@ function CreateAccount() {
       })
       .catch((error) => {
         console.log(error);
-        console.log(error.response.status);
-        if (error.response.status === 450) {
+        const status = error.response?.status;
+        console.log(status || error.message);
+        if (status === 450) {
           Toast.fire({
             icon: "error",
             title: "User with Email already exists!",

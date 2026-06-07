@@ -12,6 +12,12 @@ export function useFetchWithToken(url) {
     setLoading(true);
     try {
       const token = Cookies.get("accessToken");
+      if (!token) {
+        setData(null);
+        setError(null);
+        return;
+      }
+
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -43,7 +49,13 @@ export function usePostWithToken(url, data) {
     async function getData() {
       try {
         const token = Cookies.get("accessToken");
-        const response = axios.post(url, data, {
+        if (!token) {
+          setData(null);
+          setError(null);
+          return;
+        }
+
+        const response = await axios.post(url, data, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

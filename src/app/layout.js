@@ -1,6 +1,6 @@
 import "./globals.css";
-import Footer from "@/components/footer/footer";
 import StoreProvider from "./lib/StoreProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 export const metadata = {
   title: "Aurify AI",
@@ -10,12 +10,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <StoreProvider>
-      <html lang="en" className="scroll-smooth">
-        <body className="bg-off-white max-w-[1557px] mx-auto">
-          {children}
-        </body>
-      </html>
-    </StoreProvider>
+    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      <body className="bg-off-white max-w-[1557px] mx-auto">
+        <StoreProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </StoreProvider>
+      </body>
+    </html>
   );
 }
