@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpen,
-  ChevronDown,
   ClipboardCheck,
   FileText,
   LayoutDashboard,
@@ -494,42 +493,6 @@ function MaterialTab({ material }) {
   return (
     <div className="mx-auto max-w-[1180px] lg:relative">
       <article className="mx-auto min-w-0 max-w-[980px] xl:max-w-[1020px]">
-        {outlineItems.length ? (
-          <div className="mb-4 lg:hidden">
-            <button
-              type="button"
-              onClick={() => setMobileOutlineOpen((isOpen) => !isOpen)}
-              className="flex w-full items-center justify-between rounded-sm border border-grey-25 bg-white px-4 py-3 text-left text-h5 font-medium text-grey-200 shadow-card transition-colors duration-175 ease-smooth hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              aria-expanded={mobileOutlineOpen}
-            >
-              <span className="inline-flex items-center gap-2">
-                <BookOpen size={17} aria-hidden="true" />
-                Outline
-              </span>
-              <ChevronDown
-                size={17}
-                aria-hidden="true"
-                className={[
-                  "transition-transform duration-175 ease-smooth",
-                  mobileOutlineOpen ? "rotate-180" : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              />
-            </button>
-            {mobileOutlineOpen ? (
-              <div className="mt-2 rounded-md border border-grey-25 bg-white p-4 shadow-card">
-                <MaterialOutline
-                  items={outlineItems}
-                  activeHeadingId={activeHeadingId}
-                  onItemClick={handleOutlineClick}
-                  mobile
-                />
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-
         <Card
           variant="default"
           className="scroll-mt-32 p-5 sm:p-7"
@@ -558,18 +521,30 @@ function MaterialTab({ material }) {
       </article>
 
       {outlineItems.length ? (
-        <aside className="group fixed right-4 top-[168px] z-30 hidden lg:block">
+        <aside className="group fixed right-3 top-[142px] z-30 lg:right-4 lg:top-[168px]">
           <div className="flex items-start justify-end">
             <button
               type="button"
+              onClick={() => setMobileOutlineOpen((isOpen) => !isOpen)}
               aria-label="Show material outline"
+              aria-expanded={mobileOutlineOpen}
               className="mt-3 flex h-28 w-9 items-center justify-center rounded-l-md border border-r-0 border-grey-25 bg-white text-primary shadow-card transition-colors duration-175 ease-smooth hover:border-primary hover:bg-accent-25 focus:border-primary focus:bg-accent-25 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 group-hover:border-primary group-hover:bg-accent-25 group-focus-within:border-primary group-focus-within:bg-accent-25"
             >
               <span className="-rotate-90 whitespace-nowrap text-h6 font-semibold uppercase poppins-font">
                 Outline
               </span>
             </button>
-            <div className="pointer-events-none w-0 translate-x-3 opacity-0 transition-all duration-250 ease-smooth group-hover:pointer-events-auto group-hover:w-[340px] group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:w-[340px] group-focus-within:translate-x-0 group-focus-within:opacity-100 xl:group-hover:w-[380px] xl:group-focus-within:w-[380px]">
+            <div
+              className={[
+                "overflow-hidden transition-all duration-250 ease-smooth",
+                mobileOutlineOpen
+                  ? "pointer-events-auto w-[calc(100vw-64px)] max-w-[340px] translate-x-0 opacity-100"
+                  : "pointer-events-none w-0 max-w-[340px] translate-x-3 opacity-0",
+                "lg:pointer-events-none lg:w-0 lg:max-w-none lg:translate-x-3 lg:opacity-0 lg:group-hover:pointer-events-auto lg:group-hover:w-[340px] lg:group-hover:translate-x-0 lg:group-hover:opacity-100 lg:group-focus-within:pointer-events-auto lg:group-focus-within:w-[340px] lg:group-focus-within:translate-x-0 lg:group-focus-within:opacity-100 xl:group-hover:w-[380px] xl:group-focus-within:w-[380px]",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
               <div className="rounded-md border border-grey-25 bg-white p-4 shadow-modal">
                 <MaterialOutline
                   items={outlineItems}
