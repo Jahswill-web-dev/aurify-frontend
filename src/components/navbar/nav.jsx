@@ -33,7 +33,7 @@ function Navbar() {
               blogs
             </Link> */}
             <Link
-              href="/login"
+              href="/signup"
               className="px-5 py-2 rounded-[6px] bg-primary-50 text-off-white-100
             text-h5 poppins-font"
             >
