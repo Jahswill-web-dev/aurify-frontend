@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
+import { API_BASE_URL } from "@/app/lib/aurifyApi";
 
 export default function GoogleCallback() {
   const authMode = useSelector((store) => store.auth.authMode);
@@ -34,13 +35,21 @@ export default function GoogleCallback() {
         // console.log(authMode)
         const endpoint =
           mode === "signup"
-            ? `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/signup?access_token=${accessToken}`
-            : `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/signin?access_token=${accessToken}`;
+            ? `${API_BASE_URL}/google/signup?access_token=${accessToken}`
+            : `${API_BASE_URL}/google/signin?access_token=${accessToken}`;
         const signinRes = await axios.get(endpoint);
         // Save tokens
         console.log(signinRes);
-        Cookies.set("accessToken", signinRes.data.access_token);
-        Cookies.set("refreshToken", signinRes.data.refresh_token);
+        Cookies.set("accessToken", signinRes.data.access_token, {
+          expires: 7,
+          path: "/",
+        });
+        if (signinRes.data.refresh_token) {
+          Cookies.set("refreshToken", signinRes.data.refresh_token, {
+            expires: 7,
+            path: "/",
+          });
+        }
         // const token = Cookies.get("accessToken");
         setTimeout(() => {
           router.push("/dashboard");
@@ -49,11 +58,19 @@ export default function GoogleCallback() {
         if (err.response?.status === 451) {
           // User doesn't exist, so sign up
           const signupRes = await axios.get(
-            `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/google/signup?access_token=${accessToken}`
+            `${API_BASE_URL}/google/signup?access_token=${accessToken}`
           );
 
-          Cookies.set("accessToken", signupRes.data.access_token);
-          Cookies.set("refreshToken", signupRes.data.refresh_token);
+          Cookies.set("accessToken", signupRes.data.access_token, {
+            expires: 7,
+            path: "/",
+          });
+          if (signupRes.data.refresh_token) {
+            Cookies.set("refreshToken", signupRes.data.refresh_token, {
+              expires: 7,
+              path: "/",
+            });
+          }
 
           router.push("/dashboard");
         } else {

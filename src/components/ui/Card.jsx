@@ -6,13 +6,14 @@ const variantClasses = {
   flat: "bg-off-white-100 rounded-md border border-grey-25 p-4",
 };
 
-const Card = ({ variant = "default", children, className = "", onClick }) => {
+const Card = ({ variant = "default", children, className = "", onClick, ...props }) => {
   const clickableClasses = onClick
     ? "cursor-pointer hover:shadow-panel transition-shadow duration-175 ease-smooth"
     : "";
 
   return (
     <div
+      {...props}
       onClick={onClick}
       className={[
         variantClasses[variant] || variantClasses.default,

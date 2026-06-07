@@ -1,12 +1,40 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { LayoutDashboard, Plus } from "lucide-react";
-import { getStudies } from "@/data/mockStudies";
+import { AlertCircle, LayoutDashboard, Plus } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import EmptyStudiesState from "./_components/EmptyStudiesState";
 import StudiesGrid from "./_components/StudiesGrid";
+import { Button, Card } from "@/components/ui";
+import { listStudies } from "@/app/lib/aurifyApi";
 
 export default function StudiesPage() {
-  const studies = getStudies();
+  const [studies, setStudies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchStudies = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await listStudies();
+      setStudies(Array.isArray(data) ? data : []);
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        setError("Please log in to view your Studies.");
+      } else {
+        setError(err.message || "Could not load your Studies. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStudies();
+  }, [fetchStudies]);
 
   return (
     <main className="min-h-screen bg-off-white-100 px-4 py-8 sm:px-6 lg:px-10">
@@ -42,7 +70,38 @@ export default function StudiesPage() {
           </Link>
         </div>
 
-        {studies.length ? <StudiesGrid studies={studies} /> : <EmptyStudiesState />}
+        {loading ? (
+          <Card variant="default" className="p-8 text-center">
+            <p className="text-h4 font-semibold text-grey-200 poppins-font">
+              Loading Studies...
+            </p>
+          </Card>
+        ) : error ? (
+          <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
+            <AlertCircle className="mx-auto h-8 w-8 text-error" aria-hidden="true" />
+            <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
+              Studies could not load
+            </h2>
+            <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+              {error}
+            </p>
+            <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button variant="primary" size="md" onClick={fetchStudies}>
+                Retry
+              </Button>
+              <Link
+                href="/login"
+                className="inline-flex items-center justify-center rounded-sm border border-primary px-4 py-2 text-h5 font-medium text-primary transition-colors hover:bg-accent-25"
+              >
+                Log in
+              </Link>
+            </div>
+          </Card>
+        ) : studies.length ? (
+          <StudiesGrid studies={studies} />
+        ) : (
+          <EmptyStudiesState />
+        )}
       </div>
     </main>
   );

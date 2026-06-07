@@ -10,6 +10,14 @@ const statusConfig = {
   ready: { label: "Ready", variant: "primary" },
   in_progress: { label: "In progress", variant: "accent" },
   completed: { label: "Completed", variant: "success" },
+  queued: { label: "Queued", variant: "accent" },
+  generating_research: { label: "Researching", variant: "accent" },
+  research_ready: { label: "Research ready", variant: "accent" },
+  generating_outline: { label: "Outlining", variant: "accent" },
+  outline_ready: { label: "Outline ready", variant: "accent" },
+  generating_material: { label: "Generating", variant: "accent" },
+  material_ready: { label: "Ready", variant: "primary" },
+  failed: { label: "Failed", variant: "error" },
 };
 
 const formatDate = (date) => {
@@ -24,6 +32,9 @@ const formatDate = (date) => {
 
 function StudyCard({ study }) {
   const status = statusConfig[study.status] || statusConfig.ready;
+  const title = study.title || study.topic || "Untitled Study";
+  const progress = getProgressValue(study.progress);
+  const lastStudiedAt = study.lastStudiedAt || study.updated_at || study.created_at;
 
   return (
     <Card
@@ -37,7 +48,7 @@ function StudyCard({ study }) {
               <BookOpen size={20} aria-hidden="true" />
             </div>
             <h2 className="truncate text-h4 font-semibold text-grey-200 poppins-font">
-              {study.title}
+              {title}
             </h2>
           </div>
           <Badge variant={status.variant}>{status.label}</Badge>
@@ -50,7 +61,7 @@ function StudyCard({ study }) {
           </p>
           <p className="line-clamp-1">
             <span className="font-semibold text-grey-200">Topic:</span>{" "}
-            {study.topic}
+            {study.topic || title}
           </p>
           <p className="line-clamp-1">
             <span className="font-semibold text-grey-200">Level:</span>{" "}
@@ -61,19 +72,19 @@ function StudyCard({ study }) {
         <div className="mt-5">
           <div className="mb-2 flex items-center justify-between text-h6 inter-font">
             <span className="text-p-text">Progress</span>
-            <span className="font-semibold text-grey-200">{study.progress}%</span>
+            <span className="font-semibold text-grey-200">{progress}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-off-white-50">
             <div
               className="h-full rounded-full bg-primary"
-              style={{ width: `${study.progress}%` }}
+              style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
         <div className="mt-5 flex items-center gap-2 text-h6 text-p-text inter-font">
           <CalendarDays size={14} aria-hidden="true" />
-          <span>Last studied {formatDate(study.lastStudiedAt)}</span>
+          <span>Last updated {formatDate(lastStudiedAt)}</span>
         </div>
       </div>
 
@@ -91,3 +102,17 @@ function StudyCard({ study }) {
 }
 
 export default StudyCard;
+
+function getProgressValue(progress) {
+  if (typeof progress === "number") return Math.max(0, Math.min(100, progress));
+
+  if (!progress || typeof progress !== "object") return 0;
+
+  const completed = [
+    progress.material_completed,
+    progress.practice_completed,
+    progress.exam_completed,
+  ].filter(Boolean).length;
+
+  return Math.round((completed / 3) * 100);
+}

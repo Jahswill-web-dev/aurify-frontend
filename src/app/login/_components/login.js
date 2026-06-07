@@ -13,10 +13,9 @@ import Cookies from "js-cookie";
 import axios from "axios";
 import { RingSpinner } from "@/components/ui/ui";
 import Swal from "sweetalert2";
-import { useDispatch, useSelector } from "react-redux";
-import { setAccessToken, setAuthMode } from "@/app/lib/features/auth/authSlice";
-import { useFetchWithToken } from "@/app/hooks/useCustomHook";
-import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { setAccessToken } from "@/app/lib/features/auth/authSlice";
+import { API_BASE_URL } from "@/app/lib/aurifyApi";
 const Toast = Swal.mixin({
   toast: true,
   position: "top-end",
@@ -71,18 +70,6 @@ function SocialSignIn({ name, logo, onClick }) {
 
 function Login() {
   const router = useRouter();
-  const { data, error, loading } = useFetchWithToken(
-    `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/me`
-  );
-  useEffect(() => {
-    if (data) {
-      // console.log(data);
-    }
-    if (data?.status === 200) {
-      router.push("/dashboard");
-    }
-  }, [router, data]);
-
   const {
     register,
     handleSubmit,
@@ -96,14 +83,22 @@ function Login() {
     // console.log(data);
 
     await axios
-      .post(`${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/token`, data)
-      .then((response) => {
+      .post(`${API_BASE_URL}/login`, data)
+      .then(async (response) => {
         // console.log(response);
 
-        const { access_token } = response.data;
+        const { access_token, refresh_token } = response.data;
         // console.log(access_token);
-        Cookies.set("accessToken", access_token, { expires: 7, path: "" });
+        Cookies.set("accessToken", access_token, { expires: 7, path: "/" });
+        if (refresh_token) {
+          Cookies.set("refreshToken", refresh_token, { expires: 7, path: "/" });
+        }
         dispatch(setAccessToken(access_token));
+        await axios.get(`${API_BASE_URL}/me`, {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        });
 
         Toast.fire({
           icon: "success",
@@ -112,8 +107,9 @@ function Login() {
         router.push("/dashboard");
       })
       .catch((error) => {
-        console.log(error.response.status);
-        if (error.response.status === 451) {
+        const status = error.response?.status;
+        console.log(status || error.message);
+        if (status === 400 || status === 451) {
           Toast.fire({
             icon: "error",
             title: "Incorrect Email or Password",
@@ -134,7 +130,7 @@ function Login() {
     localStorage.setItem('authMode', 'login');
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_AURIFY_BASE_URL}/auth/google`
+        `${API_BASE_URL}/auth/google`
       );
       console.log(response);
       if (response.data.url) {
