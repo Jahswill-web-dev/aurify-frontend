@@ -22,11 +22,14 @@ import {
 } from "lucide-react";
 import { Badge, Button, Card, Tabs } from "@/components/ui";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import {
   getExamQuestions,
   getPracticeQuestions,
   getStudy,
   getStudyMaterial,
+  hasAccessToken,
+  isAuthError,
   resumeStudyGeneration,
   submitExamAttempt,
   submitPracticeAttempt,
@@ -1433,6 +1436,7 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [examAttemptResult, setExamAttemptResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [authRequired, setAuthRequired] = useState(false);
   const [resumeLoading, setResumeLoading] = useState(false);
 
   const progress = useMemo(() => getProgressValue(study?.progress), [study]);
@@ -1454,6 +1458,8 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (err.status === 404) {
         setPracticeQuestions([]);
         setPracticeError("Practice questions are not available yet.");
+      } else if (isAuthError(err)) {
+        setAuthRequired(true);
       } else {
         setPracticeError(err.message || "Could not load practice questions.");
       }
@@ -1478,6 +1484,8 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (err.status === 404) {
         setExamQuestions([]);
         setExamError("Exam questions are not available yet.");
+      } else if (isAuthError(err)) {
+        setAuthRequired(true);
       } else {
         setExamError(err.message || "Could not load exam questions.");
       }
@@ -1490,6 +1498,17 @@ export default function StudyWorkspaceClient({ studyId }) {
     async ({ showLoading = false } = {}) => {
       if (showLoading) setLoading(true);
       setError("");
+      setAuthRequired(false);
+
+      if (!hasAccessToken()) {
+        setStudy(null);
+        setMaterial(null);
+        setPracticeQuestions([]);
+        setExamQuestions([]);
+        setAuthRequired(true);
+        setLoading(false);
+        return;
+      }
 
       try {
         const nextStudy = await getStudy(studyId);
@@ -1519,8 +1538,12 @@ export default function StudyWorkspaceClient({ studyId }) {
           setExamQuestions([]);
         }
       } catch (err) {
-        if (err.status === 401 || err.status === 403) {
-          setError("Please log in to view this Study.");
+        if (isAuthError(err)) {
+          setStudy(null);
+          setMaterial(null);
+          setPracticeQuestions([]);
+          setExamQuestions([]);
+          setAuthRequired(true);
         } else if (err.status === 404) {
           setError("This Study was not found.");
         } else {
@@ -1583,6 +1606,7 @@ export default function StudyWorkspaceClient({ studyId }) {
     setError("");
     setPracticeError("");
     setExamError("");
+    setAuthRequired(false);
 
     try {
       const nextStudy = await resumeStudyGeneration(studyId);
@@ -1591,7 +1615,11 @@ export default function StudyWorkspaceClient({ studyId }) {
       setPracticeQuestions([]);
       setExamQuestions([]);
     } catch (err) {
-      setError(err.message || "Could not resume generation. Please try again.");
+      if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        setError(err.message || "Could not resume generation. Please try again.");
+      }
     } finally {
       setResumeLoading(false);
     }
@@ -1626,7 +1654,11 @@ export default function StudyWorkspaceClient({ studyId }) {
       setPracticeAttemptResult(result);
       await loadStudy();
     } catch (err) {
-      setPracticeSubmitError(err.message || "Could not submit this practice attempt.");
+      if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        setPracticeSubmitError(err.message || "Could not submit this practice attempt.");
+      }
     } finally {
       setPracticeSubmitLoading(false);
     }
@@ -1679,7 +1711,11 @@ export default function StudyWorkspaceClient({ studyId }) {
       setExamTimedOut(false);
       await loadStudy();
     } catch (err) {
-      setExamSubmitError(err.message || "Could not submit this exam attempt.");
+      if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        setExamSubmitError(err.message || "Could not submit this exam attempt.");
+      }
     } finally {
       setExamSubmitLoading(false);
     }
@@ -1695,6 +1731,18 @@ export default function StudyWorkspaceClient({ studyId }) {
     setExamSubmitError("");
     setExamAttemptResult(null);
   };
+
+  if (authRequired) {
+    return (
+      <AuthRequiredState
+        title="Log in to view this Study"
+        message="This workspace belongs to your account. Log in to open the material, practice, exam mode, and progress."
+        returnTo={`/studies/${studyId}`}
+        secondaryHref="/studies"
+        secondaryLabel="Back to Studies"
+      />
+    );
+  }
 
   if (loading) return <LoadingState />;
   if (error && !study) return <ErrorState message={error} onRetry={() => loadStudy({ showLoading: true })} />;

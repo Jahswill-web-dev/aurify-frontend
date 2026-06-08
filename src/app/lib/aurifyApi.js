@@ -5,7 +5,14 @@ import Cookies from "js-cookie";
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_AURIFY_BASE_URL || "http://localhost:8000";
 
-const getAccessToken = () => Cookies.get("accessToken");
+export const getAccessToken = () => Cookies.get("accessToken");
+
+export const hasAccessToken = () => Boolean(getAccessToken());
+
+export const clearAuthCookies = () => {
+  Cookies.remove("accessToken", { path: "/" });
+  Cookies.remove("refreshToken", { path: "/" });
+};
 
 export class ApiError extends Error {
   constructor(message, status, payload) {
@@ -15,6 +22,16 @@ export class ApiError extends Error {
     this.payload = payload;
   }
 }
+
+export class AuthRequiredError extends ApiError {
+  constructor(message = "Please log in to continue.") {
+    super(message, 401, null);
+    this.name = "AuthRequiredError";
+  }
+}
+
+export const isAuthError = (error) =>
+  error?.status === 401 || error?.status === 403;
 
 const getErrorMessage = (payload, fallback) => {
   if (!payload) return fallback;
@@ -45,6 +62,11 @@ const parseResponsePayload = async (response) => {
 export async function apiRequest(path, options = {}) {
   const token = getAccessToken();
   const headers = new Headers(options.headers);
+  const requireAuth = options.requireAuth ?? true;
+
+  if (requireAuth && !token) {
+    throw new AuthRequiredError();
+  }
 
   if (!headers.has("Content-Type") && options.body) {
     headers.set("Content-Type", "application/json");
@@ -54,13 +76,20 @@ export async function apiRequest(path, options = {}) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
+  const fetchOptions = { ...options };
+  delete fetchOptions.requireAuth;
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers,
   });
   const payload = await parseResponsePayload(response);
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      clearAuthCookies();
+    }
+
     throw new ApiError(
       getErrorMessage(payload, "Something went wrong. Please try again."),
       response.status,

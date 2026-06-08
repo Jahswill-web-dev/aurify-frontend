@@ -109,6 +109,7 @@ function CreateAccount() {
 
   const handleGoogleSignup = async () => {
     localStorage.setItem('authMode', 'signup');
+    localStorage.removeItem("authReturnTo");
     try {
       const response = await axios.get(
         `${API_BASE_URL}/auth/google`

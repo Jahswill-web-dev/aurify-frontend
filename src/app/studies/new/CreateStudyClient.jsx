@@ -12,7 +12,8 @@ import {
 } from "lucide-react";
 import { Badge, Button, Card } from "@/components/ui";
 import ThemeToggle from "@/components/theme/ThemeToggle";
-import { createStudy, parseStudyInput } from "@/app/lib/aurifyApi";
+import AuthRequiredState from "@/components/auth/AuthRequiredState";
+import { createStudy, isAuthError, parseStudyInput } from "@/app/lib/aurifyApi";
 
 const examplePrompts = [
   "Teach me system design for senior backend interviews. Focus on scaling a chat app, database choices, caching, queues, tradeoffs, and mock interview questions.",
@@ -262,6 +263,7 @@ export default function CreateStudyClient() {
   const [parsedStudy, setParsedStudy] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [authRequired, setAuthRequired] = useState(false);
 
   const clarificationPayload = useMemo(() => {
     if (!clarification || !selectedClarification) return null;
@@ -303,13 +305,14 @@ export default function CreateStudyClient() {
 
     setLoading(true);
     setError("");
+    setAuthRequired(false);
 
     try {
       const study = await createStudy(parsedStudy);
       router.push(`/studies/${study.id}`);
     } catch (err) {
-      if (err.status === 401 || err.status === 403) {
-        setError("Please log in before creating a Study.");
+      if (isAuthError(err)) {
+        setAuthRequired(true);
       } else {
         setError(err.message || "Could not create this Study. Please try again.");
       }
@@ -324,6 +327,18 @@ export default function CreateStudyClient() {
     setParsedStudy(null);
     setError("");
   };
+
+  if (authRequired) {
+    return (
+      <AuthRequiredState
+        title="Log in to create a Study"
+        message="Study creation is saved to your account. Log in, then return here to generate your workspace."
+        returnTo="/studies/new"
+        secondaryHref="/studies"
+        secondaryLabel="Back to Studies"
+      />
+    );
+  }
 
   return (
     <main className="min-h-screen bg-off-white-100 px-4 py-8 sm:px-6 lg:px-10 dark:bg-dark-bg">

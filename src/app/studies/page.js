@@ -7,23 +7,34 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 import EmptyStudiesState from "./_components/EmptyStudiesState";
 import StudiesGrid from "./_components/StudiesGrid";
 import { Button, Card } from "@/components/ui";
-import { listStudies } from "@/app/lib/aurifyApi";
+import AuthRequiredState from "@/components/auth/AuthRequiredState";
+import { hasAccessToken, isAuthError, listStudies } from "@/app/lib/aurifyApi";
 
 export default function StudiesPage() {
   const [studies, setStudies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [authRequired, setAuthRequired] = useState(false);
 
   const fetchStudies = useCallback(async () => {
     setLoading(true);
     setError("");
+    setAuthRequired(false);
+
+    if (!hasAccessToken()) {
+      setStudies([]);
+      setAuthRequired(true);
+      setLoading(false);
+      return;
+    }
 
     try {
       const data = await listStudies();
       setStudies(Array.isArray(data) ? data : []);
     } catch (err) {
-      if (err.status === 401 || err.status === 403) {
-        setError("Please log in to view your Studies.");
+      if (isAuthError(err)) {
+        setStudies([]);
+        setAuthRequired(true);
       } else {
         setError(err.message || "Could not load your Studies. Please try again.");
       }
@@ -35,6 +46,17 @@ export default function StudiesPage() {
   useEffect(() => {
     fetchStudies();
   }, [fetchStudies]);
+
+  if (authRequired) {
+    return (
+      <AuthRequiredState
+        title="Log in to view your Studies"
+        message="Your Studies are private to your account. Log in to continue where you left off."
+        secondaryHref="/"
+        secondaryLabel="Back to Home"
+      />
+    );
+  }
 
   return (
     <main className="min-h-screen bg-off-white-100 px-4 py-8 sm:px-6 lg:px-10 dark:bg-dark-bg">

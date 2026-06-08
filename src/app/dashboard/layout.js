@@ -4,7 +4,7 @@ import SideNav from "./_components/sideNav";
 import { MobileDetails } from "../dashboard/_components/details";
 import Upload from "./_components/upload";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   setUserEmail,
   setUserLimit,
@@ -12,6 +12,8 @@ import {
   setUserSubscription,
 } from "../lib/features/dashboard/dashboardSlice";
 import AudioControlls from "./_components/audioControlls";
+import AuthRequiredState from "@/components/auth/AuthRequiredState";
+import { hasAccessToken } from "../lib/aurifyApi";
 
 function DashboardLayout({ children }) {
   const { showOverlay } = useSelector((store) => store.dashboard);
@@ -19,8 +21,13 @@ function DashboardLayout({ children }) {
   const isOverlayVisible = showOverlay || navOverlay;
   // console.log(navOverlay);
   const dispatch = useDispatch();
+  const [hasSession, setHasSession] = useState(null);
 
   useEffect(() => {
+    const nextHasSession = hasAccessToken();
+    setHasSession(nextHasSession);
+    if (!nextHasSession) return;
+
     // UI preview mode: keep dashboard routes accessible while the backend auth
     // flow is paused. Re-enable the /me request below when reconnecting auth.
     dispatch(setUserName("Designer"));
@@ -51,7 +58,29 @@ function DashboardLayout({ children }) {
   // if (loading) return <Loading />;
   // if (error)
   //   return <p className="text-center text-3xl mt-28">Error: {error.message}</p>;
-  
+  if (hasSession === null) {
+    return (
+      <main className="min-h-screen bg-off-white-100 px-4 py-10 dark:bg-dark-bg">
+        <div className="mx-auto max-w-[640px] rounded-md border border-grey-25 bg-white p-8 text-center shadow-card dark:border-dark-border dark:bg-dark-surface dark:shadow-none">
+          <p className="text-h4 font-semibold text-grey-200 poppins-font dark:text-dark-text">
+            Checking your session...
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!hasSession) {
+    return (
+      <AuthRequiredState
+        title="Log in to open your Dashboard"
+        message="Your dashboard contains private study activity, uploads, scores, and account details."
+        secondaryHref="/"
+        secondaryLabel="Back to Home"
+      />
+    );
+  }
+
   return (
     <div className="">
       {/* <DashboardNav /> */}

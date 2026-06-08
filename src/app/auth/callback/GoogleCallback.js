@@ -6,6 +6,22 @@ import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { API_BASE_URL } from "@/app/lib/aurifyApi";
 
+const getSafeReturnPath = () => {
+  const storedPath = localStorage.getItem("authReturnTo");
+
+  if (
+    !storedPath ||
+    !storedPath.startsWith("/") ||
+    storedPath.startsWith("//") ||
+    storedPath.startsWith("/login") ||
+    storedPath.startsWith("/signup")
+  ) {
+    return "/dashboard";
+  }
+
+  return storedPath;
+};
+
 export default function GoogleCallback() {
   const authMode = useSelector((store) => store.auth.authMode);
   const router = useRouter();
@@ -50,9 +66,11 @@ export default function GoogleCallback() {
             path: "/",
           });
         }
+        const returnPath = getSafeReturnPath();
+        localStorage.removeItem("authReturnTo");
         // const token = Cookies.get("accessToken");
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push(returnPath);
         }, 3000);
       } catch (err) {
         if (err.response?.status === 451) {
@@ -72,7 +90,9 @@ export default function GoogleCallback() {
             });
           }
 
-          router.push("/dashboard");
+          const returnPath = getSafeReturnPath();
+          localStorage.removeItem("authReturnTo");
+          router.push(returnPath);
         } else {
           console.error("Login/signup failed:", err);
         }

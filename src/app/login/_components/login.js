@@ -16,6 +16,7 @@ import Swal from "sweetalert2";
 import { useDispatch } from "react-redux";
 import { setAccessToken } from "@/app/lib/features/auth/authSlice";
 import { API_BASE_URL } from "@/app/lib/aurifyApi";
+import { useEffect, useState } from "react";
 const Toast = Swal.mixin({
   toast: true,
   position: "top-end",
@@ -68,8 +69,18 @@ function SocialSignIn({ name, logo, onClick }) {
   );
 }
 
+const getSafeNextPath = (value) => {
+  if (!value || typeof value !== "string") return "/dashboard";
+  if (!value.startsWith("/") || value.startsWith("//")) return "/dashboard";
+  if (value.startsWith("/login") || value.startsWith("/signup")) {
+    return "/dashboard";
+  }
+  return value;
+};
+
 function Login() {
   const router = useRouter();
+  const [nextPath, setNextPath] = useState("/dashboard");
   const {
     register,
     handleSubmit,
@@ -78,6 +89,11 @@ function Login() {
     resolver: yupResolver(schema),
   });
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setNextPath(getSafeNextPath(params.get("next")));
+  }, []);
 
   const onSubmit = async (data) => {
     // console.log(data);
@@ -104,7 +120,8 @@ function Login() {
           icon: "success",
           title: "Login in successfull",
         });
-        router.push("/dashboard");
+        localStorage.removeItem("authReturnTo");
+        router.push(nextPath);
       })
       .catch((error) => {
         const status = error.response?.status;
@@ -128,6 +145,7 @@ function Login() {
   const handleGoogleLogin = async () => {
     // console.log("login with google clicked");
     localStorage.setItem('authMode', 'login');
+    localStorage.setItem("authReturnTo", nextPath);
     try {
       const response = await axios.get(
         `${API_BASE_URL}/auth/google`
