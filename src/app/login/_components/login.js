@@ -1,9 +1,4 @@
 "use client";
-import Image from "next/image";
-import googleIcon from "../../../../public/icons/google-icon.svg";
-import chevron from "../../../../public/icons/chevron-right.svg";
-import facebookIcon from "../../../../public/icons/facebook-icon.svg";
-import xIcon from "../../../../public/icons/x-icon.svg";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -17,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { setAccessToken } from "@/app/lib/features/auth/authSlice";
 import { API_BASE_URL } from "@/app/lib/aurifyApi";
 import { useEffect, useState } from "react";
+import { AlertCircle, Lock, Mail } from "lucide-react";
 const Toast = Swal.mixin({
   toast: true,
   position: "top-end",
@@ -30,8 +26,7 @@ const Toast = Swal.mixin({
 });
 
 const schema = yup.object().shape({
-  // name: yup.string().required("Name is required"),
-  email: yup.string().required("username is required"),
+  email: yup.string().required("Email or username is required"),
   password: yup
     .string()
     .required("Password is required")
@@ -39,32 +34,43 @@ const schema = yup.object().shape({
     .max(24, "Password cannot be more than 24 characters long"),
 });
 
-function InputForm({ type, title, name, id, register, errors }) {
+function InputForm({ type, title, name, id, register, errors, icon: Icon, autoComplete }) {
   const errorMessage = errors?.[name]?.message;
   return (
-    <div>
-      <p className="text-p-text-darker pb-2 text-lg">{title}</p>
-      <input
-        {...register}
-        type={type}
-        id={id}
-        placeholder=""
-        className="focus:border-primary rounded-sm border-p-text-darker w-64 md:w-[400px] h-[35px] text-x-sub-head border-2
-              p-2"
-      ></input>
-      <p className="text-red-600 m-0 p-0 text-left text-xs">{errorMessage}</p>
-    </div>
-  );
-}
-function SocialSignIn({ name, logo, onClick }) {
-  return (
-    <div
-      onClick={onClick}
-      className="cursor-pointer text-p-text-darker flex justify-around items-center bg-off-white-100  border-2 w-[300px] py-2 rounded-md"
-    >
-      <Image src={logo} width={30} height={30} alt="google icon" />
-      <div>{name}</div>
-      <Image src={chevron} alt="chevron right" width={30} height={30} />
+    <div className="grid gap-2">
+      <label
+        htmlFor={id}
+        className="text-h6 font-semibold uppercase text-grey-100 poppins-font dark:text-dark-muted"
+      >
+        {title}
+      </label>
+      <div className="relative">
+        {Icon ? (
+          <Icon
+            size={18}
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-grey-100 dark:text-dark-muted"
+          />
+        ) : null}
+        <input
+          {...register}
+          type={type}
+          id={id}
+          autoComplete={autoComplete}
+          aria-invalid={Boolean(errorMessage)}
+          className={[
+            "h-12 w-full rounded-sm border bg-off-white-100 px-4 text-h5 text-grey-200 outline-none transition-all duration-175 ease-smooth placeholder:text-grey-100 focus:border-primary focus:bg-white focus:shadow-input-focus dark:bg-dark-surface-soft dark:text-dark-text dark:placeholder:text-dark-muted dark:focus:border-primary-25 dark:focus:bg-dark-surface dark:focus:shadow-none",
+            Icon ? "pl-10" : "",
+            errorMessage ? "border-error" : "border-grey-25 dark:border-dark-border",
+          ].join(" ")}
+        />
+      </div>
+      {errorMessage ? (
+        <p className="flex items-center gap-1 text-h6 text-error inter-font">
+          <AlertCircle size={13} aria-hidden="true" />
+          {errorMessage}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -142,96 +148,74 @@ function Login() {
     // console.log(data);
   };
 
-  const handleGoogleLogin = async () => {
-    // console.log("login with google clicked");
-    localStorage.setItem('authMode', 'login');
-    localStorage.setItem("authReturnTo", nextPath);
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/auth/google`
-      );
-      console.log(response);
-      if (response.data.url) {
-        window.location.href = response.data.url;
-      }
-    } catch (error) {
-      console.error("Google Login error:", error);
-      Toast.fire({
-        icon: "error",
-        title: "Failed to initiate Google Login",
-      });
-    }
-  };
-
   return (
-    <div>
+    <div className="relative">
       <div className="relative">
         {isSubmitting && (
           <div
-            className="absolute h-full w-full flex items-center
-        justify-center"
+            className="absolute inset-0 z-20 flex items-center justify-center rounded-md bg-white/70 backdrop-blur-[1px] dark:bg-dark-surface/70"
+            aria-live="polite"
           >
-            <div className="bg-white opacity-50 absolute h-full w-72 md:w-[408px]"></div>
-            <div className="absolute z-20">
-              <RingSpinner />
-            </div>
+            <RingSpinner />
           </div>
         )}
         <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          className="flex flex-col items-center justify-center"
+          className="grid gap-5"
         >
-          <div className="flex flex-col items-center justify-center gap-4 mt-4">
-            <InputForm
-              type="email"
-              name="email"
-              title="Email"
-              id="email"
-              register={register("email")}
-              errors={errors}
-            />
-            <InputForm
-              type="password"
-              name="password"
-              title="Password"
-              id="password"
-              register={register("password")}
-              errors={errors}
-            />
-          </div>
+          <InputForm
+            type="text"
+            name="email"
+            title="Email or username"
+            id="email"
+            register={register("email")}
+            errors={errors}
+            icon={Mail}
+            autoComplete="username"
+          />
+          <InputForm
+            type="password"
+            name="password"
+            title="Password"
+            id="password"
+            register={register("password")}
+            errors={errors}
+            icon={Lock}
+            autoComplete="current-password"
+          />
 
           <button
             type="submit"
-            className="text-xl font-bold my-4 bg-primary text-white py-2 px-6 rounded-md roboto-font
-          lg:text-xl lg:font-semibold lg:my-6 w-[256px] hover:bg-[#f19d37] 
-          active:scale-95"
+            disabled={isSubmitting}
+            className="mt-1 inline-flex h-12 w-full items-center justify-center rounded-sm bg-primary px-5 text-h5 font-semibold text-white shadow-btn-primary transition-all duration-175 ease-smooth hover:bg-primary-200 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-dark-accent dark:text-[#16110a] dark:shadow-none dark:hover:bg-primary-25"
           >
-            Login
+            Log in
           </button>
         </form>
       </div>
-      <p className="text-center">
-        {"don't have an account?"}
-        <Link href="/signup">
-          <span className="text-primary underline">Signup</span>
-        </Link>
-      </p>
-      <div className="flex items-center gap-2 w-full justify-center">
-        <div className="w-[200px] h-[2px] bg-p-text-darker"></div>
-        <p className="text-p-text text-xl text-center pb-3">or</p>
-        <div className="w-[200px] h-[2px] bg-p-text-darker"></div>
+
+      <div className="mt-6 border-t border-grey-25 pt-5 text-center dark:border-dark-border">
+        <p className="text-h5 text-p-text-darker inter-font dark:text-dark-muted">
+          {"Don't have an account? "}
+          <Link
+            href="/signup"
+            className="font-semibold text-primary underline-offset-4 transition-colors hover:text-primary-200 hover:underline dark:text-primary-25"
+          >
+            Create one
+          </Link>
+        </p>
       </div>
 
-      <div className="flex flex-col gap-5 items-center justify-center">
-        <SocialSignIn
-          name="LogIn in with Google"
-          logo={googleIcon}
-          onClick={handleGoogleLogin}
-        />
-        {/* <SocialSignIn name="LogIn in Facebook" logo={facebookIcon} /> */}
-        {/* <SocialSignIn name="LogIn in Twitter" logo={xIcon} /> */}
+      {/* Google login is intentionally hidden while backend OAuth is paused.
+      <div className="mt-5">
+        <button type="button">Continue with Google</button>
       </div>
+      */}
+
+      <p className="mt-5 text-center text-h6 leading-5 text-grey-100 inter-font dark:text-dark-muted">
+        Protected Studies require your Aurify account token.
+      </p>
     </div>
   );
 }

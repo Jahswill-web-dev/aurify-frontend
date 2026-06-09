@@ -17,6 +17,8 @@ const statusConfig = {
   outline_ready: { label: "Outline ready", variant: "accent" },
   generating_material: { label: "Generating", variant: "accent" },
   material_ready: { label: "Ready", variant: "primary" },
+  generating_glossary: { label: "Generating glossary", variant: "accent" },
+  glossary_ready: { label: "Glossary ready", variant: "primary" },
   generating_practice_questions: { label: "Generating practice", variant: "accent" },
   practice_ready: { label: "Practice ready", variant: "primary" },
   generating_exam_questions: { label: "Generating exam", variant: "accent" },

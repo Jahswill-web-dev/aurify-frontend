@@ -14,6 +14,7 @@ import {
   FileText,
   LayoutDashboard,
   Play,
+  Plus,
   RotateCcw,
   RefreshCw,
   Target,
@@ -24,12 +25,19 @@ import { Badge, Button, Card, Tabs } from "@/components/ui";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import {
+  generateExamQuestionSet,
+  generatePracticeQuestionSet,
   getExamQuestions,
+  getExamQuestionSetQuestions,
   getPracticeQuestions,
+  getPracticeQuestionSetQuestions,
   getStudy,
+  getStudyGlossary,
   getStudyMaterial,
   hasAccessToken,
   isAuthError,
+  listExamQuestionSets,
+  listPracticeQuestionSets,
   resumeStudyGeneration,
   submitExamAttempt,
   submitPracticeAttempt,
@@ -38,6 +46,7 @@ import {
 const workspaceTabs = [
   { id: "overview", label: "Overview" },
   { id: "material", label: "Material" },
+  { id: "glossary", label: "Glossary" },
   { id: "practice", label: "Practice" },
   { id: "exam", label: "Exam Mode" },
   { id: "analytics", label: "Analytics" },
@@ -51,6 +60,8 @@ const pollingStatuses = new Set([
   "outline_ready",
   "generating_material",
   "material_ready",
+  "generating_glossary",
+  "glossary_ready",
   "generating_practice_questions",
   "practice_ready",
   "generating_exam_questions",
@@ -58,6 +69,16 @@ const pollingStatuses = new Set([
 
 const materialReadyStatuses = new Set([
   "material_ready",
+  "generating_glossary",
+  "glossary_ready",
+  "generating_practice_questions",
+  "practice_ready",
+  "generating_exam_questions",
+  "exam_ready",
+]);
+
+const glossaryReadyStatuses = new Set([
+  "glossary_ready",
   "generating_practice_questions",
   "practice_ready",
   "generating_exam_questions",
@@ -86,6 +107,8 @@ const statusConfig = {
   outline_ready: { label: "Outline ready", variant: "accent" },
   generating_material: { label: "Generating material", variant: "accent" },
   material_ready: { label: "Material ready", variant: "accent" },
+  generating_glossary: { label: "Generating glossary", variant: "accent" },
+  glossary_ready: { label: "Glossary ready", variant: "primary" },
   generating_practice_questions: { label: "Generating practice", variant: "accent" },
   practice_ready: { label: "Practice ready", variant: "primary" },
   generating_exam_questions: { label: "Generating exam", variant: "accent" },
@@ -94,6 +117,24 @@ const statusConfig = {
 };
 
 const clamp = (value) => Math.max(0, Math.min(100, value));
+const clampQuestionCount = (value) => {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) return 5;
+  return Math.max(5, Math.min(30, parsed));
+};
+
+const normalizeList = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+};
+
+const hasGeneratingSet = (sets) =>
+  sets.some((set) => set.status === "queued" || set.status === "generating");
+
+const getReadySets = (sets) => sets.filter((set) => set.status === "ready");
 
 function getTitle(study) {
   return study?.title || study?.topic || "Untitled Study";
@@ -611,6 +652,156 @@ function MaterialTab({ material }) {
   );
 }
 
+function GlossaryTab({ study, glossary, loading, error, onRetry, onResume, resumeLoading }) {
+  const isReady = glossaryReadyStatuses.has(study?.status);
+  const terms = Array.isArray(glossary?.terms) ? glossary.terms : [];
+  const canResumeGlossary =
+    study?.status === "material_ready" ||
+    study?.status === "glossary_ready" ||
+    study?.status === "failed";
+  const resumeLabel =
+    study?.status === "material_ready" ? "Generate Glossary" : "Resume Generation";
+
+  if (!isReady) {
+    return (
+      <Card variant="default" className="mx-auto max-w-[720px] p-6 text-center">
+        <BookOpen className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
+        <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
+          Glossary is not ready yet
+        </h2>
+        <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+          Key terms will appear here after the backend finishes generating the glossary.
+        </p>
+        <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+          <Button variant="primary" size="md" onClick={onRetry}>
+            <RefreshCw size={16} aria-hidden="true" />
+            Refresh
+          </Button>
+          {canResumeGlossary ? (
+            <Button
+              variant="ghost"
+              size="md"
+              loading={resumeLoading}
+              onClick={onResume}
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+              {resumeLabel}
+            </Button>
+          ) : null}
+        </div>
+      </Card>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
+        <BookOpen className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
+        <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
+          Glossary is loading
+        </h2>
+      </Card>
+    );
+  }
+
+  if (error || !terms.length) {
+    return (
+      <Card variant="default" className="mx-auto max-w-[720px] p-6 text-center">
+        <BookOpen className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
+        <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
+          Glossary terms are not available
+        </h2>
+        <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+          {error || "The backend marked the glossary ready, but no terms were returned."}
+        </p>
+        <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+          <Button variant="primary" size="md" onClick={onRetry}>
+            <RefreshCw size={16} aria-hidden="true" />
+            Refresh
+          </Button>
+          {canResumeGlossary ? (
+            <Button
+              variant="ghost"
+              size="md"
+              loading={resumeLoading}
+              onClick={onResume}
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+              {resumeLabel}
+            </Button>
+          ) : null}
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid gap-5">
+      <Card variant="default" className="p-5 sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-h6 font-semibold uppercase text-primary poppins-font">
+              Terms to know
+            </p>
+            <h2 className="mt-1 text-h2 font-bold text-grey-200 poppins-font">
+              {terms.length} glossary terms
+            </h2>
+            {glossary?.source_notes ? (
+              <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
+                {glossary.source_notes}
+              </p>
+            ) : null}
+          </div>
+          <Badge variant="primary">Glossary ready</Badge>
+        </div>
+      </Card>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {terms.map((item, index) => (
+          <Card
+            key={`${item.term || "term"}-${index}`}
+            variant="default"
+            className="p-5"
+          >
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+              <h3 className="text-h3 font-semibold leading-tight text-grey-200 poppins-font">
+                {item.term || "Untitled term"}
+              </h3>
+              {item.difficulty ? <Badge variant="accent">{item.difficulty}</Badge> : null}
+            </div>
+            <p className="text-h5 leading-7 text-p-text-darker inter-font">
+              {item.definition || "No definition was provided."}
+            </p>
+            {item.simple_explanation ? (
+              <p className="mt-3 text-h5 leading-7 text-p-text-darker inter-font">
+                <span className="font-semibold text-grey-200">Plain English:</span>{" "}
+                {item.simple_explanation}
+              </p>
+            ) : null}
+            {item.analogy ? (
+              <p className="mt-3 text-h5 leading-7 text-p-text-darker inter-font">
+                <span className="font-semibold text-grey-200">Analogy:</span>{" "}
+                {item.analogy}
+              </p>
+            ) : null}
+            {item.why_it_matters ? (
+              <p className="mt-3 text-h5 leading-7 text-p-text-darker inter-font">
+                <span className="font-semibold text-grey-200">Why it matters:</span>{" "}
+                {item.why_it_matters}
+              </p>
+            ) : null}
+            {item.section ? (
+              <div className="mt-4">
+                <Badge variant="neutral">{item.section}</Badge>
+              </div>
+            ) : null}
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PracticeLoadingState() {
   return (
     <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
@@ -628,9 +819,11 @@ function PracticeLoadingState() {
 function PracticeUnavailableState({ study, error, onRetry, onResume, resumeLoading }) {
   const isReady = practiceReadyStatuses.has(study?.status);
   const canResumePractice =
-    study?.status === "material_ready" || practiceReadyStatuses.has(study?.status);
+    study?.status === "material_ready" ||
+    study?.status === "glossary_ready" ||
+    practiceReadyStatuses.has(study?.status);
   const resumeLabel =
-    study?.status === "material_ready"
+    study?.status === "material_ready" || study?.status === "glossary_ready"
       ? "Generate Practice Questions"
       : "Resume Generation";
 
@@ -644,7 +837,7 @@ function PracticeUnavailableState({ study, error, onRetry, onResume, resumeLoadi
         {error ||
           (isReady
             ? "The backend marked this Study ready, but no practice questions were returned."
-            : study?.status === "material_ready"
+            : study?.status === "material_ready" || study?.status === "glossary_ready"
               ? "Material is ready, but practice questions have not been generated yet."
             : "The backend is still preparing practice questions for this Study.")}
       </p>
@@ -707,9 +900,110 @@ function PracticeResultSummary({ result, onReset }) {
   );
 }
 
+function QuestionSetControls({
+  mode,
+  sets,
+  selectedSetId,
+  title,
+  count,
+  generating,
+  onSelectSet,
+  onTitleChange,
+  onCountChange,
+  onGenerate,
+  onRefresh,
+}) {
+  const readySets = getReadySets(sets);
+  const selectedSet = sets.find((set) => set.id === selectedSetId);
+  const label = mode === "practice" ? "Practice set" : "Exam set";
+  const nextNumber = sets.length + 1;
+
+  return (
+    <Card variant="default" className="p-5">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-h6 font-semibold uppercase text-primary poppins-font">
+            Question sets
+          </p>
+          <h2 className="mt-1 text-h4 font-semibold text-grey-200 poppins-font">
+            {readySets.length ? `${readySets.length} ready` : "Using latest questions"}
+          </h2>
+        </div>
+        {selectedSet ? (
+          <Badge variant={selectedSet.status === "ready" ? "primary" : "accent"}>
+            {selectedSet.status}
+          </Badge>
+        ) : null}
+      </div>
+
+      {readySets.length ? (
+        <label className="grid gap-1 text-h6 font-medium text-p-text inter-font">
+          <span>{label}</span>
+          <select
+            value={selectedSetId || ""}
+            onChange={(event) => onSelectSet(event.target.value)}
+            className="min-h-[42px] rounded-sm border border-grey-25 bg-white px-3 text-h5 text-grey-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text"
+          >
+            {readySets.map((set, index) => (
+              <option key={set.id} value={set.id}>
+                {set.title || `${label} ${index + 1}`} ({set.question_count || set.generated_question_count || "?"})
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_110px]">
+        <label className="grid gap-1 text-h6 font-medium text-p-text inter-font">
+          <span>New title</span>
+          <input
+            value={title}
+            onChange={(event) => onTitleChange(event.target.value)}
+            placeholder={`${label} ${nextNumber}`}
+            className="min-h-[42px] rounded-sm border border-grey-25 bg-white px-3 text-h5 text-grey-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text"
+          />
+        </label>
+        <label className="grid gap-1 text-h6 font-medium text-p-text inter-font">
+          <span>Count</span>
+          <input
+            value={count}
+            min={5}
+            max={30}
+            type="number"
+            onChange={(event) => onCountChange(event.target.value)}
+            className="min-h-[42px] rounded-sm border border-grey-25 bg-white px-3 text-h5 text-grey-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text"
+          />
+        </label>
+      </div>
+
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <Button
+          variant="primary"
+          size="md"
+          loading={generating}
+          onClick={onGenerate}
+          className="flex-1"
+        >
+          <Plus size={16} aria-hidden="true" />
+          Generate Set
+        </Button>
+        <Button variant="ghost" size="md" onClick={onRefresh} className="flex-1">
+          <RefreshCw size={16} aria-hidden="true" />
+          Refresh
+        </Button>
+      </div>
+    </Card>
+  );
+}
+
 function PracticeTab({
   study,
   questions,
+  questionSets,
+  selectedSetId,
+  setTitle,
+  setCount,
+  setGenerating,
   loading,
   error,
   activeIndex,
@@ -720,6 +1014,10 @@ function PracticeTab({
   resumeLoading,
   onRetry,
   onResume,
+  onSelectSet,
+  onSetTitleChange,
+  onSetCountChange,
+  onGenerateSet,
   onAnswer,
   onActiveIndexChange,
   onSubmit,
@@ -766,6 +1064,20 @@ function PracticeTab({
   return (
     <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
       <div className="grid gap-5">
+        <QuestionSetControls
+          mode="practice"
+          sets={questionSets}
+          selectedSetId={selectedSetId}
+          title={setTitle}
+          count={setCount}
+          generating={setGenerating}
+          onSelectSet={onSelectSet}
+          onTitleChange={onSetTitleChange}
+          onCountChange={onSetCountChange}
+          onGenerate={onGenerateSet}
+          onRefresh={onRetry}
+        />
+
         <Card variant="default" className="p-5">
           <p className="text-h6 font-semibold uppercase text-primary poppins-font">
             Practice trainer
@@ -1112,6 +1424,11 @@ function ExamResultSummary({ result, onReset }) {
 function ExamTab({
   study,
   questions,
+  questionSets,
+  selectedSetId,
+  setTitle,
+  setCount,
+  setGenerating,
   loading,
   error,
   activeIndex,
@@ -1126,6 +1443,10 @@ function ExamTab({
   resumeLoading,
   onRetry,
   onResume,
+  onSelectSet,
+  onSetTitleChange,
+  onSetCountChange,
+  onGenerateSet,
   onTimerChange,
   onStart,
   onAddTime,
@@ -1166,12 +1487,27 @@ function ExamTab({
 
   if (!started) {
     return (
-      <ExamSetup
-        questions={questions}
-        selectedTimer={selectedTimer}
-        onTimerChange={onTimerChange}
-        onStart={onStart}
-      />
+      <div className="grid gap-5">
+        <QuestionSetControls
+          mode="exam"
+          sets={questionSets}
+          selectedSetId={selectedSetId}
+          title={setTitle}
+          count={setCount}
+          generating={setGenerating}
+          onSelectSet={onSelectSet}
+          onTitleChange={onSetTitleChange}
+          onCountChange={onSetCountChange}
+          onGenerate={onGenerateSet}
+          onRefresh={onRetry}
+        />
+        <ExamSetup
+          questions={questions}
+          selectedTimer={selectedTimer}
+          onTimerChange={onTimerChange}
+          onStart={onStart}
+        />
+      </div>
     );
   }
 
@@ -1188,6 +1524,20 @@ function ExamTab({
   return (
     <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
       <div className="grid gap-5">
+        <QuestionSetControls
+          mode="exam"
+          sets={questionSets}
+          selectedSetId={selectedSetId}
+          title={setTitle}
+          count={setCount}
+          generating={setGenerating}
+          onSelectSet={onSelectSet}
+          onTitleChange={onSetTitleChange}
+          onCountChange={onSetCountChange}
+          onGenerate={onGenerateSet}
+          onRefresh={onRetry}
+        />
+
         <Card variant="default" className="p-5">
           <p className="text-h6 font-semibold uppercase text-primary poppins-font">
             Exam attempt
@@ -1414,6 +1764,14 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [study, setStudy] = useState(null);
   const [material, setMaterial] = useState(null);
+  const [glossary, setGlossary] = useState(null);
+  const [glossaryLoading, setGlossaryLoading] = useState(false);
+  const [glossaryError, setGlossaryError] = useState("");
+  const [practiceQuestionSets, setPracticeQuestionSets] = useState([]);
+  const [selectedPracticeSetId, setSelectedPracticeSetId] = useState("");
+  const [practiceSetTitle, setPracticeSetTitle] = useState("");
+  const [practiceSetCount, setPracticeSetCount] = useState("");
+  const [practiceSetGenerating, setPracticeSetGenerating] = useState(false);
   const [practiceQuestions, setPracticeQuestions] = useState([]);
   const [practiceLoading, setPracticeLoading] = useState(false);
   const [practiceError, setPracticeError] = useState("");
@@ -1422,6 +1780,11 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [practiceSubmitLoading, setPracticeSubmitLoading] = useState(false);
   const [practiceSubmitError, setPracticeSubmitError] = useState("");
   const [practiceAttemptResult, setPracticeAttemptResult] = useState(null);
+  const [examQuestionSets, setExamQuestionSets] = useState([]);
+  const [selectedExamSetId, setSelectedExamSetId] = useState("");
+  const [examSetTitle, setExamSetTitle] = useState("");
+  const [examSetCount, setExamSetCount] = useState("");
+  const [examSetGenerating, setExamSetGenerating] = useState(false);
   const [examQuestions, setExamQuestions] = useState([]);
   const [examLoading, setExamLoading] = useState(false);
   const [examError, setExamError] = useState("");
@@ -1441,14 +1804,73 @@ export default function StudyWorkspaceClient({ studyId }) {
 
   const progress = useMemo(() => getProgressValue(study?.progress), [study]);
   const shouldPoll = study ? pollingStatuses.has(study.status) : false;
+  const shouldPollQuestionSets =
+    hasGeneratingSet(practiceQuestionSets) || hasGeneratingSet(examQuestionSets);
+
+  const loadGlossary = useCallback(async () => {
+    setGlossaryLoading(true);
+    setGlossaryError("");
+
+    try {
+      const data = await getStudyGlossary(studyId);
+      setGlossary(data);
+
+      if (!Array.isArray(data?.terms) || !data.terms.length) {
+        setGlossaryError("No glossary terms were returned for this Study.");
+      }
+    } catch (err) {
+      if (err.status === 404) {
+        setGlossary(null);
+        setGlossaryError("Glossary terms are not available yet.");
+      } else if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        setGlossaryError(err.message || "Could not load glossary terms.");
+      }
+    } finally {
+      setGlossaryLoading(false);
+    }
+  }, [studyId]);
 
   const loadPracticeQuestions = useCallback(async () => {
     setPracticeLoading(true);
     setPracticeError("");
 
     try {
+      try {
+        const setsData = await listPracticeQuestionSets(studyId);
+        const nextSets = normalizeList(setsData);
+        const readySets = getReadySets(nextSets);
+        const selectedReadySet = readySets.find(
+          (set) => set.id === selectedPracticeSetId
+        );
+        const nextSelectedSet =
+          selectedReadySet ||
+          (!selectedPracticeSetId ? readySets[readySets.length - 1] : null);
+
+        setPracticeQuestionSets(nextSets);
+
+        if (nextSelectedSet?.id) {
+          const setQuestions = await getPracticeQuestionSetQuestions(
+            studyId,
+            nextSelectedSet.id
+          );
+          const nextQuestions = normalizeList(setQuestions);
+          setSelectedPracticeSetId(nextSelectedSet.id);
+          setPracticeQuestions(nextQuestions);
+
+          if (!nextQuestions.length) {
+            setPracticeError("No practice questions were returned for this set.");
+          }
+
+          return;
+        }
+      } catch (setErr) {
+        if (isAuthError(setErr)) throw setErr;
+      }
+
       const data = await getPracticeQuestions(studyId);
-      const nextQuestions = Array.isArray(data) ? data : [];
+      const nextQuestions = normalizeList(data);
       setPracticeQuestions(nextQuestions);
 
       if (!nextQuestions.length) {
@@ -1466,15 +1888,45 @@ export default function StudyWorkspaceClient({ studyId }) {
     } finally {
       setPracticeLoading(false);
     }
-  }, [studyId]);
+  }, [selectedPracticeSetId, studyId]);
 
   const loadExamQuestions = useCallback(async () => {
     setExamLoading(true);
     setExamError("");
 
     try {
+      try {
+        const setsData = await listExamQuestionSets(studyId);
+        const nextSets = normalizeList(setsData);
+        const readySets = getReadySets(nextSets);
+        const selectedReadySet = readySets.find((set) => set.id === selectedExamSetId);
+        const nextSelectedSet =
+          selectedReadySet ||
+          (!selectedExamSetId ? readySets[readySets.length - 1] : null);
+
+        setExamQuestionSets(nextSets);
+
+        if (nextSelectedSet?.id) {
+          const setQuestions = await getExamQuestionSetQuestions(
+            studyId,
+            nextSelectedSet.id
+          );
+          const nextQuestions = normalizeList(setQuestions);
+          setSelectedExamSetId(nextSelectedSet.id);
+          setExamQuestions(nextQuestions);
+
+          if (!nextQuestions.length) {
+            setExamError("No exam questions were returned for this set.");
+          }
+
+          return;
+        }
+      } catch (setErr) {
+        if (isAuthError(setErr)) throw setErr;
+      }
+
       const data = await getExamQuestions(studyId);
-      const nextQuestions = Array.isArray(data) ? data : [];
+      const nextQuestions = normalizeList(data);
       setExamQuestions(nextQuestions);
 
       if (!nextQuestions.length) {
@@ -1492,7 +1944,7 @@ export default function StudyWorkspaceClient({ studyId }) {
     } finally {
       setExamLoading(false);
     }
-  }, [studyId]);
+  }, [selectedExamSetId, studyId]);
 
   const loadStudy = useCallback(
     async ({ showLoading = false } = {}) => {
@@ -1503,7 +1955,10 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (!hasAccessToken()) {
         setStudy(null);
         setMaterial(null);
+        setGlossary(null);
+        setPracticeQuestionSets([]);
         setPracticeQuestions([]);
+        setExamQuestionSets([]);
         setExamQuestions([]);
         setAuthRequired(true);
         setLoading(false);
@@ -1526,22 +1981,33 @@ export default function StudyWorkspaceClient({ studyId }) {
           setMaterial(null);
         }
 
+        if (glossaryReadyStatuses.has(nextStudy.status)) {
+          await loadGlossary();
+        } else {
+          setGlossary(null);
+        }
+
         if (practiceReadyStatuses.has(nextStudy.status)) {
           await loadPracticeQuestions();
         } else {
+          setPracticeQuestionSets([]);
           setPracticeQuestions([]);
         }
 
         if (nextStudy.status === "exam_ready") {
           await loadExamQuestions();
         } else {
+          setExamQuestionSets([]);
           setExamQuestions([]);
         }
       } catch (err) {
         if (isAuthError(err)) {
           setStudy(null);
           setMaterial(null);
+          setGlossary(null);
+          setPracticeQuestionSets([]);
           setPracticeQuestions([]);
+          setExamQuestionSets([]);
           setExamQuestions([]);
           setAuthRequired(true);
         } else if (err.status === 404) {
@@ -1553,7 +2019,7 @@ export default function StudyWorkspaceClient({ studyId }) {
         setLoading(false);
       }
     },
-    [loadExamQuestions, loadPracticeQuestions, studyId]
+    [loadExamQuestions, loadGlossary, loadPracticeQuestions, studyId]
   );
 
   useEffect(() => {
@@ -1569,6 +2035,23 @@ export default function StudyWorkspaceClient({ studyId }) {
 
     return () => window.clearInterval(interval);
   }, [loadStudy, shouldPoll]);
+
+  useEffect(() => {
+    if (!shouldPollQuestionSets) return undefined;
+
+    const interval = window.setInterval(() => {
+      if (practiceQuestionSets.length) loadPracticeQuestions();
+      if (examQuestionSets.length) loadExamQuestions();
+    }, 4000);
+
+    return () => window.clearInterval(interval);
+  }, [
+    examQuestionSets.length,
+    loadExamQuestions,
+    loadPracticeQuestions,
+    practiceQuestionSets.length,
+    shouldPollQuestionSets,
+  ]);
 
   useEffect(() => {
     if (
@@ -1604,6 +2087,7 @@ export default function StudyWorkspaceClient({ studyId }) {
   const handleResume = async () => {
     setResumeLoading(true);
     setError("");
+    setGlossaryError("");
     setPracticeError("");
     setExamError("");
     setAuthRequired(false);
@@ -1612,7 +2096,10 @@ export default function StudyWorkspaceClient({ studyId }) {
       const nextStudy = await resumeStudyGeneration(studyId);
       setStudy(nextStudy);
       setMaterial(null);
+      setGlossary(null);
+      setPracticeQuestionSets([]);
       setPracticeQuestions([]);
+      setExamQuestionSets([]);
       setExamQuestions([]);
     } catch (err) {
       if (isAuthError(err)) {
@@ -1622,6 +2109,135 @@ export default function StudyWorkspaceClient({ studyId }) {
       }
     } finally {
       setResumeLoading(false);
+    }
+  };
+
+  const resetPracticeAttemptState = () => {
+    setActivePracticeIndex(0);
+    setPracticeAnswers({});
+    setPracticeSubmitError("");
+    setPracticeAttemptResult(null);
+  };
+
+  const resetExamAttemptState = () => {
+    setActiveExamIndex(0);
+    setExamAnswers({});
+    setExamStarted(false);
+    setSelectedExamTimer(0);
+    setExamSecondsRemaining(0);
+    setExamTimedOut(false);
+    setExamSubmitError("");
+    setExamAttemptResult(null);
+  };
+
+  const handleSelectPracticeSet = (questionSetId) => {
+    setSelectedPracticeSetId(questionSetId);
+    resetPracticeAttemptState();
+    setPracticeLoading(true);
+    setPracticeError("");
+
+    getPracticeQuestionSetQuestions(studyId, questionSetId)
+      .then((data) => {
+        const nextQuestions = normalizeList(data);
+        setPracticeQuestions(nextQuestions);
+
+        if (!nextQuestions.length) {
+          setPracticeError("No practice questions were returned for this set.");
+        }
+      })
+      .catch((err) => {
+        if (isAuthError(err)) {
+          setAuthRequired(true);
+        } else {
+          setPracticeError(err.message || "Could not load this practice set.");
+        }
+      })
+      .finally(() => setPracticeLoading(false));
+  };
+
+  const handleSelectExamSet = (questionSetId) => {
+    setSelectedExamSetId(questionSetId);
+    resetExamAttemptState();
+    setExamLoading(true);
+    setExamError("");
+
+    getExamQuestionSetQuestions(studyId, questionSetId)
+      .then((data) => {
+        const nextQuestions = normalizeList(data);
+        setExamQuestions(nextQuestions);
+
+        if (!nextQuestions.length) {
+          setExamError("No exam questions were returned for this set.");
+        }
+      })
+      .catch((err) => {
+        if (isAuthError(err)) {
+          setAuthRequired(true);
+        } else {
+          setExamError(err.message || "Could not load this exam set.");
+        }
+      })
+      .finally(() => setExamLoading(false));
+  };
+
+  const handleGeneratePracticeSet = async () => {
+    const nextTitle =
+      practiceSetTitle.trim() || `Practice Set ${practiceQuestionSets.length + 1}`;
+    const nextCount = clampQuestionCount(
+      practiceSetCount || study?.practice_question_count || 10
+    );
+
+    setPracticeSetGenerating(true);
+    setPracticeError("");
+    setAuthRequired(false);
+
+    try {
+      const createdSet = await generatePracticeQuestionSet(studyId, {
+        title: nextTitle,
+        questionCount: nextCount,
+      });
+      setPracticeSetTitle("");
+      setPracticeSetCount("");
+      setSelectedPracticeSetId(createdSet?.id || "");
+      resetPracticeAttemptState();
+      await loadPracticeQuestions();
+    } catch (err) {
+      if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        setPracticeError(err.message || "Could not generate a practice set.");
+      }
+    } finally {
+      setPracticeSetGenerating(false);
+    }
+  };
+
+  const handleGenerateExamSet = async () => {
+    const nextTitle = examSetTitle.trim() || `Exam Set ${examQuestionSets.length + 1}`;
+    const nextCount = clampQuestionCount(examSetCount || study?.exam_question_count || 12);
+
+    setExamSetGenerating(true);
+    setExamError("");
+    setAuthRequired(false);
+
+    try {
+      const createdSet = await generateExamQuestionSet(studyId, {
+        title: nextTitle,
+        questionCount: nextCount,
+      });
+      setExamSetTitle("");
+      setExamSetCount("");
+      setSelectedExamSetId(createdSet?.id || "");
+      resetExamAttemptState();
+      await loadExamQuestions();
+    } catch (err) {
+      if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        setExamError(err.message || "Could not generate an exam set.");
+      }
+    } finally {
+      setExamSetGenerating(false);
     }
   };
 
@@ -1665,10 +2281,7 @@ export default function StudyWorkspaceClient({ studyId }) {
   };
 
   const handlePracticeReset = () => {
-    setActivePracticeIndex(0);
-    setPracticeAnswers({});
-    setPracticeSubmitError("");
-    setPracticeAttemptResult(null);
+    resetPracticeAttemptState();
   };
 
   const handleStartExam = () => {
@@ -1722,14 +2335,7 @@ export default function StudyWorkspaceClient({ studyId }) {
   };
 
   const handleExamReset = () => {
-    setActiveExamIndex(0);
-    setExamAnswers({});
-    setExamStarted(false);
-    setSelectedExamTimer(0);
-    setExamSecondsRemaining(0);
-    setExamTimedOut(false);
-    setExamSubmitError("");
-    setExamAttemptResult(null);
+    resetExamAttemptState();
   };
 
   if (authRequired) {
@@ -1760,11 +2366,28 @@ export default function StudyWorkspaceClient({ studyId }) {
         );
       case "material":
         return <MaterialTab material={material} />;
+      case "glossary":
+        return (
+          <GlossaryTab
+            study={study}
+            glossary={glossary}
+            loading={glossaryLoading}
+            error={glossaryError}
+            onRetry={() => loadStudy()}
+            onResume={handleResume}
+            resumeLoading={resumeLoading}
+          />
+        );
       case "practice":
         return (
           <PracticeTab
             study={study}
             questions={practiceQuestions}
+            questionSets={practiceQuestionSets}
+            selectedSetId={selectedPracticeSetId}
+            setTitle={practiceSetTitle}
+            setCount={practiceSetCount}
+            setGenerating={practiceSetGenerating}
             loading={practiceLoading}
             error={practiceError}
             activeIndex={activePracticeIndex}
@@ -1775,6 +2398,10 @@ export default function StudyWorkspaceClient({ studyId }) {
             resumeLoading={resumeLoading}
             onRetry={() => loadStudy()}
             onResume={handleResume}
+            onSelectSet={handleSelectPracticeSet}
+            onSetTitleChange={setPracticeSetTitle}
+            onSetCountChange={setPracticeSetCount}
+            onGenerateSet={handleGeneratePracticeSet}
             onAnswer={handlePracticeAnswer}
             onActiveIndexChange={setActivePracticeIndex}
             onSubmit={handlePracticeSubmit}
@@ -1786,6 +2413,11 @@ export default function StudyWorkspaceClient({ studyId }) {
           <ExamTab
             study={study}
             questions={examQuestions}
+            questionSets={examQuestionSets}
+            selectedSetId={selectedExamSetId}
+            setTitle={examSetTitle}
+            setCount={examSetCount}
+            setGenerating={examSetGenerating}
             loading={examLoading}
             error={examError}
             activeIndex={activeExamIndex}
@@ -1800,6 +2432,10 @@ export default function StudyWorkspaceClient({ studyId }) {
             resumeLoading={resumeLoading}
             onRetry={() => loadStudy()}
             onResume={handleResume}
+            onSelectSet={handleSelectExamSet}
+            onSetTitleChange={setExamSetTitle}
+            onSetCountChange={setExamSetCount}
+            onGenerateSet={handleGenerateExamSet}
             onTimerChange={setSelectedExamTimer}
             onStart={handleStartExam}
             onAddTime={handleAddExamTime}

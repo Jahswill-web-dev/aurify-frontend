@@ -102,19 +102,49 @@ export async function apiRequest(path, options = {}) {
 
 export const listStudies = () => apiRequest("/studies");
 export const getStudy = (studyId) => apiRequest(`/studies/${studyId}`);
+export const getStudyResearchContext = (studyId) =>
+  apiRequest(`/studies/${studyId}/research-context`);
+export const getStudyOutline = (studyId) =>
+  apiRequest(`/studies/${studyId}/outline`);
 export const getStudyMaterial = (studyId) =>
   apiRequest(`/studies/${studyId}/material`);
+export const getStudyGlossary = (studyId) =>
+  apiRequest(`/studies/${studyId}/glossary`);
 export const getPracticeQuestions = (studyId) =>
   apiRequest(`/studies/${studyId}/practice-questions`);
 export const getExamQuestions = (studyId) =>
   apiRequest(`/studies/${studyId}/exam-questions`);
 export const resumeStudyGeneration = (studyId) =>
   apiRequest(`/studies/${studyId}/generation/resume`, { method: "POST" });
+export const generateStudyOutline = (studyId) =>
+  apiRequest(`/studies/${studyId}/outline/generate`, { method: "POST" });
+export const generateStudyMaterial = (studyId) =>
+  apiRequest(`/studies/${studyId}/material/generate`, { method: "POST" });
 export const createStudy = (payload) =>
   apiRequest("/studies", {
     method: "POST",
     body: JSON.stringify(payload),
   });
+export const listPracticeQuestionSets = (studyId) =>
+  apiRequest(`/studies/${studyId}/practice-question-sets`);
+export const generatePracticeQuestionSet = (studyId, payload = {}) =>
+  apiRequest(`/studies/${studyId}/practice-question-sets/generate`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+export const getPracticeQuestionSetQuestions = (studyId, questionSetId) =>
+  apiRequest(
+    `/studies/${studyId}/practice-question-sets/${questionSetId}/questions`
+  );
+export const listExamQuestionSets = (studyId) =>
+  apiRequest(`/studies/${studyId}/exam-question-sets`);
+export const generateExamQuestionSet = (studyId, payload = {}) =>
+  apiRequest(`/studies/${studyId}/exam-question-sets/generate`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+export const getExamQuestionSetQuestions = (studyId, questionSetId) =>
+  apiRequest(`/studies/${studyId}/exam-question-sets/${questionSetId}/questions`);
 export const submitPracticeAttempt = (studyId, answers) =>
   apiRequest(`/studies/${studyId}/practice-attempts`, {
     method: "POST",

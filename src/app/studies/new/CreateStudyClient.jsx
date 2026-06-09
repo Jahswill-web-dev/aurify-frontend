@@ -13,7 +13,12 @@ import {
 import { Badge, Button, Card } from "@/components/ui";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
-import { createStudy, isAuthError, parseStudyInput } from "@/app/lib/aurifyApi";
+import {
+  createStudy,
+  hasAccessToken,
+  isAuthError,
+  parseStudyInput,
+} from "@/app/lib/aurifyApi";
 
 const examplePrompts = [
   "Teach me system design for senior backend interviews. Focus on scaling a chat app, database choices, caching, queues, tradeoffs, and mock interview questions.",
@@ -264,6 +269,7 @@ export default function CreateStudyClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [authRequired, setAuthRequired] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   const clarificationPayload = useMemo(() => {
     if (!clarification || !selectedClarification) return null;
@@ -273,6 +279,11 @@ export default function CreateStudyClient() {
       value: selectedClarification,
     };
   }, [clarification, selectedClarification]);
+
+  useEffect(() => {
+    setAuthRequired(!hasAccessToken());
+    setSessionChecked(true);
+  }, []);
 
   const runParser = async (nextClarification) => {
     setLoading(true);
@@ -327,6 +338,18 @@ export default function CreateStudyClient() {
     setParsedStudy(null);
     setError("");
   };
+
+  if (!sessionChecked) {
+    return (
+      <main className="min-h-screen bg-off-white-100 px-4 py-10 dark:bg-dark-bg">
+        <Card variant="default" className="mx-auto max-w-[640px] p-8 text-center">
+          <p className="text-h4 font-semibold text-grey-200 poppins-font dark:text-dark-text">
+            Checking your session...
+          </p>
+        </Card>
+      </main>
+    );
+  }
 
   if (authRequired) {
     return (
