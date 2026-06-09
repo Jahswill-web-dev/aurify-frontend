@@ -13,6 +13,8 @@ import {
   Clock,
   FileText,
   LayoutDashboard,
+  Circle,
+  Loader2,
   Play,
   Plus,
   RotateCcw,
@@ -122,6 +124,124 @@ const statusConfig = {
   exam_ready: { label: "Exam ready", variant: "primary" },
   failed: { label: "Failed", variant: "error" },
 };
+
+const generationSteps = [
+  {
+    id: "research",
+    title: "Research context",
+    activeLabel: "Generating research context",
+    doneLabel: "Research context generation done",
+    waitingLabel: "Research context queued",
+    generatingStatus: "generating_research",
+    readyStatuses: [
+      "research_ready",
+      "generating_outline",
+      "outline_ready",
+      "generating_material",
+      "material_ready",
+      "generating_glossary",
+      "glossary_ready",
+      "generating_practice_questions",
+      "practice_ready",
+      "generating_exam_questions",
+      "exam_ready",
+    ],
+  },
+  {
+    id: "outline",
+    title: "Study outline",
+    activeLabel: "Generating study outline",
+    doneLabel: "Study outline generation done",
+    waitingLabel: "Study outline queued",
+    generatingStatus: "generating_outline",
+    readyStatuses: [
+      "outline_ready",
+      "generating_material",
+      "material_ready",
+      "generating_glossary",
+      "glossary_ready",
+      "generating_practice_questions",
+      "practice_ready",
+      "generating_exam_questions",
+      "exam_ready",
+    ],
+  },
+  {
+    id: "material",
+    title: "Study material",
+    activeLabel: "Generating study material",
+    doneLabel: "Study material generation done",
+    waitingLabel: "Study material queued",
+    generatingStatus: "generating_material",
+    readyStatuses: [
+      "material_ready",
+      "generating_glossary",
+      "glossary_ready",
+      "generating_practice_questions",
+      "practice_ready",
+      "generating_exam_questions",
+      "exam_ready",
+    ],
+  },
+  {
+    id: "glossary",
+    title: "Glossary",
+    activeLabel: "Generating glossary",
+    doneLabel: "Glossary generation done",
+    waitingLabel: "Glossary queued",
+    generatingStatus: "generating_glossary",
+    readyStatuses: [
+      "glossary_ready",
+      "generating_practice_questions",
+      "practice_ready",
+      "generating_exam_questions",
+      "exam_ready",
+    ],
+  },
+  {
+    id: "practice",
+    title: "Practice questions",
+    activeLabel: "Generating practice questions",
+    doneLabel: "Practice question generation done",
+    waitingLabel: "Practice questions queued",
+    generatingStatus: "generating_practice_questions",
+    readyStatuses: ["practice_ready", "generating_exam_questions", "exam_ready"],
+  },
+  {
+    id: "exam",
+    title: "Exam questions",
+    activeLabel: "Generating exam questions",
+    doneLabel: "Exam question generation done",
+    waitingLabel: "Exam questions queued",
+    generatingStatus: "generating_exam_questions",
+    readyStatuses: ["exam_ready"],
+  },
+];
+
+const visibleGenerationStatuses = new Set([
+  "queued",
+  "research_ready",
+  "outline_ready",
+  "material_ready",
+  "glossary_ready",
+  "practice_ready",
+  ...pollingStatuses,
+]);
+
+const getGenerationStepState = (status, step, index) => {
+  if (step.readyStatuses.includes(status)) return "done";
+  if (status === step.generatingStatus) return "active";
+  if (status === "queued" && index === 0) return "active";
+  return "waiting";
+};
+
+const getActiveGenerationStep = (status) => {
+  if (status === "queued") return generationSteps[0];
+  return generationSteps.find((step) => step.generatingStatus === status);
+};
+
+const getNextGenerationStep = (status) =>
+  generationSteps.find((step, index) => getGenerationStepState(status, step, index) === "waiting");
 
 const clamp = (value) => Math.max(0, Math.min(100, value));
 const clampQuestionCount = (value) => {
@@ -329,24 +449,150 @@ function GenerationNotice({ study, polling, onResume, resumeLoading }) {
     );
   }
 
-  if (!polling) return null;
+  if (!visibleGenerationStatuses.has(study.status) || study.status === "exam_ready") {
+    return null;
+  }
+
+  const activeStep = getActiveGenerationStep(study.status);
+  const nextStep = activeStep ? null : getNextGenerationStep(study.status);
+  const completedCount = generationSteps.filter(
+    (step, index) => getGenerationStepState(study.status, step, index) === "done"
+  ).length;
+  const primaryLabel =
+    activeStep?.activeLabel ||
+    (nextStep ? `${nextStep.title} is up next` : "Finishing your Study");
+  const helperLabel = activeStep
+    ? "Aurify is working through this step now."
+    : "The previous step is ready. Aurify will continue when the next generation step starts.";
 
   return (
-    <Card variant="accent" className="mb-5 p-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-h4 font-semibold text-grey-200 poppins-font">
-            Building your Study
-          </h2>
-          <p className="mt-1 text-h5 leading-7 text-p-text-darker inter-font">
-            {polling
-              ? "This page will update automatically as the backend finishes each generation step."
-              : "Refresh to check whether the backend has finished generation."}
-          </p>
+    <Card
+      variant="default"
+      className="mb-5 overflow-hidden border-primary/30 bg-white p-0 shadow-panel dark:border-primary-25/30 dark:bg-dark-surface"
+    >
+      <div className="border-b border-grey-25 bg-off-white-100 px-5 py-4 dark:border-dark-border dark:bg-dark-surface-soft sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 gap-3">
+            <div className="relative mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-primary/30 bg-accent-100 text-primary dark:border-primary-25/30 dark:bg-dark-surface dark:text-primary-25">
+              {activeStep ? (
+                <Loader2 className="h-5 w-5 aurify-loader-spin" aria-hidden="true" />
+              ) : (
+                <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <div className="mb-1 flex flex-wrap items-center gap-2">
+                <p className="text-h6 font-semibold uppercase text-primary poppins-font dark:text-primary-25">
+                  Building your Study
+                </p>
+                <Badge variant="accent">
+                  {completedCount}/{generationSteps.length} done
+                </Badge>
+              </div>
+              <h2 className="break-words text-h4 font-semibold leading-7 text-grey-200 poppins-font dark:text-dark-text">
+                {primaryLabel}
+              </h2>
+              <p className="mt-1 text-h5 leading-6 text-p-text-darker inter-font dark:text-dark-muted">
+                {helperLabel}
+              </p>
+            </div>
+          </div>
+          <Badge variant={polling ? "accent" : "neutral"}>
+            {polling ? "Live update" : "Ready"}
+          </Badge>
         </div>
-        <Badge variant="accent">
-          {statusConfig[study.status]?.label || "Generating"}
-        </Badge>
+      </div>
+
+      <div className="grid gap-2 p-4 sm:p-5" role="list" aria-label="Study generation progress">
+        {generationSteps.map((step, index) => {
+          const state = getGenerationStepState(study.status, step, index);
+          const isDone = state === "done";
+          const isActive = state === "active";
+          const label = isDone
+            ? step.doneLabel
+            : isActive
+              ? step.activeLabel
+              : step.waitingLabel;
+
+          return (
+            <div
+              key={step.id}
+              role="listitem"
+              className={[
+                "flex items-start gap-3 rounded-md border px-3 py-3 transition-all duration-250 ease-smooth",
+                isDone
+                  ? "border-success/25 bg-success-light/70 dark:border-success/30 dark:bg-success/10"
+                  : "",
+                isActive
+                  ? "border-primary/40 bg-accent-25 shadow-card dark:border-primary-25/40 dark:bg-dark-surface-soft"
+                  : "",
+                !isDone && !isActive
+                  ? "border-grey-25 bg-white dark:border-dark-border dark:bg-dark-surface"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <div
+                className={[
+                  "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
+                  isDone
+                    ? "border-success bg-success text-white"
+                    : "",
+                  isActive
+                    ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
+                    : "",
+                  !isDone && !isActive
+                    ? "border-grey-25 bg-off-white-100 text-grey-100 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {isDone ? (
+                  <CheckCircle2 size={15} aria-hidden="true" />
+                ) : isActive ? (
+                  <Loader2 size={15} className="aurify-loader-spin" aria-hidden="true" />
+                ) : (
+                  <Circle size={10} aria-hidden="true" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <p
+                    className={[
+                      "break-words text-h5 font-semibold leading-6 inter-font",
+                      isDone
+                        ? "text-grey-200 dark:text-dark-text"
+                        : isActive
+                          ? "text-primary-200 dark:text-primary-25"
+                          : "text-p-text dark:text-dark-muted",
+                    ].join(" ")}
+                  >
+                    {label}
+                  </p>
+                  <span
+                    className={[
+                      "shrink-0 text-h6 font-semibold uppercase inter-font",
+                      isDone
+                        ? "text-success"
+                        : isActive
+                          ? "text-primary dark:text-primary-25"
+                          : "text-grey-100 dark:text-dark-muted",
+                    ].join(" ")}
+                  >
+                    {isDone ? "Done" : isActive ? "Generating" : index === completedCount ? "Up next" : "Queued"}
+                  </span>
+                </div>
+                {isActive ? (
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-off-white-50 dark:bg-dark-bg">
+                    <div className="h-full w-1/2 rounded-full bg-primary aurify-loader-slide dark:bg-dark-accent" />
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </Card>
   );
