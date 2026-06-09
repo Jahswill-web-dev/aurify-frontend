@@ -21,7 +21,7 @@ import {
   Trophy,
   XCircle,
 } from "lucide-react";
-import { Badge, Button, Card, Tabs } from "@/components/ui";
+import { Badge, Button, Card, LoadingExperience, Tabs } from "@/components/ui";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import {
@@ -38,6 +38,7 @@ import {
   isAuthError,
   listExamQuestionSets,
   listPracticeQuestionSets,
+  regenerateStudyGlossary,
   resumeStudyGeneration,
   submitExamAttempt,
   submitPracticeAttempt,
@@ -55,15 +56,10 @@ const workspaceTabs = [
 const pollingStatuses = new Set([
   "queued",
   "generating_research",
-  "research_ready",
   "generating_outline",
-  "outline_ready",
   "generating_material",
-  "material_ready",
   "generating_glossary",
-  "glossary_ready",
   "generating_practice_questions",
-  "practice_ready",
   "generating_exam_questions",
 ]);
 
@@ -78,6 +74,15 @@ const materialReadyStatuses = new Set([
 ]);
 
 const glossaryReadyStatuses = new Set([
+  "glossary_ready",
+  "generating_practice_questions",
+  "practice_ready",
+  "generating_exam_questions",
+  "exam_ready",
+]);
+
+const glossaryRegenerableStatuses = new Set([
+  "material_ready",
   "glossary_ready",
   "generating_practice_questions",
   "practice_ready",
@@ -135,6 +140,38 @@ const hasGeneratingSet = (sets) =>
   sets.some((set) => set.status === "queued" || set.status === "generating");
 
 const getReadySets = (sets) => sets.filter((set) => set.status === "ready");
+const latestSetId = "__latest_questions__";
+
+const getSetQuestionCount = (set, fallback = 0) =>
+  set?.question_count || set?.generated_question_count || set?.questions_count || fallback;
+
+const getQuestionSetCards = ({ mode, sets, questions }) => {
+  const label = mode === "practice" ? "Practice Set" : "Exam Set";
+  const readySets = getReadySets(sets);
+
+  if (readySets.length) {
+    return readySets.map((set, index) => ({
+      ...set,
+      title: set.title || `${label} ${index + 1}`,
+      questionCount: getSetQuestionCount(set),
+      isFallback: false,
+    }));
+  }
+
+  if (questions.length) {
+    return [
+      {
+        id: latestSetId,
+        title: mode === "practice" ? "Latest Practice" : "Latest Exam",
+        questionCount: questions.length,
+        status: "ready",
+        isFallback: true,
+      },
+    ];
+  }
+
+  return [];
+};
 
 function getTitle(study) {
   return study?.title || study?.topic || "Untitled Study";
@@ -225,13 +262,10 @@ function WorkspaceHeader({ study, progress }) {
 
 function LoadingState() {
   return (
-    <main className="min-h-screen bg-off-white-100 px-4 py-10 dark:bg-dark-bg">
-      <Card variant="default" className="mx-auto max-w-[640px] p-8 text-center">
-        <p className="text-h4 font-semibold text-grey-200 poppins-font">
-          Loading Study...
-        </p>
-      </Card>
-    </main>
+    <LoadingExperience
+      title="Loading this Study"
+      message="Preparing your material, question sets, and progress."
+    />
   );
 }
 
@@ -263,8 +297,6 @@ function ErrorState({ message, onRetry }) {
 }
 
 function GenerationNotice({ study, polling, onResume, resumeLoading }) {
-  if (study.status === "exam_ready") return null;
-
   if (study.status === "failed") {
     return (
       <Card variant="default" className="mb-5 border-error bg-error-light p-5">
@@ -294,6 +326,8 @@ function GenerationNotice({ study, polling, onResume, resumeLoading }) {
       </Card>
     );
   }
+
+  if (!polling) return null;
 
   return (
     <Card variant="accent" className="mb-5 p-5">
@@ -652,15 +686,23 @@ function MaterialTab({ material }) {
   );
 }
 
-function GlossaryTab({ study, glossary, loading, error, onRetry, onResume, resumeLoading }) {
+function GlossaryTab({
+  study,
+  glossary,
+  loading,
+  error,
+  onRetry,
+  onResume,
+  resumeLoading,
+  onRegenerate,
+  regenerateLoading,
+}) {
   const isReady = glossaryReadyStatuses.has(study?.status);
   const terms = Array.isArray(glossary?.terms) ? glossary.terms : [];
-  const canResumeGlossary =
-    study?.status === "material_ready" ||
-    study?.status === "glossary_ready" ||
-    study?.status === "failed";
-  const resumeLabel =
-    study?.status === "material_ready" ? "Generate Glossary" : "Resume Generation";
+  const isFailed = study?.status === "failed";
+  const canGenerateGlossary = glossaryRegenerableStatuses.has(study?.status);
+  const glossaryActionLabel =
+    study?.status === "material_ready" ? "Generate Glossary" : "Regenerate Glossary";
 
   if (!isReady) {
     return (
@@ -677,7 +719,18 @@ function GlossaryTab({ study, glossary, loading, error, onRetry, onResume, resum
             <RefreshCw size={16} aria-hidden="true" />
             Refresh
           </Button>
-          {canResumeGlossary ? (
+          {canGenerateGlossary ? (
+            <Button
+              variant="ghost"
+              size="md"
+              loading={regenerateLoading}
+              onClick={onRegenerate}
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+              {glossaryActionLabel}
+            </Button>
+          ) : null}
+          {isFailed ? (
             <Button
               variant="ghost"
               size="md"
@@ -685,7 +738,7 @@ function GlossaryTab({ study, glossary, loading, error, onRetry, onResume, resum
               onClick={onResume}
             >
               <RotateCcw size={16} aria-hidden="true" />
-              {resumeLabel}
+              Resume Generation
             </Button>
           ) : null}
         </div>
@@ -695,12 +748,11 @@ function GlossaryTab({ study, glossary, loading, error, onRetry, onResume, resum
 
   if (loading) {
     return (
-      <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
-        <BookOpen className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
-        <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
-          Glossary is loading
-        </h2>
-      </Card>
+      <LoadingExperience
+        variant="panel"
+        title="Loading glossary"
+        message="Organizing key terms and definitions for this Study."
+      />
     );
   }
 
@@ -719,7 +771,18 @@ function GlossaryTab({ study, glossary, loading, error, onRetry, onResume, resum
             <RefreshCw size={16} aria-hidden="true" />
             Refresh
           </Button>
-          {canResumeGlossary ? (
+          {canGenerateGlossary ? (
+            <Button
+              variant="ghost"
+              size="md"
+              loading={regenerateLoading}
+              onClick={onRegenerate}
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+              {glossaryActionLabel}
+            </Button>
+          ) : null}
+          {isFailed ? (
             <Button
               variant="ghost"
               size="md"
@@ -727,7 +790,7 @@ function GlossaryTab({ study, glossary, loading, error, onRetry, onResume, resum
               onClick={onResume}
             >
               <RotateCcw size={16} aria-hidden="true" />
-              {resumeLabel}
+              Resume Generation
             </Button>
           ) : null}
         </div>
@@ -804,15 +867,11 @@ function GlossaryTab({ study, glossary, loading, error, onRetry, onResume, resum
 
 function PracticeLoadingState() {
   return (
-    <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
-      <BookOpen className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
-      <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
-        Practice is loading
-      </h2>
-      <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
-        The Study is ready. Questions will appear here in a moment.
-      </p>
-    </Card>
+    <LoadingExperience
+      variant="panel"
+      title="Loading practice sets"
+      message="Preparing questions and checking your saved progress."
+    />
   );
 }
 
@@ -900,99 +959,203 @@ function PracticeResultSummary({ result, onReset }) {
   );
 }
 
-function QuestionSetControls({
+function QuestionSetLanding({
   mode,
   sets,
-  selectedSetId,
+  questions,
   title,
   count,
   generating,
+  error,
   onSelectSet,
   onTitleChange,
   onCountChange,
   onGenerate,
   onRefresh,
 }) {
-  const readySets = getReadySets(sets);
-  const selectedSet = sets.find((set) => set.id === selectedSetId);
+  const cards = getQuestionSetCards({ mode, sets, questions });
   const label = mode === "practice" ? "Practice set" : "Exam set";
+  const titleText = mode === "practice" ? "Practice question sets" : "Exam question sets";
+  const actionText = mode === "practice" ? "Start Practice" : "Start Exam";
   const nextNumber = sets.length + 1;
 
   return (
-    <Card variant="default" className="p-5">
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+    <div className="grid gap-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <p className="text-h6 font-semibold uppercase text-primary poppins-font">
             Question sets
           </p>
-          <h2 className="mt-1 text-h4 font-semibold text-grey-200 poppins-font">
-            {readySets.length ? `${readySets.length} ready` : "Using latest questions"}
+          <h2 className="mt-1 text-h2 font-bold text-grey-200 poppins-font">
+            {titleText}
           </h2>
         </div>
-        {selectedSet ? (
-          <Badge variant={selectedSet.status === "ready" ? "primary" : "accent"}>
-            {selectedSet.status}
-          </Badge>
-        ) : null}
+        <Button variant="ghost" size="md" onClick={onRefresh}>
+          <RefreshCw size={16} aria-hidden="true" />
+          Refresh
+        </Button>
       </div>
 
-      {readySets.length ? (
-        <label className="grid gap-1 text-h6 font-medium text-p-text inter-font">
-          <span>{label}</span>
-          <select
-            value={selectedSetId || ""}
-            onChange={(event) => onSelectSet(event.target.value)}
-            className="min-h-[42px] rounded-sm border border-grey-25 bg-white px-3 text-h5 text-grey-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text"
-          >
-            {readySets.map((set, index) => (
-              <option key={set.id} value={set.id}>
-                {set.title || `${label} ${index + 1}`} ({set.question_count || set.generated_question_count || "?"})
-              </option>
-            ))}
-          </select>
-        </label>
+      {error ? (
+        <div className="flex items-start gap-3 rounded-md border border-error bg-error-light px-4 py-3 text-error">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          <p className="text-h5 leading-6 inter-font">{error}</p>
+        </div>
       ) : null}
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_110px]">
-        <label className="grid gap-1 text-h6 font-medium text-p-text inter-font">
-          <span>New title</span>
-          <input
-            value={title}
-            onChange={(event) => onTitleChange(event.target.value)}
-            placeholder={`${label} ${nextNumber}`}
-            className="min-h-[42px] rounded-sm border border-grey-25 bg-white px-3 text-h5 text-grey-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text"
-          />
-        </label>
-        <label className="grid gap-1 text-h6 font-medium text-p-text inter-font">
-          <span>Count</span>
-          <input
-            value={count}
-            min={5}
-            max={30}
-            type="number"
-            onChange={(event) => onCountChange(event.target.value)}
-            className="min-h-[42px] rounded-sm border border-grey-25 bg-white px-3 text-h5 text-grey-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text"
-          />
-        </label>
-      </div>
+      {cards.length ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {cards.map((set) => (
+            <Card
+              key={set.id}
+              variant="default"
+              onClick={() => onSelectSet(set.id)}
+              className="flex min-h-[190px] flex-col justify-between p-5"
+            >
+              <div>
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent-100 text-primary dark:bg-dark-surface-soft dark:text-primary-25">
+                    {mode === "practice" ? (
+                      <BookOpen size={20} aria-hidden="true" />
+                    ) : (
+                      <ClipboardCheck size={20} aria-hidden="true" />
+                    )}
+                  </div>
+                  {set.isFallback ? (
+                    <Badge variant="neutral">Latest</Badge>
+                  ) : set.status && set.status !== "ready" ? (
+                    <Badge variant="accent">{set.status}</Badge>
+                  ) : null}
+                </div>
+                <h3 className="break-words text-h3 font-semibold leading-7 text-grey-200 poppins-font">
+                  {set.title}
+                </h3>
+                <p className="mt-3 text-h5 text-p-text-darker inter-font">
+                  {set.questionCount || "?"} questions
+                </p>
+              </div>
+              <div className="mt-5 flex items-center justify-between border-t border-grey-25 pt-4 dark:border-dark-border">
+                <span className="text-h5 font-semibold text-primary inter-font">
+                  {actionText}
+                </span>
+                <Play size={17} className="text-primary" aria-hidden="true" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Card variant="default" className="p-6 text-center">
+          <h3 className="text-h3 font-semibold text-grey-200 poppins-font">
+            No ready sets yet
+          </h3>
+          <p className="mx-auto mt-2 max-w-[560px] text-h5 leading-7 text-p-text-darker inter-font">
+            Generate a {label} to start working through questions.
+          </p>
+        </Card>
+      )}
 
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+      <Card variant="default" className="p-5">
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_110px]">
+          <label className="grid gap-1 text-h6 font-medium text-p-text inter-font">
+            <span>New title</span>
+            <input
+              value={title}
+              onChange={(event) => onTitleChange(event.target.value)}
+              placeholder={`${label} ${nextNumber}`}
+              className="min-h-[42px] rounded-sm border border-grey-25 bg-white px-3 text-h5 text-grey-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text"
+            />
+          </label>
+          <label className="grid gap-1 text-h6 font-medium text-p-text inter-font">
+            <span>Count</span>
+            <input
+              value={count}
+              min={5}
+              max={30}
+              type="number"
+              onChange={(event) => onCountChange(event.target.value)}
+              className="min-h-[42px] rounded-sm border border-grey-25 bg-white px-3 text-h5 text-grey-200 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-text"
+            />
+          </label>
+        </div>
+
         <Button
           variant="primary"
           size="md"
           loading={generating}
           onClick={onGenerate}
-          className="flex-1"
+          className="mt-4 w-full sm:w-auto"
         >
           <Plus size={16} aria-hidden="true" />
           Generate Set
         </Button>
-        <Button variant="ghost" size="md" onClick={onRefresh} className="flex-1">
-          <RefreshCw size={16} aria-hidden="true" />
-          Refresh
-        </Button>
+      </Card>
+    </div>
+  );
+}
+
+function SessionHeader({ mode, title, answeredCount, totalQuestions, onBack, children }) {
+  const progress = totalQuestions
+    ? Math.round((answeredCount / totalQuestions) * 100)
+    : 0;
+
+  return (
+    <Card variant="default" className="p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <Button variant="text" size="sm" onClick={onBack} className="px-0">
+            <ArrowLeft size={16} aria-hidden="true" />
+            Back to sets
+          </Button>
+          <p className="mt-4 text-h6 font-semibold uppercase text-primary poppins-font">
+            {mode === "practice" ? "Practice session" : "Exam session"}
+          </p>
+          <h2 className="mt-1 break-words text-h3 font-bold text-grey-200 poppins-font">
+            {title}
+          </h2>
+        </div>
+        {children}
+      </div>
+      <div className="mt-4">
+        <div className="mb-2 flex items-center justify-between text-h6 inter-font">
+          <span className="text-p-text">Progress</span>
+          <span className="font-semibold text-grey-200">
+            {answeredCount} of {totalQuestions} answered
+          </span>
+        </div>
+        <ProgressBar value={progress} />
       </div>
     </Card>
+  );
+}
+
+function QuestionNumberGrid({ questions, answers, activeIndex, onActiveIndexChange, variant = "practice" }) {
+  return (
+    <div className="grid grid-cols-6 gap-2 sm:grid-cols-10 lg:grid-cols-12">
+      {questions.map((item, index) => {
+        const isActive = index === activeIndex;
+        const isAnswered = Boolean(answers[item.id]);
+
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onActiveIndexChange(index)}
+            className={[
+              "flex aspect-square min-h-[36px] items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
+              isActive
+                ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
+                : isAnswered && variant === "practice"
+                  ? "border-success bg-success-light text-success dark:bg-success/15 dark:text-green-300"
+                  : isAnswered
+                    ? "border-primary bg-accent-25 text-primary dark:border-primary-25 dark:bg-dark-surface-soft dark:text-primary-25"
+                    : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted dark:hover:border-primary-25 dark:hover:text-primary-25",
+            ].join(" ")}
+          >
+            {index + 1}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -1001,6 +1164,7 @@ function PracticeTab({
   questions,
   questionSets,
   selectedSetId,
+  activeView,
   setTitle,
   setCount,
   setGenerating,
@@ -1015,6 +1179,7 @@ function PracticeTab({
   onRetry,
   onResume,
   onSelectSet,
+  onBackToSets,
   onSetTitleChange,
   onSetCountChange,
   onGenerateSet,
@@ -1036,6 +1201,25 @@ function PracticeTab({
   }
 
   if (loading) return <PracticeLoadingState />;
+
+  if (activeView === "sets") {
+    return (
+      <QuestionSetLanding
+        mode="practice"
+        sets={questionSets}
+        questions={questions}
+        title={setTitle}
+        count={setCount}
+        generating={setGenerating}
+        error={error}
+        onSelectSet={onSelectSet}
+        onTitleChange={onSetTitleChange}
+        onCountChange={onSetCountChange}
+        onGenerate={onGenerateSet}
+        onRefresh={onRetry}
+      />
+    );
+  }
 
   if (error || !questions.length) {
     return (
@@ -1059,61 +1243,30 @@ function PracticeTab({
     questions.some((item) => item.id === questionId)
   ).length;
   const allAnswered = answeredCount === questions.length;
-  const progress = Math.round((answeredCount / questions.length) * 100);
+  const selectedSet = questionSets.find((set) => set.id === selectedSetId);
+  const sessionTitle =
+    selectedSet?.title || (selectedSetId === latestSetId ? "Latest Practice" : "Practice Set");
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
+    <div className="grid gap-5">
+      <SessionHeader
+        mode="practice"
+        title={sessionTitle}
+        answeredCount={answeredCount}
+        totalQuestions={questions.length}
+        onBack={onBackToSets}
+      />
+
+      <QuestionNumberGrid
+        questions={questions}
+        answers={answers}
+        activeIndex={safeActiveIndex}
+        onActiveIndexChange={onActiveIndexChange}
+        variant="practice"
+      />
+
       <div className="grid gap-5">
-        <QuestionSetControls
-          mode="practice"
-          sets={questionSets}
-          selectedSetId={selectedSetId}
-          title={setTitle}
-          count={setCount}
-          generating={setGenerating}
-          onSelectSet={onSelectSet}
-          onTitleChange={onSetTitleChange}
-          onCountChange={onSetCountChange}
-          onGenerate={onGenerateSet}
-          onRefresh={onRetry}
-        />
-
-        <Card variant="default" className="p-5">
-          <p className="text-h6 font-semibold uppercase text-primary poppins-font">
-            Practice trainer
-          </p>
-          <h2 className="mt-1 text-h3 font-bold text-grey-200 poppins-font">
-            {answeredCount} of {questions.length} answered
-          </h2>
-          <ProgressBar value={progress} className="mt-4" />
-          <div className="mt-4 grid grid-cols-5 gap-2 sm:grid-cols-8 lg:grid-cols-5">
-            {questions.map((item, index) => {
-              const isActive = index === safeActiveIndex;
-              const isAnswered = Boolean(answers[item.id]);
-
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => onActiveIndexChange(index)}
-                  className={[
-                    "flex aspect-square items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
-                    isActive
-                      ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
-                      : isAnswered
-                        ? "border-success bg-success-light text-success dark:bg-success/15 dark:text-green-300"
-                        : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted dark:hover:border-primary-25 dark:hover:text-primary-25",
-                  ].join(" ")}
-                >
-                  {index + 1}
-                </button>
-              );
-            })}
-          </div>
-        </Card>
-
         <PracticeResultSummary result={attemptResult} onReset={onReset} />
-      </div>
 
       <Card variant="default" className="p-5 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -1226,21 +1379,18 @@ function PracticeTab({
           </Button>
         </div>
       </Card>
+      </div>
     </div>
   );
 }
 
 function ExamLoadingState() {
   return (
-    <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
-      <ClipboardCheck className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
-      <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font">
-        Exam is loading
-      </h2>
-      <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font">
-        The Study is ready. Exam questions will appear here in a moment.
-      </p>
-    </Card>
+    <LoadingExperience
+      variant="panel"
+      title="Loading exam mode"
+      message="Preparing your exam set, timer, and attempt state."
+    />
   );
 }
 
@@ -1426,6 +1576,7 @@ function ExamTab({
   questions,
   questionSets,
   selectedSetId,
+  activeView,
   setTitle,
   setCount,
   setGenerating,
@@ -1444,6 +1595,7 @@ function ExamTab({
   onRetry,
   onResume,
   onSelectSet,
+  onBackToSets,
   onSetTitleChange,
   onSetCountChange,
   onGenerateSet,
@@ -1469,6 +1621,25 @@ function ExamTab({
 
   if (loading) return <ExamLoadingState />;
 
+  if (activeView === "sets") {
+    return (
+      <QuestionSetLanding
+        mode="exam"
+        sets={questionSets}
+        questions={questions}
+        title={setTitle}
+        count={setCount}
+        generating={setGenerating}
+        error={error}
+        onSelectSet={onSelectSet}
+        onTitleChange={onSetTitleChange}
+        onCountChange={onSetCountChange}
+        onGenerate={onGenerateSet}
+        onRefresh={onRetry}
+      />
+    );
+  }
+
   if (error || !questions.length) {
     return (
       <ExamUnavailableState
@@ -1481,25 +1652,31 @@ function ExamTab({
     );
   }
 
+  const selectedSet = questionSets.find((set) => set.id === selectedSetId);
+  const sessionTitle =
+    selectedSet?.title || (selectedSetId === latestSetId ? "Latest Exam" : "Exam Set");
+
   if (attemptResult) {
-    return <ExamResultSummary result={attemptResult} onReset={onReset} />;
+    return (
+      <div className="grid gap-5">
+        <Button variant="text" size="sm" onClick={onBackToSets} className="w-fit px-0">
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back to sets
+        </Button>
+        <ExamResultSummary result={attemptResult} onReset={onReset} />
+      </div>
+    );
   }
 
   if (!started) {
     return (
       <div className="grid gap-5">
-        <QuestionSetControls
+        <SessionHeader
           mode="exam"
-          sets={questionSets}
-          selectedSetId={selectedSetId}
-          title={setTitle}
-          count={setCount}
-          generating={setGenerating}
-          onSelectSet={onSelectSet}
-          onTitleChange={onSetTitleChange}
-          onCountChange={onSetCountChange}
-          onGenerate={onGenerateSet}
-          onRefresh={onRetry}
+          title={sessionTitle}
+          answeredCount={0}
+          totalQuestions={questions.length}
+          onBack={onBackToSets}
         />
         <ExamSetup
           questions={questions}
@@ -1517,103 +1694,67 @@ function ExamTab({
   const answeredCount = Object.keys(answers).filter((questionId) =>
     questions.some((item) => item.id === questionId)
   ).length;
-  const progress = Math.round((answeredCount / questions.length) * 100);
   const hasTimer = selectedTimer > 0;
   const isAnsweringLocked = timedOut || submitLoading;
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[0.7fr_1.3fr]">
-      <div className="grid gap-5">
-        <QuestionSetControls
-          mode="exam"
-          sets={questionSets}
-          selectedSetId={selectedSetId}
-          title={setTitle}
-          count={setCount}
-          generating={setGenerating}
-          onSelectSet={onSelectSet}
-          onTitleChange={onSetTitleChange}
-          onCountChange={onSetCountChange}
-          onGenerate={onGenerateSet}
-          onRefresh={onRetry}
-        />
-
-        <Card variant="default" className="p-5">
-          <p className="text-h6 font-semibold uppercase text-primary poppins-font">
-            Exam attempt
-          </p>
-          <h2 className="mt-1 text-h3 font-bold text-grey-200 poppins-font">
-            {answeredCount} of {questions.length} answered
-          </h2>
-          <ProgressBar value={progress} className="mt-4" />
-
-          <div className="mt-4 flex items-center justify-between rounded-md border border-grey-25 bg-off-white-100 px-4 py-3 dark:border-dark-border dark:bg-dark-bg">
-            <div className="flex items-center gap-2 text-h5 font-semibold text-grey-200 inter-font">
-              <Clock size={16} aria-hidden="true" />
-              {hasTimer ? formatDuration(secondsRemaining) : "No timer"}
-            </div>
-            {hasTimer ? (
-              <Badge variant={timedOut ? "error" : "accent"}>
-                {timedOut ? "Time up" : "Running"}
-              </Badge>
-            ) : null}
+    <div className="grid gap-5">
+      <SessionHeader
+        mode="exam"
+        title={sessionTitle}
+        answeredCount={answeredCount}
+        totalQuestions={questions.length}
+        onBack={onBackToSets}
+      >
+        <div className="flex min-w-[170px] items-center justify-between rounded-md border border-grey-25 bg-off-white-100 px-4 py-3 dark:border-dark-border dark:bg-dark-bg">
+          <div className="flex items-center gap-2 text-h5 font-semibold text-grey-200 inter-font">
+            <Clock size={16} aria-hidden="true" />
+            {hasTimer ? formatDuration(secondsRemaining) : "No timer"}
           </div>
+          {hasTimer ? (
+            <Badge variant={timedOut ? "error" : "accent"}>
+              {timedOut ? "Time up" : "Running"}
+            </Badge>
+          ) : null}
+        </div>
+      </SessionHeader>
 
-          <div className="mt-4 grid grid-cols-5 gap-2 sm:grid-cols-8 lg:grid-cols-5">
-            {questions.map((item, index) => {
-              const isActive = index === safeActiveIndex;
-              const isAnswered = Boolean(answers[item.id]);
+      <QuestionNumberGrid
+        questions={questions}
+        answers={answers}
+        activeIndex={safeActiveIndex}
+        onActiveIndexChange={onActiveIndexChange}
+        variant="exam"
+      />
 
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => onActiveIndexChange(index)}
-                  className={[
-                    "flex aspect-square items-center justify-center rounded-sm border text-h6 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-primary-25 dark:focus:ring-offset-dark-bg",
-                    isActive
-                      ? "border-primary bg-primary text-white dark:border-primary-25 dark:bg-dark-accent dark:text-[#16110a]"
-                      : isAnswered
-                        ? "border-primary bg-accent-25 text-primary dark:border-primary-25 dark:bg-dark-surface-soft dark:text-primary-25"
-                        : "border-grey-25 bg-white text-p-text hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted dark:hover:border-primary-25 dark:hover:text-primary-25",
-                  ].join(" ")}
-                >
-                  {index + 1}
-                </button>
-              );
-            })}
+      {timedOut ? (
+        <Card variant="default" className="border-error bg-error-light p-5">
+          <AlertCircle className="h-6 w-6 text-error" aria-hidden="true" />
+          <h3 className="mt-2 text-h4 font-semibold text-grey-200 poppins-font">
+            Time is up
+          </h3>
+          <p className="mt-1 text-h5 leading-7 text-p-text-darker inter-font">
+            Add more time to continue this attempt, or submit your selected answers now.
+          </p>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <Button variant="ghost" size="md" onClick={() => onAddTime(5)}>
+              Add 5 min
+            </Button>
+            <Button variant="ghost" size="md" onClick={() => onAddTime(10)}>
+              Add 10 min
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              disabled={!answeredCount}
+              loading={submitLoading}
+              onClick={onSubmit}
+            >
+              Submit Now
+            </Button>
           </div>
         </Card>
-
-        {timedOut ? (
-          <Card variant="default" className="border-error bg-error-light p-5">
-            <AlertCircle className="h-6 w-6 text-error" aria-hidden="true" />
-            <h3 className="mt-2 text-h4 font-semibold text-grey-200 poppins-font">
-              Time is up
-            </h3>
-            <p className="mt-1 text-h5 leading-7 text-p-text-darker inter-font">
-              Add more time to continue this attempt, or submit your selected answers now.
-            </p>
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <Button variant="ghost" size="md" onClick={() => onAddTime(5)}>
-                Add 5 min
-              </Button>
-              <Button variant="ghost" size="md" onClick={() => onAddTime(10)}>
-                Add 10 min
-              </Button>
-              <Button
-                variant="primary"
-                size="md"
-                disabled={!answeredCount}
-                loading={submitLoading}
-                onClick={onSubmit}
-              >
-                Submit Now
-              </Button>
-            </div>
-          </Card>
-        ) : null}
-      </div>
+      ) : null}
 
       <Card variant="default" className="p-5 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -1780,6 +1921,7 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [practiceSubmitLoading, setPracticeSubmitLoading] = useState(false);
   const [practiceSubmitError, setPracticeSubmitError] = useState("");
   const [practiceAttemptResult, setPracticeAttemptResult] = useState(null);
+  const [activePracticeView, setActivePracticeView] = useState("sets");
   const [examQuestionSets, setExamQuestionSets] = useState([]);
   const [selectedExamSetId, setSelectedExamSetId] = useState("");
   const [examSetTitle, setExamSetTitle] = useState("");
@@ -1797,10 +1939,12 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [examSubmitLoading, setExamSubmitLoading] = useState(false);
   const [examSubmitError, setExamSubmitError] = useState("");
   const [examAttemptResult, setExamAttemptResult] = useState(null);
+  const [activeExamView, setActiveExamView] = useState("sets");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [authRequired, setAuthRequired] = useState(false);
   const [resumeLoading, setResumeLoading] = useState(false);
+  const [glossaryRegenerating, setGlossaryRegenerating] = useState(false);
 
   const progress = useMemo(() => getProgressValue(study?.progress), [study]);
   const shouldPoll = study ? pollingStatuses.has(study.status) : false;
@@ -2112,6 +2256,33 @@ export default function StudyWorkspaceClient({ studyId }) {
     }
   };
 
+  const handleRegenerateGlossary = async () => {
+    setGlossaryRegenerating(true);
+    setError("");
+    setGlossaryError("");
+    setAuthRequired(false);
+
+    try {
+      const nextStudy = await regenerateStudyGlossary(studyId);
+      setStudy(nextStudy);
+      setGlossary(null);
+
+      if (glossaryReadyStatuses.has(nextStudy?.status)) {
+        await loadGlossary();
+      }
+    } catch (err) {
+      if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        setGlossaryError(
+          err.message || "Could not regenerate glossary terms. Please try again."
+        );
+      }
+    } finally {
+      setGlossaryRegenerating(false);
+    }
+  };
+
   const resetPracticeAttemptState = () => {
     setActivePracticeIndex(0);
     setPracticeAnswers({});
@@ -2130,9 +2301,25 @@ export default function StudyWorkspaceClient({ studyId }) {
     setExamAttemptResult(null);
   };
 
-  const handleSelectPracticeSet = (questionSetId) => {
-    setSelectedPracticeSetId(questionSetId);
+  const handleBackToPracticeSets = () => {
     resetPracticeAttemptState();
+    setActivePracticeView("sets");
+  };
+
+  const handleBackToExamSets = () => {
+    resetExamAttemptState();
+    setActiveExamView("sets");
+  };
+
+  const handleSelectPracticeSet = (questionSetId) => {
+    resetPracticeAttemptState();
+    setSelectedPracticeSetId(questionSetId);
+
+    if (questionSetId === latestSetId) {
+      setActivePracticeView("session");
+      return;
+    }
+
     setPracticeLoading(true);
     setPracticeError("");
 
@@ -2144,6 +2331,8 @@ export default function StudyWorkspaceClient({ studyId }) {
         if (!nextQuestions.length) {
           setPracticeError("No practice questions were returned for this set.");
         }
+
+        setActivePracticeView("session");
       })
       .catch((err) => {
         if (isAuthError(err)) {
@@ -2156,8 +2345,14 @@ export default function StudyWorkspaceClient({ studyId }) {
   };
 
   const handleSelectExamSet = (questionSetId) => {
-    setSelectedExamSetId(questionSetId);
     resetExamAttemptState();
+    setSelectedExamSetId(questionSetId);
+
+    if (questionSetId === latestSetId) {
+      setActiveExamView("session");
+      return;
+    }
+
     setExamLoading(true);
     setExamError("");
 
@@ -2169,6 +2364,8 @@ export default function StudyWorkspaceClient({ studyId }) {
         if (!nextQuestions.length) {
           setExamError("No exam questions were returned for this set.");
         }
+
+        setActiveExamView("session");
       })
       .catch((err) => {
         if (isAuthError(err)) {
@@ -2200,7 +2397,25 @@ export default function StudyWorkspaceClient({ studyId }) {
       setPracticeSetCount("");
       setSelectedPracticeSetId(createdSet?.id || "");
       resetPracticeAttemptState();
-      await loadPracticeQuestions();
+
+      if (createdSet?.id) {
+        setPracticeQuestionSets((current) => {
+          const withoutCreated = current.filter((set) => set.id !== createdSet.id);
+          return [...withoutCreated, createdSet];
+        });
+        const setQuestions = await getPracticeQuestionSetQuestions(studyId, createdSet.id);
+        const nextQuestions = normalizeList(setQuestions);
+        setPracticeQuestions(nextQuestions);
+
+        if (!nextQuestions.length) {
+          setPracticeError("No practice questions were returned for this set.");
+        }
+
+        setActivePracticeView("session");
+      } else {
+        await loadPracticeQuestions();
+        setActivePracticeView("session");
+      }
     } catch (err) {
       if (isAuthError(err)) {
         setAuthRequired(true);
@@ -2229,7 +2444,25 @@ export default function StudyWorkspaceClient({ studyId }) {
       setExamSetCount("");
       setSelectedExamSetId(createdSet?.id || "");
       resetExamAttemptState();
-      await loadExamQuestions();
+
+      if (createdSet?.id) {
+        setExamQuestionSets((current) => {
+          const withoutCreated = current.filter((set) => set.id !== createdSet.id);
+          return [...withoutCreated, createdSet];
+        });
+        const setQuestions = await getExamQuestionSetQuestions(studyId, createdSet.id);
+        const nextQuestions = normalizeList(setQuestions);
+        setExamQuestions(nextQuestions);
+
+        if (!nextQuestions.length) {
+          setExamError("No exam questions were returned for this set.");
+        }
+
+        setActiveExamView("session");
+      } else {
+        await loadExamQuestions();
+        setActiveExamView("session");
+      }
     } catch (err) {
       if (isAuthError(err)) {
         setAuthRequired(true);
@@ -2376,6 +2609,8 @@ export default function StudyWorkspaceClient({ studyId }) {
             onRetry={() => loadStudy()}
             onResume={handleResume}
             resumeLoading={resumeLoading}
+            onRegenerate={handleRegenerateGlossary}
+            regenerateLoading={glossaryRegenerating}
           />
         );
       case "practice":
@@ -2385,6 +2620,7 @@ export default function StudyWorkspaceClient({ studyId }) {
             questions={practiceQuestions}
             questionSets={practiceQuestionSets}
             selectedSetId={selectedPracticeSetId}
+            activeView={activePracticeView}
             setTitle={practiceSetTitle}
             setCount={practiceSetCount}
             setGenerating={practiceSetGenerating}
@@ -2399,6 +2635,7 @@ export default function StudyWorkspaceClient({ studyId }) {
             onRetry={() => loadStudy()}
             onResume={handleResume}
             onSelectSet={handleSelectPracticeSet}
+            onBackToSets={handleBackToPracticeSets}
             onSetTitleChange={setPracticeSetTitle}
             onSetCountChange={setPracticeSetCount}
             onGenerateSet={handleGeneratePracticeSet}
@@ -2415,6 +2652,7 @@ export default function StudyWorkspaceClient({ studyId }) {
             questions={examQuestions}
             questionSets={examQuestionSets}
             selectedSetId={selectedExamSetId}
+            activeView={activeExamView}
             setTitle={examSetTitle}
             setCount={examSetCount}
             setGenerating={examSetGenerating}
@@ -2433,6 +2671,7 @@ export default function StudyWorkspaceClient({ studyId }) {
             onRetry={() => loadStudy()}
             onResume={handleResume}
             onSelectSet={handleSelectExamSet}
+            onBackToSets={handleBackToExamSets}
             onSetTitleChange={setExamSetTitle}
             onSetCountChange={setExamSetCount}
             onGenerateSet={handleGenerateExamSet}

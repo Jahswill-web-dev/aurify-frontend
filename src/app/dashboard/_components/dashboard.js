@@ -38,20 +38,29 @@
 // export default Dashboard;
 
 import React from "react";
-import { motion } from "framer-motion";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { WelcomeSection } from "./welcomeSection";
 import { RecentStudies } from "./recentStudies";
 
-export const Dashboard = ({ onCreateStudy }) => {
+export const Dashboard = ({ onCreateStudy, user, studies, loading, error, onRetry }) => {
   return (
     <div className="h-full overflow-auto">
       <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
         <div className="flex justify-end">
           <ThemeToggle />
         </div>
-        <WelcomeSection onCreateStudy={onCreateStudy} />
-        <RecentStudies />
+        <WelcomeSection
+          onCreateStudy={onCreateStudy}
+          user={user}
+          studies={studies}
+          loading={loading}
+        />
+        <RecentStudies
+          studies={studies}
+          loading={loading}
+          error={error}
+          onRetry={onRetry}
+        />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { AlertCircle, LayoutDashboard, Plus } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import EmptyStudiesState from "./_components/EmptyStudiesState";
 import StudiesGrid from "./_components/StudiesGrid";
-import { Button, Card } from "@/components/ui";
+import { Button, Card, LoadingExperience } from "@/components/ui";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import { hasAccessToken, isAuthError, listStudies } from "@/app/lib/aurifyApi";
 
@@ -93,11 +93,11 @@ export default function StudiesPage() {
         </div>
 
         {loading ? (
-          <Card variant="default" className="p-8 text-center">
-            <p className="text-h4 font-semibold text-grey-200 poppins-font">
-              Loading Studies...
-            </p>
-          </Card>
+          <LoadingExperience
+            variant="panel"
+            title="Loading your Studies"
+            message="Finding your saved workspaces and recent progress."
+          />
         ) : error ? (
           <Card variant="default" className="mx-auto max-w-[640px] p-6 text-center">
             <AlertCircle className="mx-auto h-8 w-8 text-error" aria-hidden="true" />

@@ -101,6 +101,7 @@ export async function apiRequest(path, options = {}) {
 }
 
 export const listStudies = () => apiRequest("/studies");
+export const getCurrentUser = () => apiRequest("/me");
 export const getStudy = (studyId) => apiRequest(`/studies/${studyId}`);
 export const getStudyResearchContext = (studyId) =>
   apiRequest(`/studies/${studyId}/research-context`);
@@ -116,6 +117,8 @@ export const getExamQuestions = (studyId) =>
   apiRequest(`/studies/${studyId}/exam-questions`);
 export const resumeStudyGeneration = (studyId) =>
   apiRequest(`/studies/${studyId}/generation/resume`, { method: "POST" });
+export const regenerateStudyGlossary = (studyId) =>
+  resumeStudyGeneration(studyId);
 export const generateStudyOutline = (studyId) =>
   apiRequest(`/studies/${studyId}/outline/generate`, { method: "POST" });
 export const generateStudyMaterial = (studyId) =>

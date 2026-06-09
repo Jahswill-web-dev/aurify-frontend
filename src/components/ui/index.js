@@ -6,3 +6,4 @@ export { default as Tabs } from './Tabs';
 export { default as Dropdown } from './Dropdown';
 export { default as Modal } from './Modal';
 export { default as Spinner } from './Spinner';
+export { default as LoadingExperience } from './LoadingExperience';
