@@ -15,6 +15,7 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import {
   createStudy,
+  getUserFacingError,
   hasAccessToken,
   isAuthError,
   parseStudyInput,
@@ -305,7 +306,13 @@ export default function CreateStudyClient() {
       setParsedStudy(result.data);
       setClarification(null);
     } catch (err) {
-      setError(err.message || "Could not prepare this Study. Please try again.");
+      console.error("Could not prepare Study from prompt", err);
+      setError(
+        getUserFacingError(
+          err,
+          "We could not prepare this Study right now. Please adjust your prompt or try again."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -325,7 +332,10 @@ export default function CreateStudyClient() {
       if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setError(err.message || "Could not create this Study. Please try again.");
+        console.error("Could not create Study", err);
+        setError(
+          getUserFacingError(err, "Could not create this Study. Please try again.")
+        );
       }
     } finally {
       setLoading(false);

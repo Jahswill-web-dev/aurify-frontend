@@ -33,6 +33,40 @@ export class AuthRequiredError extends ApiError {
 export const isAuthError = (error) =>
   error?.status === 401 || error?.status === 403;
 
+const userFacingStatusMessages = {
+  400: "We could not complete that request. Please check your input and try again.",
+  408: "The request took too long. Please try again.",
+  409: "That request could not be completed right now. Please refresh and try again.",
+  413: "That request is too large. Please reduce it and try again.",
+  422: "We could not process that request. Please check your input and try again.",
+  429: "Too many requests were sent at once. Please wait a moment and try again.",
+  500: "Something went wrong on our side. Please try again in a moment.",
+  502: "The generation service is temporarily unavailable. Please try again in a moment.",
+  503: "The generation service is temporarily unavailable. Please try again in a moment.",
+  504: "The request took too long. Please try again in a moment.",
+};
+
+export const getUserFacingError = (
+  error,
+  fallback = "Something went wrong. Please try again."
+) => {
+  if (isAuthError(error)) return "Please log in to continue.";
+
+  const status = Number(error?.status);
+  if (status && userFacingStatusMessages[status]) {
+    return userFacingStatusMessages[status];
+  }
+
+  if (error instanceof TypeError) {
+    return "We could not reach Aurify right now. Please check your connection and try again.";
+  }
+
+  return fallback;
+};
+
+export const getGenerationFailureMessage = () =>
+  "Generation stopped before Aurify could finish this Study. You can resume generation or try again in a moment.";
+
 const getErrorMessage = (payload, fallback) => {
   if (!payload) return fallback;
   if (typeof payload === "string") return payload;

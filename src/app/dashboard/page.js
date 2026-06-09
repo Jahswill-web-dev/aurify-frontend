@@ -10,6 +10,7 @@ import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import { Button, Card } from "@/components/ui";
 import {
   getCurrentUser,
+  getUserFacingError,
   hasAccessToken,
   isAuthError,
   listStudies,
@@ -53,7 +54,10 @@ function App() {
         setStudies([]);
         setAuthRequired(true);
       } else {
-        setError(err.message || "Could not load your dashboard. Please try again.");
+        console.error("Could not load dashboard", err);
+        setError(
+          getUserFacingError(err, "Could not load your dashboard. Please try again.")
+        );
       }
     } finally {
       setLoading(false);

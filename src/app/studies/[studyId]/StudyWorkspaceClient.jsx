@@ -34,6 +34,8 @@ import {
   getStudy,
   getStudyGlossary,
   getStudyMaterial,
+  getGenerationFailureMessage,
+  getUserFacingError,
   hasAccessToken,
   isAuthError,
   listExamQuestionSets,
@@ -308,7 +310,7 @@ function GenerationNotice({ study, polling, onResume, resumeLoading }) {
                 Generation stopped
               </h2>
               <p className="mt-1 text-h5 leading-7 text-p-text-darker inter-font">
-                {study.generation_error || "The backend could not finish this Study."}
+                {getGenerationFailureMessage(study)}
               </p>
             </div>
           </div>
@@ -1969,7 +1971,10 @@ export default function StudyWorkspaceClient({ studyId }) {
       } else if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setGlossaryError(err.message || "Could not load glossary terms.");
+        console.error("Could not load glossary terms", err);
+        setGlossaryError(
+          getUserFacingError(err, "Could not load glossary terms. Please try again.")
+        );
       }
     } finally {
       setGlossaryLoading(false);
@@ -2027,7 +2032,10 @@ export default function StudyWorkspaceClient({ studyId }) {
       } else if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setPracticeError(err.message || "Could not load practice questions.");
+        console.error("Could not load practice questions", err);
+        setPracticeError(
+          getUserFacingError(err, "Could not load practice questions. Please try again.")
+        );
       }
     } finally {
       setPracticeLoading(false);
@@ -2083,7 +2091,10 @@ export default function StudyWorkspaceClient({ studyId }) {
       } else if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setExamError(err.message || "Could not load exam questions.");
+        console.error("Could not load exam questions", err);
+        setExamError(
+          getUserFacingError(err, "Could not load exam questions. Please try again.")
+        );
       }
     } finally {
       setExamLoading(false);
@@ -2157,7 +2168,8 @@ export default function StudyWorkspaceClient({ studyId }) {
         } else if (err.status === 404) {
           setError("This Study was not found.");
         } else {
-          setError(err.message || "Could not load this Study. Please try again.");
+          console.error("Could not load Study workspace", err);
+          setError(getUserFacingError(err, "Could not load this Study. Please try again."));
         }
       } finally {
         setLoading(false);
@@ -2249,7 +2261,8 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setError(err.message || "Could not resume generation. Please try again.");
+        console.error("Could not resume Study generation", err);
+        setError(getUserFacingError(err, "Could not resume generation. Please try again."));
       }
     } finally {
       setResumeLoading(false);
@@ -2274,8 +2287,12 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
+        console.error("Could not regenerate glossary terms", err);
         setGlossaryError(
-          err.message || "Could not regenerate glossary terms. Please try again."
+          getUserFacingError(
+            err,
+            "Could not regenerate glossary terms. Please try again."
+          )
         );
       }
     } finally {
@@ -2338,7 +2355,10 @@ export default function StudyWorkspaceClient({ studyId }) {
         if (isAuthError(err)) {
           setAuthRequired(true);
         } else {
-          setPracticeError(err.message || "Could not load this practice set.");
+          console.error("Could not load practice set", err);
+          setPracticeError(
+            getUserFacingError(err, "Could not load this practice set. Please try again.")
+          );
         }
       })
       .finally(() => setPracticeLoading(false));
@@ -2371,7 +2391,10 @@ export default function StudyWorkspaceClient({ studyId }) {
         if (isAuthError(err)) {
           setAuthRequired(true);
         } else {
-          setExamError(err.message || "Could not load this exam set.");
+          console.error("Could not load exam set", err);
+          setExamError(
+            getUserFacingError(err, "Could not load this exam set. Please try again.")
+          );
         }
       })
       .finally(() => setExamLoading(false));
@@ -2420,7 +2443,10 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setPracticeError(err.message || "Could not generate a practice set.");
+        console.error("Could not generate practice set", err);
+        setPracticeError(
+          getUserFacingError(err, "Could not generate a practice set. Please try again.")
+        );
       }
     } finally {
       setPracticeSetGenerating(false);
@@ -2467,7 +2493,10 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setExamError(err.message || "Could not generate an exam set.");
+        console.error("Could not generate exam set", err);
+        setExamError(
+          getUserFacingError(err, "Could not generate an exam set. Please try again.")
+        );
       }
     } finally {
       setExamSetGenerating(false);
@@ -2506,7 +2535,13 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setPracticeSubmitError(err.message || "Could not submit this practice attempt.");
+        console.error("Could not submit practice attempt", err);
+        setPracticeSubmitError(
+          getUserFacingError(
+            err,
+            "Could not submit this practice attempt. Please try again."
+          )
+        );
       }
     } finally {
       setPracticeSubmitLoading(false);
@@ -2560,7 +2595,10 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (isAuthError(err)) {
         setAuthRequired(true);
       } else {
-        setExamSubmitError(err.message || "Could not submit this exam attempt.");
+        console.error("Could not submit exam attempt", err);
+        setExamSubmitError(
+          getUserFacingError(err, "Could not submit this exam attempt. Please try again.")
+        );
       }
     } finally {
       setExamSubmitLoading(false);

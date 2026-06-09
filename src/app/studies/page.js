@@ -8,7 +8,12 @@ import EmptyStudiesState from "./_components/EmptyStudiesState";
 import StudiesGrid from "./_components/StudiesGrid";
 import { Button, Card, LoadingExperience } from "@/components/ui";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
-import { hasAccessToken, isAuthError, listStudies } from "@/app/lib/aurifyApi";
+import {
+  getUserFacingError,
+  hasAccessToken,
+  isAuthError,
+  listStudies,
+} from "@/app/lib/aurifyApi";
 
 export default function StudiesPage() {
   const [studies, setStudies] = useState([]);
@@ -36,7 +41,8 @@ export default function StudiesPage() {
         setStudies([]);
         setAuthRequired(true);
       } else {
-        setError(err.message || "Could not load your Studies. Please try again.");
+        console.error("Could not load Studies", err);
+        setError(getUserFacingError(err, "Could not load your Studies. Please try again."));
       }
     } finally {
       setLoading(false);
