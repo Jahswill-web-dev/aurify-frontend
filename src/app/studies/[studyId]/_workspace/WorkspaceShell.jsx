@@ -105,7 +105,19 @@ export function ErrorState({ message, onRetry }) {
 }
 
 export function GenerationNotice({ study, polling, onResume, resumeLoading }) {
-  if (study.status === "failed") {
+  if (
+    study.status === "failed" ||
+    study.status === "modules_failed" ||
+    study.status === "module_partial_ready"
+  ) {
+    const isPartial = study.status === "module_partial_ready";
+    const title = isPartial
+      ? "Some modules need attention"
+      : "Generation stopped";
+    const message = isPartial
+      ? "Aurify saved the modules that finished successfully. Resume generation to retry the unfinished module batch."
+      : study.generation_error || getGenerationFailureMessage(study);
+
     return (
       <Card variant="default" className="mb-5 border-error bg-error-light p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -113,10 +125,10 @@ export function GenerationNotice({ study, polling, onResume, resumeLoading }) {
             <AlertCircle className="mt-1 h-5 w-5 shrink-0 text-error" aria-hidden="true" />
             <div>
               <h2 className="text-h4 font-semibold text-grey-200 poppins-font">
-                Generation stopped
+                {title}
               </h2>
               <p className="mt-1 text-h5 leading-7 text-p-text-darker inter-font">
-                {getGenerationFailureMessage(study)}
+                {message}
               </p>
             </div>
           </div>

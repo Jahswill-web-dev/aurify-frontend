@@ -2,6 +2,7 @@ import { generationSteps, latestSetId } from "./constants";
 
 export const getGenerationStepState = (status, step, index) => {
   if (step.readyStatuses.includes(status)) return "done";
+  if (step.activeStatuses?.includes(status)) return "active";
   if (status === step.generatingStatus) return "active";
   if (status === "queued" && index === 0) return "active";
   return "waiting";
@@ -9,7 +10,9 @@ export const getGenerationStepState = (status, step, index) => {
 
 export const getActiveGenerationStep = (status) => {
   if (status === "queued") return generationSteps[0];
-  return generationSteps.find((step) => step.generatingStatus === status);
+  return generationSteps.find(
+    (step) => step.generatingStatus === status || step.activeStatuses?.includes(status)
+  );
 };
 
 export const getNextGenerationStep = (status) =>

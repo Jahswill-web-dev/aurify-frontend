@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle } from "lucide-react";
-import { Tabs } from "@/components/ui";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import {
   generateExamQuestionSet,
@@ -33,16 +32,27 @@ import {
   practiceReadyStatuses,
   workspaceTabs,
 } from "./_workspace/constants";
+import { CoursePlayerWorkspace } from "./_workspace/CoursePlayerWorkspace";
 import { ExamTab } from "./_workspace/ExamTab";
 import { GlossaryTab } from "./_workspace/GlossaryTab";
 import { clampQuestionCount, getProgressValue, getReadySets, hasGeneratingSet, normalizeList } from "./_workspace/helpers";
-import { MaterialTab } from "./_workspace/MaterialTab";
-import { OverviewTab } from "./_workspace/OverviewTab";
 import { PracticeTab } from "./_workspace/PracticeTab";
 import { ErrorState, GenerationNotice, LoadingState, WorkspaceHeader } from "./_workspace/WorkspaceShell";
+import {
+  createDemoQuestionSet,
+  demoExamQuestionSets,
+  demoExamQuestions,
+  demoGlossary,
+  demoMaterial,
+  demoPracticeQuestions,
+  demoPracticeQuestionSets,
+  demoStudy,
+  isDemoStudyId,
+} from "./_workspace/demoData";
 
 export default function StudyWorkspaceClient({ studyId }) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const isDemo = isDemoStudyId(studyId);
+  const [activeTab, setActiveTab] = useState("learn");
   const [study, setStudy] = useState(null);
   const [material, setMaterial] = useState(null);
   const [glossary, setGlossary] = useState(null);
@@ -89,9 +99,17 @@ export default function StudyWorkspaceClient({ studyId }) {
   const progress = useMemo(() => getProgressValue(study?.progress), [study]);
   const shouldPoll = study ? pollingStatuses.has(study.status) : false;
   const shouldPollQuestionSets =
-    hasGeneratingSet(practiceQuestionSets) || hasGeneratingSet(examQuestionSets);
+    !isDemo &&
+    (hasGeneratingSet(practiceQuestionSets) || hasGeneratingSet(examQuestionSets));
 
   const loadGlossary = useCallback(async () => {
+    if (isDemo) {
+      setGlossary(demoGlossary);
+      setGlossaryError("");
+      setGlossaryLoading(false);
+      return;
+    }
+
     setGlossaryLoading(true);
     setGlossaryError("");
 
@@ -117,9 +135,18 @@ export default function StudyWorkspaceClient({ studyId }) {
     } finally {
       setGlossaryLoading(false);
     }
-  }, [studyId]);
+  }, [isDemo, studyId]);
 
   const loadPracticeQuestions = useCallback(async () => {
+    if (isDemo) {
+      setPracticeQuestionSets(demoPracticeQuestionSets);
+      setSelectedPracticeSetId((current) => current || demoPracticeQuestionSets[0]?.id || "");
+      setPracticeQuestions(demoPracticeQuestions);
+      setPracticeError("");
+      setPracticeLoading(false);
+      return;
+    }
+
     setPracticeLoading(true);
     setPracticeError("");
 
@@ -178,9 +205,18 @@ export default function StudyWorkspaceClient({ studyId }) {
     } finally {
       setPracticeLoading(false);
     }
-  }, [selectedPracticeSetId, studyId]);
+  }, [isDemo, selectedPracticeSetId, studyId]);
 
   const loadExamQuestions = useCallback(async () => {
+    if (isDemo) {
+      setExamQuestionSets(demoExamQuestionSets);
+      setSelectedExamSetId((current) => current || demoExamQuestionSets[0]?.id || "");
+      setExamQuestions(demoExamQuestions);
+      setExamError("");
+      setExamLoading(false);
+      return;
+    }
+
     setExamLoading(true);
     setExamError("");
 
@@ -237,13 +273,27 @@ export default function StudyWorkspaceClient({ studyId }) {
     } finally {
       setExamLoading(false);
     }
-  }, [selectedExamSetId, studyId]);
+  }, [isDemo, selectedExamSetId, studyId]);
 
   const loadStudy = useCallback(
     async ({ showLoading = false } = {}) => {
       if (showLoading) setLoading(true);
       setError("");
       setAuthRequired(false);
+
+      if (isDemo) {
+        setStudy(demoStudy);
+        setMaterial(demoMaterial);
+        setGlossary(demoGlossary);
+        setPracticeQuestionSets(demoPracticeQuestionSets);
+        setSelectedPracticeSetId((current) => current || demoPracticeQuestionSets[0]?.id || "");
+        setPracticeQuestions(demoPracticeQuestions);
+        setExamQuestionSets(demoExamQuestionSets);
+        setSelectedExamSetId((current) => current || demoExamQuestionSets[0]?.id || "");
+        setExamQuestions(demoExamQuestions);
+        setLoading(false);
+        return;
+      }
 
       if (!hasAccessToken()) {
         setStudy(null);
@@ -313,7 +363,7 @@ export default function StudyWorkspaceClient({ studyId }) {
         setLoading(false);
       }
     },
-    [loadExamQuestions, loadGlossary, loadPracticeQuestions, studyId]
+    [isDemo, loadExamQuestions, loadGlossary, loadPracticeQuestions, studyId]
   );
 
   useEffect(() => {
@@ -385,6 +435,66 @@ export default function StudyWorkspaceClient({ studyId }) {
     setPracticeError("");
     setExamError("");
     setAuthRequired(false);
+
+    if (isDemo) {
+      window.setTimeout(() => {
+        setStudy({
+          ...demoStudy,
+          status: "exam_ready",
+          generation_error: null,
+          progress: {
+            ...demoStudy.progress,
+            practice_completed: true,
+          },
+        });
+        setMaterial({
+          ...demoMaterial,
+          modules: demoMaterial.modules.map((module) =>
+            module.status === "failed"
+              ? {
+                  ...module,
+                  status: "ready",
+                  generation_error: null,
+                  lessons: [
+                    {
+                      id: "demo-lesson-5",
+                      lesson_number: 1,
+                      title: "Left And Right Limits",
+                      content:
+                        "One-sided limits ask what happens from only one direction. If the left-hand and right-hand limits match, the two-sided limit exists.",
+                      estimated_minutes: 7,
+                      key_takeaways: [
+                        "Left-hand limits approach from smaller x-values.",
+                        "Right-hand limits approach from larger x-values.",
+                        "The two-sided limit needs both sides to agree.",
+                      ],
+                    },
+                  ],
+                  practice_questions: [
+                    {
+                      id: "demo-module-question-3",
+                      question: "When does a two-sided limit exist?",
+                      options: [
+                        "When both one-sided limits match",
+                        "When only the left side exists",
+                        "When the graph is colorful",
+                        "When f(a) is undefined",
+                      ],
+                      correct_answer: "When both one-sided limits match",
+                      explanation:
+                        "The left-hand and right-hand limits must approach the same value.",
+                      difficulty: "medium",
+                      weak_area: "one-sided limits",
+                    },
+                  ],
+                }
+              : module
+          ),
+        });
+        setResumeLoading(false);
+      }, 700);
+      return;
+    }
 
     try {
       const nextStudy = await resumeStudyGeneration(studyId);
@@ -470,6 +580,12 @@ export default function StudyWorkspaceClient({ studyId }) {
     resetPracticeAttemptState();
     setSelectedPracticeSetId(questionSetId);
 
+    if (isDemo) {
+      setPracticeQuestions(demoPracticeQuestions);
+      setActivePracticeView("session");
+      return;
+    }
+
     if (questionSetId === latestSetId) {
       setActivePracticeView("session");
       return;
@@ -505,6 +621,12 @@ export default function StudyWorkspaceClient({ studyId }) {
   const handleSelectExamSet = (questionSetId) => {
     resetExamAttemptState();
     setSelectedExamSetId(questionSetId);
+
+    if (isDemo) {
+      setExamQuestions(demoExamQuestions);
+      setActiveExamView("session");
+      return;
+    }
 
     if (questionSetId === latestSetId) {
       setActiveExamView("session");
@@ -548,6 +670,23 @@ export default function StudyWorkspaceClient({ studyId }) {
     setPracticeSetGenerating(true);
     setPracticeError("");
     setAuthRequired(false);
+
+    if (isDemo) {
+      const createdSet = createDemoQuestionSet(
+        "practice",
+        practiceQuestionSets.length + 1,
+        nextCount
+      );
+      setPracticeQuestionSets((current) => [...current, createdSet]);
+      setSelectedPracticeSetId(createdSet.id);
+      setPracticeQuestions(demoPracticeQuestions.slice(0, Math.min(nextCount, demoPracticeQuestions.length)));
+      setPracticeSetTitle("");
+      setPracticeSetCount("");
+      resetPracticeAttemptState();
+      setActivePracticeView("session");
+      setPracticeSetGenerating(false);
+      return;
+    }
 
     try {
       const createdSet = await generatePracticeQuestionSet(studyId, {
@@ -598,6 +737,23 @@ export default function StudyWorkspaceClient({ studyId }) {
     setExamSetGenerating(true);
     setExamError("");
     setAuthRequired(false);
+
+    if (isDemo) {
+      const createdSet = createDemoQuestionSet(
+        "exam",
+        examQuestionSets.length + 1,
+        nextCount
+      );
+      setExamQuestionSets((current) => [...current, createdSet]);
+      setSelectedExamSetId(createdSet.id);
+      setExamQuestions(demoExamQuestions.slice(0, Math.min(nextCount, demoExamQuestions.length)));
+      setExamSetTitle("");
+      setExamSetCount("");
+      resetExamAttemptState();
+      setActiveExamView("session");
+      setExamSetGenerating(false);
+      return;
+    }
 
     try {
       const createdSet = await generateExamQuestionSet(studyId, {
@@ -665,6 +821,51 @@ export default function StudyWorkspaceClient({ studyId }) {
     setPracticeSubmitLoading(true);
     setPracticeSubmitError("");
 
+    if (isDemo) {
+      const feedback = practiceQuestions.map((question) => {
+        const selectedAnswer = practiceAnswers[question.id];
+        const isCorrect = selectedAnswer === question.correct_answer;
+
+        return {
+          question_id: question.id,
+          question: question.question,
+          selected_answer: selectedAnswer,
+          correct_answer: question.correct_answer,
+          is_correct: isCorrect,
+          explanation: question.explanation,
+          difficulty: question.difficulty,
+          weak_area: question.weak_area,
+        };
+      });
+      const correctCount = feedback.filter((item) => item.is_correct).length;
+      const score = Math.round((correctCount / practiceQuestions.length) * 100);
+
+      setPracticeAttemptResult({
+        id: "demo-practice-attempt",
+        study_id: "demo",
+        answers,
+        score,
+        total_questions: practiceQuestions.length,
+        correct_count: correctCount,
+        weak_areas: feedback.filter((item) => !item.is_correct).map((item) => item.weak_area),
+        feedback,
+        created_at: new Date().toISOString(),
+      });
+      setStudy((current) => ({
+        ...current,
+        progress: {
+          ...current.progress,
+          practice_completed: true,
+          latest_practice_score: score,
+          aggregate_weak_areas: feedback
+            .filter((item) => !item.is_correct)
+            .map((item) => item.weak_area),
+        },
+      }));
+      setPracticeSubmitLoading(false);
+      return;
+    }
+
     try {
       const result = await submitPracticeAttempt(studyId, answers);
       setPracticeAttemptResult(result);
@@ -724,6 +925,52 @@ export default function StudyWorkspaceClient({ studyId }) {
     setExamSubmitLoading(true);
     setExamSubmitError("");
 
+    if (isDemo) {
+      const feedback = examQuestions.map((question) => {
+        const selectedAnswer = examAnswers[question.id];
+        const isCorrect = selectedAnswer === question.correct_answer;
+
+        return {
+          question_id: question.id,
+          question: question.question,
+          selected_answer: selectedAnswer,
+          correct_answer: question.correct_answer,
+          is_correct: isCorrect,
+          explanation: question.explanation,
+          difficulty: question.difficulty,
+          weak_area: question.weak_area,
+        };
+      });
+      const correctCount = feedback.filter((item) => item.is_correct).length;
+      const score = Math.round((correctCount / examQuestions.length) * 100);
+
+      setExamAttemptResult({
+        id: "demo-exam-attempt",
+        study_id: "demo",
+        answers,
+        score,
+        total_questions: examQuestions.length,
+        correct_count: correctCount,
+        weak_areas: feedback.filter((item) => !item.is_correct).map((item) => item.weak_area),
+        feedback,
+        created_at: new Date().toISOString(),
+      });
+      setStudy((current) => ({
+        ...current,
+        progress: {
+          ...current.progress,
+          exam_completed: true,
+          latest_exam_score: score,
+          aggregate_weak_areas: feedback
+            .filter((item) => !item.is_correct)
+            .map((item) => item.weak_area),
+        },
+      }));
+      setExamTimedOut(false);
+      setExamSubmitLoading(false);
+      return;
+    }
+
     try {
       const result = await submitExamAttempt(studyId, answers);
       setExamAttemptResult(result);
@@ -751,7 +998,7 @@ export default function StudyWorkspaceClient({ studyId }) {
     return (
       <AuthRequiredState
         title="Log in to view this Study"
-        message="This workspace belongs to your account. Log in to open the material, practice, exam mode, and progress."
+        message="This workspace belongs to your account. Log in to open the material, practice, exam mode, and progress. In local development, you can also open /studies/demo to preview the UI with dummy data."
         returnTo={`/studies/${studyId}`}
         secondaryHref="/studies"
         secondaryLabel="Back to Studies"
@@ -762,19 +1009,8 @@ export default function StudyWorkspaceClient({ studyId }) {
   if (loading) return <LoadingState />;
   if (error && !study) return <ErrorState message={error} onRetry={() => loadStudy({ showLoading: true })} />;
 
-  const renderTab = () => {
-    switch (activeTab) {
-      case "overview":
-        return (
-          <OverviewTab
-            study={study}
-            material={material}
-            progress={progress}
-            onTabChange={setActiveTab}
-          />
-        );
-      case "material":
-        return <MaterialTab material={material} />;
+  const renderTool = (mode) => {
+    switch (mode) {
       case "glossary":
         return (
           <GlossaryTab
@@ -870,34 +1106,32 @@ export default function StudyWorkspaceClient({ studyId }) {
   return (
     <main className="min-h-screen bg-off-white-100 dark:bg-dark-bg">
       <WorkspaceHeader study={study} progress={progress} />
-      <div className="sticky top-0 z-20 border-b border-grey-25 bg-white px-4 sm:px-6 lg:px-8 dark:border-dark-border dark:bg-dark-surface">
-        <div className="mx-auto max-w-[1180px]">
-          <Tabs
-            tabs={workspaceTabs}
-            activeTab={activeTab}
-            onChange={setActiveTab}
-            className="scrollbar-hide overflow-x-auto border-b-0 [&_button]:shrink-0"
-          />
-        </div>
-      </div>
-
-      <section className="px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-[1180px]">
-          {error ? (
-            <div className="mb-5 flex items-start gap-3 rounded-md border border-error bg-error-light px-4 py-3 text-error">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <p className="text-h5 leading-6 inter-font">{error}</p>
-            </div>
-          ) : null}
-          <GenerationNotice
-            study={study}
-            polling={shouldPoll}
-            onResume={handleResume}
-            resumeLoading={resumeLoading}
-          />
-          {renderTab()}
-        </div>
-      </section>
+      <CoursePlayerWorkspace
+        activeMode={activeTab}
+        onModeChange={setActiveTab}
+        study={study}
+        material={material}
+        progress={progress}
+        onResume={handleResume}
+        resumeLoading={resumeLoading}
+        renderTool={renderTool}
+        notice={
+          <>
+            {error ? (
+              <div className="mb-5 flex items-start gap-3 rounded-md border border-error bg-error-light px-4 py-3 text-error">
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                <p className="text-h5 leading-6 inter-font">{error}</p>
+              </div>
+            ) : null}
+            <GenerationNotice
+              study={study}
+              polling={shouldPoll}
+              onResume={handleResume}
+              resumeLoading={resumeLoading}
+            />
+          </>
+        }
+      />
     </main>
   );
 }

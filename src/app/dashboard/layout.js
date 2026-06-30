@@ -1,9 +1,5 @@
 "use client";
-import DashboardNav from "./_components/dashboardNav";
-import SideNav from "./_components/sideNav";
-import { MobileDetails } from "../dashboard/_components/details";
-import Upload from "./_components/upload";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import {
   setUserEmail,
@@ -11,15 +7,10 @@ import {
   setUserName,
   setUserSubscription,
 } from "../lib/features/dashboard/dashboardSlice";
-import AudioControlls from "./_components/audioControlls";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import { hasAccessToken } from "../lib/aurifyApi";
 
 function DashboardLayout({ children }) {
-  const { showOverlay } = useSelector((store) => store.dashboard);
-  const { navOverlay } = useSelector((store) => store.nav);
-  const isOverlayVisible = showOverlay || navOverlay;
-  // console.log(navOverlay);
   const dispatch = useDispatch();
   const [hasSession, setHasSession] = useState(null);
 
@@ -83,16 +74,7 @@ function DashboardLayout({ children }) {
 
   return (
     <div className="">
-      {/* <DashboardNav /> */}
       <div className="">{children}</div>
-      <MobileDetails />
-      <Upload />
-      <AudioControlls />
-      {/* <DeleteBox/> */}
-      {/* dark overlay */}
-      {isOverlayVisible && (
-        <div className="h-screen fixed top-0 bottom-0 right-0 left-0 bg-black opacity-20 z-10"></div>
-      )}
     </div>
   );
 }

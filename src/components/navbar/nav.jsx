@@ -9,7 +9,13 @@ function Navbar() {
     <nav className="container mt-6">
       <div className="flex items-center justify-between">
         {/* logo */}
-        <Image src={aurifyLogo} width={150} height={150} alt="Aurify AI Logo" />
+        <Image
+          src={aurifyLogo}
+          width={150}
+          height={150}
+          alt="Aurify AI Logo"
+          className="h-auto w-[124px] sm:w-[150px]"
+        />
 
         {/* Desktop Nav Links */}
         <div
@@ -36,8 +42,8 @@ function Navbar() {
             </Link> */}
             <Link
               href="/signup"
-              className="px-4 py-2 sm:px-5 rounded-[6px] bg-primary text-white
-            text-h5 poppins-font transition-colors hover:bg-primary-200 dark:bg-dark-accent dark:text-[#16110a] dark:hover:bg-primary-25"
+              className="whitespace-nowrap px-3 py-2 sm:px-5 rounded-[6px] bg-primary text-white
+            text-h6 sm:text-h5 poppins-font transition-colors hover:bg-primary-200 dark:bg-dark-accent dark:text-[#16110a] dark:hover:bg-primary-25"
             >
               Sign Up Free
             </Link>

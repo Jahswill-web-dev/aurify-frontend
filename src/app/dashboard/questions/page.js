@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 function QuestionPage() {
   // return <Main centerComp={<Questions />} name="questions" />;
-   redirect("/dashboard");
+   redirect("/studies");
   // return (
   //   <div>
   //     <DashboardNav />

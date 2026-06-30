@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { FileText } from "lucide-react";
-import { Card } from "@/components/ui";
+import {
+  AlertCircle,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  FileText,
+  RefreshCw,
+} from "lucide-react";
+import { Badge, Button, Card } from "@/components/ui";
 
 export function createHeadingSlug(text, counts) {
   const baseSlug =
@@ -57,7 +64,340 @@ export function MaterialOutline({ items, activeHeadingId, onItemClick, mobile = 
   );
 }
 
-export function MaterialTab({ material }) {
+const getSortedModules = (modules) =>
+  Array.isArray(modules)
+    ? [...modules].sort(
+        (first, second) =>
+          Number(first?.module_number || 0) - Number(second?.module_number || 0)
+      )
+    : [];
+
+function ModulePracticeQuestions({ questions }) {
+  if (!Array.isArray(questions) || !questions.length) return null;
+
+  return (
+    <div className="mt-5 rounded-md border border-grey-25 bg-off-white-100 p-4 dark:border-dark-border dark:bg-dark-surface-soft">
+      <div className="mb-3 flex items-center gap-2">
+        <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+        <h4 className="text-h4 font-semibold text-grey-200 poppins-font dark:text-dark-text">
+          Module practice
+        </h4>
+      </div>
+      <div className="grid gap-3">
+        {questions.map((question, index) => (
+          <div
+            key={question.id || `${question.question}-${index}`}
+            className="rounded-md border border-grey-25 bg-white p-4 dark:border-dark-border dark:bg-dark-surface"
+          >
+            <div className="mb-2 flex flex-wrap gap-2">
+              <Badge variant="neutral">Question {index + 1}</Badge>
+              {question.difficulty ? (
+                <Badge variant="accent">{question.difficulty}</Badge>
+              ) : null}
+              {question.weak_area ? (
+                <Badge variant="neutral">{question.weak_area}</Badge>
+              ) : null}
+            </div>
+            <p className="text-h5 font-semibold leading-7 text-grey-200 inter-font dark:text-dark-text">
+              {question.question}
+            </p>
+            {Array.isArray(question.options) && question.options.length ? (
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {question.options.map((option) => {
+                  const isCorrect = option === question.correct_answer;
+
+                  return (
+                    <div
+                      key={option}
+                      className={[
+                        "rounded-sm border px-3 py-2 text-h6 inter-font",
+                        isCorrect
+                          ? "border-success bg-success-light text-success dark:bg-success/15 dark:text-green-300"
+                          : "border-grey-25 bg-white text-p-text-darker dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted",
+                      ].join(" ")}
+                    >
+                      {option}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+            {question.explanation ? (
+              <p className="mt-3 text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+                {question.explanation}
+              </p>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReadyModuleCard({ module }) {
+  const lessons = Array.isArray(module.lessons) ? module.lessons : [];
+
+  return (
+    <Card
+      id={`module-${module.module_number || module.id}`}
+      variant="default"
+      className="scroll-mt-32 p-5 sm:p-6"
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-h6 font-semibold uppercase text-primary poppins-font dark:text-primary-25">
+            Module {module.module_number || "-"}
+          </p>
+          <h2 className="mt-1 break-words text-h2 font-bold text-grey-200 poppins-font dark:text-dark-text">
+            {module.title || "Untitled module"}
+          </h2>
+          {module.objective ? (
+            <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+              {module.objective}
+            </p>
+          ) : null}
+        </div>
+        <div className="flex flex-wrap gap-2 sm:justify-end">
+          <Badge variant="primary">Ready</Badge>
+          {module.estimated_minutes ? (
+            <Badge variant="neutral">
+              <Clock size={13} aria-hidden="true" />
+              {module.estimated_minutes} min
+            </Badge>
+          ) : null}
+        </div>
+      </div>
+
+      {Array.isArray(module.key_concepts) && module.key_concepts.length ? (
+        <div className="mt-5 flex flex-wrap gap-2">
+          {module.key_concepts.map((concept) => (
+            <Badge key={concept} variant="neutral">
+              {concept}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
+
+      {module.coverage_notes ? (
+        <p className="mt-4 rounded-md border border-grey-25 bg-off-white-100 px-4 py-3 text-h5 leading-7 text-p-text-darker inter-font dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted">
+          {module.coverage_notes}
+        </p>
+      ) : null}
+
+      {lessons.length ? (
+        <div className="mt-6 grid gap-5">
+          {lessons.map((lesson, index) => (
+            <section
+              key={lesson.id || `${module.id}-lesson-${index}`}
+              className="border-t border-grey-25 pt-5 first:border-t-0 first:pt-0 dark:border-dark-border"
+            >
+              <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-h6 font-semibold uppercase text-grey-100 poppins-font dark:text-dark-muted">
+                    Lesson {lesson.lesson_number || index + 1}
+                  </p>
+                  <h3 className="mt-1 text-h3 font-semibold leading-7 text-grey-200 poppins-font dark:text-dark-text">
+                    {lesson.title || "Untitled lesson"}
+                  </h3>
+                </div>
+                {lesson.estimated_minutes ? (
+                  <Badge variant="neutral">{lesson.estimated_minutes} min</Badge>
+                ) : null}
+              </div>
+              <div className="prose prose-neutral max-w-none text-grey-200 prose-p:leading-7 prose-a:text-primary dark:prose-invert dark:text-dark-text">
+                <ReactMarkdown>{lesson.content || ""}</ReactMarkdown>
+              </div>
+              {Array.isArray(lesson.key_takeaways) && lesson.key_takeaways.length ? (
+                <div className="mt-4 rounded-md border border-grey-25 bg-white p-4 dark:border-dark-border dark:bg-dark-surface-soft">
+                  <h4 className="text-h5 font-semibold text-grey-200 inter-font dark:text-dark-text">
+                    Key takeaways
+                  </h4>
+                  <ul className="mt-2 grid gap-2 text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+                    {lesson.key_takeaways.map((takeaway) => (
+                      <li key={takeaway} className="flex gap-2">
+                        <CheckCircle2
+                          className="mt-1 h-4 w-4 shrink-0 text-primary dark:text-primary-25"
+                          aria-hidden="true"
+                        />
+                        <span>{takeaway}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </section>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-5 text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+          This module is marked ready, but no lessons were returned.
+        </p>
+      )}
+
+      <ModulePracticeQuestions questions={module.practice_questions} />
+    </Card>
+  );
+}
+
+function FailedModulesNotice({ modules, study, onResume, resumeLoading }) {
+  if (!modules.length && study?.status !== "modules_failed") return null;
+
+  const title =
+    study?.status === "modules_failed"
+      ? "Module generation failed"
+      : "Some modules need to be regenerated";
+
+  return (
+    <Card variant="default" className="border-error bg-error-light p-5 dark:bg-error/15">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 gap-3">
+          <AlertCircle className="mt-1 h-5 w-5 shrink-0 text-error" aria-hidden="true" />
+          <div>
+            <h2 className="text-h4 font-semibold text-grey-200 poppins-font dark:text-dark-text">
+              {title}
+            </h2>
+            <p className="mt-1 text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+              {study?.generation_error ||
+                "Aurify saved the ready modules and can resume generation for the unfinished ones."}
+            </p>
+          </div>
+        </div>
+        {onResume ? (
+          <Button
+            variant="primary"
+            size="md"
+            loading={resumeLoading}
+            onClick={onResume}
+            className="shrink-0"
+          >
+            <RefreshCw size={16} aria-hidden="true" />
+            Resume
+          </Button>
+        ) : null}
+      </div>
+
+      {modules.length ? (
+        <div className="mt-4 grid gap-2">
+          {modules.map((module) => (
+            <div
+              key={module.id || module.module_number}
+              className="rounded-md border border-error/30 bg-white px-4 py-3 text-h5 text-p-text-darker inter-font dark:bg-dark-surface"
+            >
+              <span className="font-semibold text-grey-200 dark:text-dark-text">
+                Module {module.module_number || "-"}:{" "}
+                {module.title || "Untitled module"}
+              </span>
+              <span> - {module.generation_error || "Generation did not finish."}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </Card>
+  );
+}
+
+function ModuleMaterial({ material, study, onResume, resumeLoading }) {
+  const modules = getSortedModules(material?.modules);
+  const readyModules = modules.filter((module) => module.status === "ready");
+  const failedModules = modules.filter((module) => module.status === "failed");
+
+  return (
+    <div className="mx-auto grid max-w-[1180px] gap-5">
+      <Card variant="default" className="p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-h6 font-semibold uppercase text-primary poppins-font dark:text-primary-25">
+              Generated modules
+            </p>
+            <h2 className="mt-1 text-h2 font-bold text-grey-200 poppins-font dark:text-dark-text">
+              {material.title || "Study Material"}
+            </h2>
+            {material.source_notes ? (
+              <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+                {material.source_notes}
+              </p>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap gap-2 sm:justify-end">
+            <Badge variant="primary">{readyModules.length} ready</Badge>
+            {failedModules.length ? (
+              <Badge variant="error">{failedModules.length} failed</Badge>
+            ) : null}
+          </div>
+        </div>
+
+        {readyModules.length ? (
+          <div className="mt-5 flex flex-wrap gap-2">
+            {readyModules.map((module) => (
+              <a
+                key={module.id || module.module_number}
+                href={`#module-${module.module_number || module.id}`}
+                className="inline-flex items-center gap-2 rounded-sm border border-grey-25 bg-off-white-100 px-3 py-2 text-h6 font-medium text-p-text-darker transition-colors hover:border-primary hover:text-primary dark:border-dark-border dark:bg-dark-surface-soft dark:text-dark-muted dark:hover:border-primary-25 dark:hover:text-primary-25"
+              >
+                <BookOpen size={14} aria-hidden="true" />
+                Module {module.module_number || "-"}
+              </a>
+            ))}
+          </div>
+        ) : null}
+      </Card>
+
+      <FailedModulesNotice
+        modules={failedModules}
+        study={study}
+        onResume={onResume}
+        resumeLoading={resumeLoading}
+      />
+
+      {readyModules.length ? (
+        <div className="grid gap-5">
+          {readyModules.map((module) => (
+            <ReadyModuleCard key={module.id || module.module_number} module={module} />
+          ))}
+        </div>
+      ) : (
+        <Card variant="default" className="mx-auto max-w-[720px] p-6 text-center">
+          <FileText className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
+          <h2 className="mt-3 text-h3 font-semibold text-grey-200 poppins-font dark:text-dark-text">
+            No ready modules yet
+          </h2>
+          <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+            Aurify has module records for this Study, but none are ready to read yet.
+          </p>
+          {onResume && (study?.status === "modules_failed" || failedModules.length) ? (
+            <Button
+              variant="primary"
+              size="md"
+              loading={resumeLoading}
+              onClick={onResume}
+              className="mt-5"
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              Resume
+            </Button>
+          ) : null}
+        </Card>
+      )}
+    </div>
+  );
+}
+
+export function MaterialTab({ material, study, onResume, resumeLoading }) {
+  if (material?.modules?.length) {
+    return (
+      <ModuleMaterial
+        material={material}
+        study={study}
+        onResume={onResume}
+        resumeLoading={resumeLoading}
+      />
+    );
+  }
+
+  return <MarkdownMaterial material={material} />;
+}
+
+function MarkdownMaterial({ material }) {
   const markdownRef = useRef(null);
   const materialTopRef = useRef(null);
   const [outlineItems, setOutlineItems] = useState([]);
