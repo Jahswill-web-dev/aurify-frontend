@@ -1,22 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import {
-  AlertCircle,
   BookOpen,
   CheckCircle2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Circle,
   FileText,
   ListTree,
-  Lock,
   Menu,
   RefreshCw,
   X,
 } from "lucide-react";
-import { Badge, Button, Card, Tabs } from "@/components/ui";
+import { Badge, Button, Card, Modal, Tabs } from "@/components/ui";
 import { workspaceTabs } from "./constants";
+import {
+  getLessonProgress,
+  getLessonProgressLabel,
+  getModuleProgress,
+  getPracticeQuestionForLesson,
+} from "./helpers";
+import { LessonPracticePanel } from "./LessonPracticePanel";
 import { MaterialTab } from "./MaterialTab";
 
 const getSortedModules = (modules) =>
@@ -77,6 +83,8 @@ function CurriculumSidebar({
           const isReady = module.status === "ready";
           const isExpanded = expandedModules.has(module.id || module.module_number);
           const moduleKey = module.id || module.module_number;
+          const moduleProgress = getModuleProgress(module);
+          const modulePercent = Math.round(moduleProgress.percent_complete || 0);
 
           return (
             <div key={moduleKey} className="border-b border-grey-25 dark:border-dark-border">
@@ -97,17 +105,53 @@ function CurriculumSidebar({
                     <span className="text-h6 font-semibold uppercase text-grey-100 poppins-font dark:text-dark-muted">
                       Module {module.module_number || "-"}
                     </span>
-                    <Badge variant={isReady ? "primary" : "error"}>
-                      {isReady ? "Ready" : "Needs resume"}
+                    <Badge
+                      variant={
+                        !isReady
+                          ? "error"
+                          : moduleProgress.completed
+                            ? "success"
+                            : "primary"
+                      }
+                    >
+                      {!isReady
+                        ? "Needs resume"
+                        : moduleProgress.completed
+                          ? "Completed"
+                          : "Ready"}
                     </Badge>
                   </div>
                   <h3 className="break-words text-h5 font-semibold leading-6 text-grey-200 inter-font dark:text-dark-text">
                     {module.title || "Untitled module"}
                   </h3>
                   <p className="mt-1 text-h6 text-p-text-darker inter-font dark:text-dark-muted">
-                    {lessons.length} lessons
+                    {moduleProgress.completed_lessons}/
+                    {moduleProgress.total_lessons || lessons.length} lessons
+                    {module.estimated_minutes ? ` - ${module.estimated_minutes} min` : ""}
+                  </p>
+                  <p className="hidden">
+                    {moduleProgress.completed_lessons}/
+                    {moduleProgress.total_lessons || lessons.length} lessons
                     {module.estimated_minutes ? ` • ${module.estimated_minutes} min` : ""}
                   </p>
+                  {isReady ? (
+                    <div className="mt-3">
+                      <div className="mb-1 flex items-center justify-between text-h6 inter-font">
+                        <span className="text-grey-100 dark:text-dark-muted">
+                          Module progress
+                        </span>
+                        <span className="font-semibold text-grey-200 dark:text-dark-text">
+                          {modulePercent}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-off-white-50 dark:bg-dark-surface-soft">
+                        <div
+                          className="h-full rounded-full bg-primary transition-all duration-350 dark:bg-dark-accent"
+                          style={{ width: `${modulePercent}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </button>
 
@@ -118,6 +162,8 @@ function CurriculumSidebar({
                       {lessons.map((lesson, index) => {
                         const itemId = `${module.id || module.module_number}-lesson-${lesson.id || index}`;
                         const isSelected = selectedItemId === itemId;
+                        const lessonProgress = getLessonProgress(lesson);
+                        const lessonState = getLessonProgressLabel(lessonProgress);
 
                         return (
                           <button
@@ -139,14 +185,34 @@ function CurriculumSidebar({
                                 : "border-transparent text-p-text-darker hover:bg-white hover:text-grey-200 dark:text-dark-muted dark:hover:bg-dark-surface dark:hover:text-dark-text",
                             ].join(" ")}
                           >
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                            {lessonProgress.status === "completed" ? (
+                              <CheckCircle2
+                                className="mt-0.5 h-4 w-4 shrink-0 text-success"
+                                aria-hidden="true"
+                              />
+                            ) : lessonProgress.status === "practice_pending" ? (
+                              <Clock
+                                className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <Circle
+                                className="mt-0.5 h-4 w-4 shrink-0 text-grey-100 dark:text-dark-muted"
+                                aria-hidden="true"
+                              />
+                            )}
                             <span className="min-w-0">
                               <span className="block text-h6 font-semibold inter-font">
                                 {lesson.title || `Lesson ${index + 1}`}
                               </span>
-                              <span className="mt-0.5 flex items-center gap-1 text-h6 text-grey-100 dark:text-dark-muted">
-                                <Clock size={12} aria-hidden="true" />
-                                {lesson.estimated_minutes || 7} min
+                              <span className="mt-1 flex flex-wrap items-center gap-2 text-h6 text-grey-100 dark:text-dark-muted">
+                                <span className="inline-flex items-center gap-1">
+                                  <Clock size={12} aria-hidden="true" />
+                                  {lesson.estimated_minutes || 7} min
+                                </span>
+                                <Badge variant={lessonState.variant}>
+                                  {lessonState.label}
+                                </Badge>
                               </span>
                             </span>
                           </button>
@@ -208,15 +274,54 @@ function CurriculumSidebar({
   );
 }
 
-function LessonReader({ item, lessonItems, onSelectItem }) {
+function LessonReader({
+  item,
+  lessonItems,
+  lessonPracticeState,
+  onSelectItem,
+  onCompleteLesson,
+  onSelectLessonPracticeAnswer,
+  onSubmitLessonPracticeAnswer,
+}) {
   const currentIndex = lessonItems.findIndex((lessonItem) => lessonItem.id === item?.id);
   const previous = currentIndex > 0 ? lessonItems[currentIndex - 1] : null;
   const next =
     currentIndex >= 0 && currentIndex < lessonItems.length - 1
       ? lessonItems[currentIndex + 1]
       : null;
+  const { module, lesson, lessonIndex } = item || {};
+  const lessonProgress = getLessonProgress(lesson);
+  const lessonState = getLessonProgressLabel(lessonProgress);
+  const moduleProgress = getModuleProgress(module);
+  const practiceState = lesson?.id ? lessonPracticeState?.[lesson.id] || {} : {};
+  const practiceQuestion =
+    practiceState.question ||
+    (lessonProgress.status === "practice_pending"
+      ? getPracticeQuestionForLesson(module, lesson)
+      : null);
+  const hasFeedback = Boolean(practiceState.feedback);
+  const canContinue = hasFeedback || lessonProgress.completed;
+  const [practiceModalOpen, setPracticeModalOpen] = useState(false);
+  const [lastAutoOpenedQuestionId, setLastAutoOpenedQuestionId] = useState("");
 
-  if (!item?.lesson) {
+  useEffect(() => {
+    const freshQuestionId = practiceState.question?.id;
+
+    if (
+      freshQuestionId &&
+      freshQuestionId !== lastAutoOpenedQuestionId &&
+      !practiceState.feedback
+    ) {
+      setPracticeModalOpen(true);
+      setLastAutoOpenedQuestionId(freshQuestionId);
+    }
+  }, [
+    lastAutoOpenedQuestionId,
+    practiceState.feedback,
+    practiceState.question?.id,
+  ]);
+
+  if (!lesson) {
     return (
       <Card variant="default" className="mx-auto max-w-[720px] p-6 text-center">
         <FileText className="mx-auto h-9 w-9 text-primary" aria-hidden="true" />
@@ -230,8 +335,6 @@ function LessonReader({ item, lessonItems, onSelectItem }) {
     );
   }
 
-  const { module, lesson, lessonIndex } = item;
-
   return (
     <article className="mx-auto max-w-[900px]">
       <Card variant="default" className="p-5 sm:p-7">
@@ -244,6 +347,7 @@ function LessonReader({ item, lessonItems, onSelectItem }) {
                 <Clock size={13} aria-hidden="true" />
                 {lesson.estimated_minutes || 7} min
               </Badge>
+              <Badge variant={lessonState.variant}>{lessonState.label}</Badge>
             </div>
             <h1 className="text-xl-head font-bold leading-tight text-grey-200 poppins-font dark:text-dark-text">
               {lesson.title || "Untitled lesson"}
@@ -280,6 +384,84 @@ function LessonReader({ item, lessonItems, onSelectItem }) {
           </div>
         ) : null}
 
+        {lessonProgress.status === "not_started" && !practiceState.question ? (
+          <div className="mt-6 rounded-md border border-primary/25 bg-accent-25 p-4 dark:border-primary-25/30 dark:bg-dark-surface-soft">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-h5 font-semibold text-grey-200 inter-font dark:text-dark-text">
+                  Ready to check this lesson?
+                </p>
+                <p className="mt-1 text-h6 leading-5 text-p-text-darker inter-font dark:text-dark-muted">
+                  Complete the lesson to unlock its practice question.
+                </p>
+              </div>
+              <Button
+                variant="primary"
+                size="md"
+                loading={practiceState.completing}
+                onClick={() => onCompleteLesson(lesson.id)}
+                className="shrink-0"
+              >
+                <CheckCircle2 size={16} aria-hidden="true" />
+                Complete lesson
+              </Button>
+            </div>
+            {practiceState.error ? (
+              <p className="mt-3 rounded-sm border border-error/30 bg-error-light px-3 py-2 text-h6 leading-5 text-error inter-font dark:bg-error/15 dark:text-red-300">
+                {practiceState.error}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {lessonProgress.status === "practice_pending" || practiceState.question || hasFeedback ? (
+          <div className="mt-6 rounded-md border border-primary/25 bg-white p-4 dark:border-primary-25/30 dark:bg-dark-surface-soft">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-h5 font-semibold text-grey-200 inter-font dark:text-dark-text">
+                  Lesson practice is ready
+                </p>
+                <p className="mt-1 text-h6 leading-5 text-p-text-darker inter-font dark:text-dark-muted">
+                  Complete the lesson by answering its practice question.
+                </p>
+              </div>
+              <Button
+                variant={hasFeedback ? "ghost" : "primary"}
+                size="md"
+                onClick={() => setPracticeModalOpen(true)}
+                className="shrink-0"
+              >
+                {hasFeedback ? "Review feedback" : "Complete lesson"}
+              </Button>
+            </div>
+            {practiceState.error ? (
+              <p className="mt-3 rounded-sm border border-error/30 bg-error-light px-3 py-2 text-h6 leading-5 text-error inter-font dark:bg-error/15 dark:text-red-300">
+                {practiceState.error}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {lessonProgress.completed && !hasFeedback ? (
+          <div className="mt-6 rounded-md border border-success/30 bg-success-light p-4 text-success dark:bg-success/15 dark:text-green-300">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <p className="text-h5 font-semibold inter-font">
+                Lesson completed
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        {moduleProgress.completed && canContinue ? (
+          <div className="mt-4 rounded-md border border-success/30 bg-white p-4 dark:border-success/30 dark:bg-dark-surface-soft">
+            <div className="flex items-center gap-2 text-success dark:text-green-300">
+              <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <p className="text-h5 font-semibold inter-font">Module complete</p>
+            </div>
+          </div>
+        ) : null}
+
         <div className="mt-7 flex flex-col gap-3 border-t border-grey-25 pt-5 sm:flex-row sm:items-center sm:justify-between dark:border-dark-border">
           <Button
             variant="ghost"
@@ -290,17 +472,91 @@ function LessonReader({ item, lessonItems, onSelectItem }) {
             <ChevronLeft size={16} aria-hidden="true" />
             Previous lesson
           </Button>
-          <Button
-            variant="primary"
-            size="md"
-            disabled={!next}
-            onClick={() => next && onSelectItem(next)}
-          >
-            Next lesson
-            <ChevronRight size={16} aria-hidden="true" />
-          </Button>
+          {canContinue ? (
+            <Button
+              variant="primary"
+              size="md"
+              disabled={!next}
+              onClick={() => next && onSelectItem(next)}
+            >
+              Next lesson
+              <ChevronRight size={16} aria-hidden="true" />
+            </Button>
+          ) : (
+            <Badge variant={lessonProgress.status === "practice_pending" ? "accent" : "neutral"}>
+              {lessonProgress.status === "practice_pending"
+                ? "Practice pending"
+                : "Complete lesson to continue"}
+            </Badge>
+          )}
         </div>
       </Card>
+
+      <Modal
+        isOpen={practiceModalOpen}
+        onClose={() => {
+          if (!practiceState.submitting) setPracticeModalOpen(false);
+        }}
+        title="Lesson practice"
+        className="max-h-[90vh] overflow-y-auto p-5 sm:max-w-[860px] sm:p-6 lg:max-w-[920px]"
+      >
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <Badge variant="accent">Module {module.module_number || "-"}</Badge>
+          <Badge variant="neutral">
+            Lesson {lesson.lesson_number || lessonIndex + 1}
+          </Badge>
+          <Badge variant={lessonState.variant}>{lessonState.label}</Badge>
+        </div>
+
+        <LessonPracticePanel
+          question={practiceQuestion}
+          selectedAnswer={practiceState.selectedAnswer || ""}
+          feedback={practiceState.feedback}
+          loading={practiceState.completing}
+          submitting={practiceState.submitting}
+          error={practiceState.error}
+          onSelectAnswer={(answer) =>
+            onSelectLessonPracticeAnswer(lesson.id, answer)
+          }
+          onSubmit={() => onSubmitLessonPracticeAnswer(lesson.id)}
+        />
+
+        {hasFeedback ? (
+          <div className="mt-5 flex flex-col gap-3 border-t border-grey-25 pt-4 sm:flex-row sm:items-center sm:justify-between dark:border-dark-border">
+            {moduleProgress.completed ? (
+              <div className="flex items-center gap-2 text-success dark:text-green-300">
+                <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <p className="text-h5 font-semibold inter-font">
+                  Module complete
+                </p>
+              </div>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => {
+                  setPracticeModalOpen(false);
+                  onSelectItem(next);
+                }}
+              >
+                Next lesson
+                <ChevronRight size={16} aria-hidden="true" />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="md"
+                onClick={() => setPracticeModalOpen(false)}
+              >
+                Close
+              </Button>
+            )}
+          </div>
+        ) : null}
+      </Modal>
     </article>
   );
 }
@@ -373,21 +629,61 @@ export function CoursePlayerWorkspace({
   study,
   material,
   progress,
+  lessonProgress,
+  lessonPracticeState,
   notice,
   renderTool,
   onResume,
   resumeLoading,
+  onCompleteLesson,
+  onSelectLessonPracticeAnswer,
+  onSubmitLessonPracticeAnswer,
 }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [mobileCurriculumOpen, setMobileCurriculumOpen] = useState(false);
   const modules = useMemo(() => getSortedModules(material?.modules), [material?.modules]);
   const lessonItems = useMemo(() => getLessonItems(modules), [modules]);
+  const modulePracticeItems = useMemo(
+    () =>
+      modules
+        .filter(
+          (module) =>
+            module.status === "ready" &&
+            Array.isArray(module.practice_questions) &&
+            module.practice_questions.length
+        )
+        .map((module) => ({
+          id: `${module.id || module.module_number}-practice`,
+          type: "module-practice",
+          module,
+        })),
+    [modules]
+  );
+  const activeSelectedItem = useMemo(() => {
+    if (!selectedItem?.id) return null;
+    return (
+      lessonItems.find((item) => item.id === selectedItem.id) ||
+      modulePracticeItems.find((item) => item.id === selectedItem.id) ||
+      null
+    );
+  }, [lessonItems, modulePracticeItems, selectedItem?.id]);
+  const courseProgress = Math.round(
+    typeof lessonProgress?.percent_complete === "number"
+      ? lessonProgress.percent_complete
+      : progress
+  );
   const [expandedModules, setExpandedModules] = useState(new Set());
 
   useEffect(() => {
     const firstReadyModule = modules.find((module) => module.status === "ready");
     const firstItem = lessonItems[0] || null;
-    setSelectedItem((current) => current || firstItem);
+    setSelectedItem((current) =>
+      current &&
+      (lessonItems.some((item) => item.id === current.id) ||
+        modulePracticeItems.some((item) => item.id === current.id))
+        ? current
+        : firstItem
+    );
     setExpandedModules(
       new Set(
         modules
@@ -396,7 +692,7 @@ export function CoursePlayerWorkspace({
           .map((module) => module.id || module.module_number)
       )
     );
-  }, [lessonItems, modules]);
+  }, [lessonItems, modulePracticeItems, modules]);
 
   const handleSelectItem = (item) => {
     setSelectedItem(item);
@@ -451,12 +747,12 @@ export function CoursePlayerWorkspace({
             <div className="w-full min-w-[220px] sm:w-[260px]">
               <div className="mb-1 flex items-center justify-between text-h6 inter-font">
                 <span className="text-p-text dark:text-dark-muted">Progress</span>
-                <span className="font-semibold text-grey-200 dark:text-dark-text">{progress}%</span>
+                <span className="font-semibold text-grey-200 dark:text-dark-text">{courseProgress}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-off-white-50 dark:bg-dark-surface-soft">
                 <div
                   className="h-full rounded-full bg-primary transition-all duration-350 dark:bg-dark-accent"
-                  style={{ width: `${progress}%` }}
+                  style={{ width: `${courseProgress}%` }}
                 />
               </div>
             </div>
@@ -476,13 +772,17 @@ export function CoursePlayerWorkspace({
         <main className="min-w-0 px-4 py-5 sm:px-6 lg:px-8">
           {notice}
           {activeMode === "learn" ? (
-            selectedItem?.type === "module-practice" ? (
-              <ModulePracticeReader item={selectedItem} />
+            activeSelectedItem?.type === "module-practice" ? (
+              <ModulePracticeReader item={activeSelectedItem} />
             ) : (
               <LessonReader
-                item={selectedItem}
+                item={activeSelectedItem}
                 lessonItems={lessonItems}
+                lessonPracticeState={lessonPracticeState}
                 onSelectItem={handleSelectItem}
+                onCompleteLesson={onCompleteLesson}
+                onSelectLessonPracticeAnswer={onSelectLessonPracticeAnswer}
+                onSubmitLessonPracticeAnswer={onSubmitLessonPracticeAnswer}
               />
             )
           ) : (
@@ -493,7 +793,7 @@ export function CoursePlayerWorkspace({
         <div className="hidden lg:block">
           <CurriculumSidebar
             modules={modules}
-            selectedItemId={selectedItem?.id}
+            selectedItemId={activeSelectedItem?.id || selectedItem?.id}
             expandedModules={expandedModules}
             onToggleModule={handleToggleModule}
             onSelectItem={handleSelectItem}
@@ -530,7 +830,7 @@ export function CoursePlayerWorkspace({
             </div>
             <CurriculumSidebar
               modules={modules}
-              selectedItemId={selectedItem?.id}
+              selectedItemId={activeSelectedItem?.id || selectedItem?.id}
               expandedModules={expandedModules}
               onToggleModule={handleToggleModule}
               onSelectItem={handleSelectItem}

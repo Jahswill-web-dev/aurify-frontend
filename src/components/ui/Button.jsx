@@ -9,6 +9,12 @@ const variantClasses = {
     "bg-accent-100 text-primary-200 rounded-sm hover:bg-accent-50 transition-all duration-175 ease-smooth dark:border dark:border-dark-border dark:bg-dark-surface-soft dark:text-primary-25 dark:hover:border-primary-25 dark:hover:bg-dark-surface",
   ghost:
     "bg-transparent border border-primary text-primary rounded-sm hover:bg-accent-25 transition-all duration-175 ease-smooth dark:border-primary-25 dark:text-primary-25 dark:hover:bg-dark-surface-soft",
+  destructive:
+    "bg-error text-white rounded-sm hover:bg-error/90 active:bg-error/90 transition-all duration-175 ease-smooth dark:bg-error dark:text-white dark:hover:bg-error/90 dark:active:bg-error/90",
+  destructiveGhost:
+    "bg-transparent border border-error/40 text-error rounded-sm hover:bg-error-light hover:text-error transition-all duration-175 ease-smooth dark:border-error/50 dark:text-red-300 dark:hover:bg-error/15 dark:hover:text-red-200",
+  dangerSubtle:
+    "bg-transparent border border-grey-25 text-p-text rounded-sm hover:border-error/40 hover:bg-error-light hover:text-error transition-all duration-175 ease-smooth dark:border-dark-border dark:text-dark-muted dark:hover:border-error/50 dark:hover:bg-error/15 dark:hover:text-red-300",
   text:
     "bg-transparent text-primary underline-offset-2 hover:underline text-h5 transition-all duration-175 dark:text-primary-25",
 };
@@ -28,15 +34,18 @@ const Button = ({
   children,
   className = "",
   type = "button",
+  ...buttonProps
 }) => {
   const isDisabled = disabled || loading;
-  const spinnerColor = variant === "primary" ? "white" : "orange";
+  const spinnerColor =
+    variant === "primary" || variant === "destructive" ? "white" : "orange";
 
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={isDisabled}
+      {...buttonProps}
       className={[
         "inline-flex items-center justify-center gap-2 whitespace-nowrap",
         variantClasses[variant] || variantClasses.primary,

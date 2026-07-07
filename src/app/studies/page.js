@@ -6,9 +6,10 @@ import { AlertCircle, LayoutDashboard, Plus } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import EmptyStudiesState from "./_components/EmptyStudiesState";
 import StudiesGrid from "./_components/StudiesGrid";
-import { Button, Card, LoadingExperience } from "@/components/ui";
+import { Button, Card, LoadingExperience, Modal } from "@/components/ui";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import {
+  deleteStudy,
   getUserFacingError,
   hasAccessToken,
   isAuthError,
@@ -20,6 +21,9 @@ export default function StudiesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [authRequired, setAuthRequired] = useState(false);
+  const [studyToDelete, setStudyToDelete] = useState(null);
+  const [deletingStudyId, setDeletingStudyId] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const fetchStudies = useCallback(async () => {
     setLoading(true);
@@ -52,6 +56,41 @@ export default function StudiesPage() {
   useEffect(() => {
     fetchStudies();
   }, [fetchStudies]);
+
+  const handleDeleteRequest = (study) => {
+    setStudyToDelete(study);
+    setDeleteError("");
+  };
+
+  const handleCloseDeleteModal = () => {
+    if (deletingStudyId) return;
+    setStudyToDelete(null);
+    setDeleteError("");
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!studyToDelete?.id) return;
+
+    setDeletingStudyId(studyToDelete.id);
+    setDeleteError("");
+
+    try {
+      await deleteStudy(studyToDelete.id);
+      setStudies((currentStudies) =>
+        currentStudies.filter((study) => study.id !== studyToDelete.id)
+      );
+      setStudyToDelete(null);
+    } catch (err) {
+      console.error("Could not delete Study", err);
+      setDeleteError(
+        getUserFacingError(err, "Could not delete this Study. Please try again.")
+      );
+    } finally {
+      setDeletingStudyId(null);
+    }
+  };
+
+  const deleteTitle = studyToDelete?.title || studyToDelete?.topic || "this Study";
 
   if (authRequired) {
     return (
@@ -126,11 +165,54 @@ export default function StudiesPage() {
             </div>
           </Card>
         ) : studies.length ? (
-          <StudiesGrid studies={studies} />
+          <StudiesGrid studies={studies} onDeleteStudy={handleDeleteRequest} />
         ) : (
           <EmptyStudiesState />
         )}
       </div>
+
+      <Modal
+        isOpen={Boolean(studyToDelete)}
+        onClose={handleCloseDeleteModal}
+        title="Delete Study?"
+      >
+        <div className="space-y-4">
+          <p className="text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+            Are you sure you want to delete{" "}
+            <span className="font-semibold text-grey-200 dark:text-dark-text">
+              {deleteTitle}
+            </span>
+            ? This Study and its generated lessons, practice questions, exam
+            results, and progress will be permanently deleted. You will not be
+            able to get it back.
+          </p>
+
+          {deleteError ? (
+            <div className="rounded-md border border-error/30 bg-error-light p-3 text-h6 leading-5 text-error inter-font dark:bg-error/15 dark:text-red-300">
+              {deleteError}
+            </div>
+          ) : null}
+
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+            <Button
+              variant="ghost"
+              size="md"
+              onClick={handleCloseDeleteModal}
+              disabled={Boolean(deletingStudyId)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="md"
+              loading={deletingStudyId === studyToDelete?.id}
+              onClick={handleConfirmDelete}
+            >
+              Delete permanently
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </main>
   );
 }

@@ -84,13 +84,15 @@ const getErrorMessage = (payload, fallback) => {
 
 const parseResponsePayload = async (response) => {
   const contentType = response.headers.get("content-type") || "";
+  const text = await response.text();
+
+  if (!text) return null;
 
   if (contentType.includes("application/json")) {
-    return response.json();
+    return JSON.parse(text);
   }
 
-  const text = await response.text();
-  return text || null;
+  return text;
 };
 
 export async function apiRequest(path, options = {}) {
@@ -137,12 +139,37 @@ export async function apiRequest(path, options = {}) {
 export const listStudies = () => apiRequest("/studies");
 export const getCurrentUser = () => apiRequest("/me");
 export const getStudy = (studyId) => apiRequest(`/studies/${studyId}`);
+export const deleteStudy = async (studyId) => {
+  const payload = await apiRequest(`/studies/${studyId}`, { method: "DELETE" });
+
+  if (
+    payload &&
+    typeof payload === "object" &&
+    Object.prototype.hasOwnProperty.call(payload, "deleted") &&
+    payload.deleted !== true
+  ) {
+    throw new ApiError("The Study was not deleted. Please try again.", 500, payload);
+  }
+
+  return payload;
+};
 export const getStudyResearchContext = (studyId) =>
   apiRequest(`/studies/${studyId}/research-context`);
 export const getStudyOutline = (studyId) =>
   apiRequest(`/studies/${studyId}/outline`);
 export const getStudyMaterial = (studyId) =>
   apiRequest(`/studies/${studyId}/material`);
+export const getStudyProgress = (studyId) =>
+  apiRequest(`/studies/${studyId}/progress`);
+export const completeLesson = (studyId, lessonId) =>
+  apiRequest(`/studies/${studyId}/lessons/${lessonId}/complete`, {
+    method: "POST",
+  });
+export const submitLessonPracticeAttempt = (studyId, lessonId, payload) =>
+  apiRequest(`/studies/${studyId}/lessons/${lessonId}/practice-attempt`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 export const getStudyGlossary = (studyId) =>
   apiRequest(`/studies/${studyId}/glossary`);
 export const getPracticeQuestions = (studyId) =>

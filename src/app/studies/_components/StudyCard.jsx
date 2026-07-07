@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BookOpen, CalendarDays } from "lucide-react";
-import { Badge, Card } from "@/components/ui";
+import { ArrowRight, BookOpen, CalendarDays, Trash2 } from "lucide-react";
+import { Badge, Button, Card } from "@/components/ui";
 
 const statusConfig = {
   draft: { label: "Draft", variant: "neutral" },
@@ -39,11 +39,12 @@ const formatDate = (date) => {
   }).format(new Date(date));
 };
 
-function StudyCard({ study }) {
+function StudyCard({ study, onDeleteStudy }) {
   const status = statusConfig[study.status] || statusConfig.ready;
   const title = study.title || study.topic || "Untitled Study";
   const progress = getProgressValue(study.progress);
   const lastStudiedAt = study.lastStudiedAt || study.updated_at || study.created_at;
+  const canDelete = typeof onDeleteStudy === "function";
 
   return (
     <Card
@@ -97,14 +98,27 @@ function StudyCard({ study }) {
         </div>
       </div>
 
-      <div className="border-t border-grey-25 px-5 py-4 dark:border-dark-border">
+      <div className="flex items-center gap-2 border-t border-grey-25 px-5 py-4 dark:border-dark-border">
         <Link
           href={`/studies/${study.id}`}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2 text-h5 font-medium text-white shadow-btn-primary transition-all duration-175 ease-smooth hover:bg-primary-200 dark:bg-dark-accent dark:text-[#16110a] dark:shadow-none dark:hover:bg-primary-25"
+          className="inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2 text-h5 font-medium text-white shadow-btn-primary transition-all duration-175 ease-smooth hover:bg-primary-200 dark:bg-dark-accent dark:text-[#16110a] dark:shadow-none dark:hover:bg-primary-25"
         >
           Continue
           <ArrowRight size={16} aria-hidden="true" />
         </Link>
+        {canDelete ? (
+          <Button
+            variant="dangerSubtle"
+            size="sm"
+            onClick={() => onDeleteStudy(study)}
+            className="shrink-0 px-2.5"
+            title="Delete Study"
+            aria-label={`Delete ${title}`}
+          >
+            <Trash2 size={15} aria-hidden="true" />
+            <span className="hidden sm:inline">Delete</span>
+          </Button>
+        ) : null}
       </div>
     </Card>
   );

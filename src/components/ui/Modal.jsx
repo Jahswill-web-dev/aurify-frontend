@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { X } from "lucide-react";
 
 const focusableSelector =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -76,10 +77,10 @@ const Modal = ({ isOpen, onClose, title, children, className = "" }) => {
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-grey-100 hover:text-grey-200 transition-colors duration-175 dark:text-dark-muted dark:hover:text-dark-text"
+          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-md border border-transparent text-grey-100 transition-colors duration-175 hover:border-grey-25 hover:bg-off-white-100 hover:text-grey-200 focus:outline-none focus:ring-2 focus:ring-primary/40 dark:text-dark-muted dark:hover:border-dark-border dark:hover:bg-dark-surface-soft dark:hover:text-dark-text"
           aria-label="Close modal"
         >
-          x
+          <X className="h-5 w-5" aria-hidden="true" />
         </button>
         {title ? (
           <h2 className="text-h3 font-semibold text-grey-200 poppins-font mb-4 pr-8 dark:text-dark-text">

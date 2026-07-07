@@ -55,6 +55,13 @@ export const demoMaterial = {
         "Starts with intuition, then connects the idea to notation and graphs.",
       practice_coverage_reason:
         "Checks limit language, graph interpretation, and a common misconception.",
+      progress: {
+        module_id: "demo-module-1",
+        completed_lessons: 0,
+        total_lessons: 2,
+        percent_complete: 0,
+        completed: false,
+      },
       lessons: [
         {
           id: "demo-lesson-1",
@@ -68,6 +75,13 @@ export const demoMaterial = {
             "The function value at the target can be different from the limit.",
             "Graphs are often the fastest way to see the idea.",
           ],
+          progress: {
+            lesson_id: "demo-lesson-1",
+            content_completed: false,
+            practice_completed: false,
+            completed: false,
+            status: "not_started",
+          },
         },
         {
           id: "demo-lesson-2",
@@ -81,11 +95,19 @@ export const demoMaterial = {
             "The value after the equals sign is the approached output.",
             "Read notation as a sentence before solving.",
           ],
+          progress: {
+            lesson_id: "demo-lesson-2",
+            content_completed: true,
+            practice_completed: false,
+            completed: false,
+            status: "practice_pending",
+          },
         },
       ],
       practice_questions: [
         {
           id: "demo-module-question-1",
+          lesson_id: "demo-lesson-1",
           question: "What does a limit mainly describe?",
           options: [
             "The value a function approaches",
@@ -99,6 +121,23 @@ export const demoMaterial = {
           difficulty: "easy",
           weak_area: "limit definition",
           source_lesson: "The Big Idea",
+        },
+        {
+          id: "demo-module-question-1b",
+          lesson_id: "demo-lesson-2",
+          question: "What does the arrow in limit notation tell you?",
+          options: [
+            "Where x is moving",
+            "The final exam score",
+            "Only the y-intercept",
+            "The largest input value",
+          ],
+          correct_answer: "Where x is moving",
+          explanation:
+            "The arrow shows the target value that x approaches.",
+          difficulty: "easy",
+          weak_area: "limit notation",
+          source_lesson: "Reading Limit Notation",
         },
       ],
     },
@@ -118,6 +157,13 @@ export const demoMaterial = {
         "Focuses on the first practical solving moves students use in homework and exams.",
       practice_coverage_reason:
         "Tests direct substitution first, then simplification when substitution is blocked.",
+      progress: {
+        module_id: "demo-module-2",
+        completed_lessons: 1,
+        total_lessons: 2,
+        percent_complete: 50,
+        completed: false,
+      },
       lessons: [
         {
           id: "demo-lesson-3",
@@ -131,6 +177,17 @@ export const demoMaterial = {
             "A clean number usually means you are done.",
             "Do not overcomplicate continuous functions.",
           ],
+          progress: {
+            lesson_id: "demo-lesson-3",
+            content_completed: true,
+            practice_completed: true,
+            completed: true,
+            status: "completed",
+            last_question_id: "demo-module-question-2a",
+            last_answer: "Substitute first when the expression allows it",
+            last_is_correct: true,
+            last_weak_area: "direct substitution",
+          },
         },
         {
           id: "demo-lesson-4",
@@ -144,11 +201,36 @@ export const demoMaterial = {
             "Factoring can reveal a removable problem.",
             "After simplifying, substitute again.",
           ],
+          progress: {
+            lesson_id: "demo-lesson-4",
+            content_completed: false,
+            practice_completed: false,
+            completed: false,
+            status: "not_started",
+          },
         },
       ],
       practice_questions: [
         {
+          id: "demo-module-question-2a",
+          lesson_id: "demo-lesson-3",
+          question: "What is the fastest first check for many continuous functions?",
+          options: [
+            "Substitute first when the expression allows it",
+            "Always factor immediately",
+            "Ignore the target value",
+            "Start with a timed exam",
+          ],
+          correct_answer: "Substitute first when the expression allows it",
+          explanation:
+            "Direct substitution is usually the quickest valid first move for continuous functions.",
+          difficulty: "easy",
+          weak_area: "direct substitution",
+          source_lesson: "Try Direct Substitution First",
+        },
+        {
           id: "demo-module-question-2",
+          lesson_id: "demo-lesson-4",
           question: "What should you do if direct substitution gives 0/0?",
           options: [
             "Simplify the expression and try again",

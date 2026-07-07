@@ -1,6 +1,6 @@
 # Aurify API And Features
 
-Last reviewed: 2026-06-29
+Last reviewed: 2026-07-06
 
 ## Product Model
 
@@ -38,10 +38,12 @@ Recommended frontend flow:
 6. If the parser emits `ready`, send that payload directly to `POST /studies`.
 7. Poll `GET /studies/{study_id}` until `status` becomes `exam_ready`, `module_partial_ready`, `modules_failed`, or `failed`.
 8. When `module_partial_ready`, `material_ready`, or later, call `GET /studies/{study_id}/material` and render any `material.modules[]` entries with `status: "ready"`.
-9. When `glossary_ready` or later, call `GET /studies/{study_id}/glossary`.
-10. When `practice_ready` or later, call `GET /studies/{study_id}/practice-questions` for the latest ready practice set, or use the practice question-set endpoints.
-11. When `exam_ready`, call `GET /studies/{study_id}/exam-questions` for the latest ready exam set, or use the exam question-set endpoints.
-12. If generation fails or gets stuck, call `POST /studies/{study_id}/generation/resume`.
+9. Use `GET /studies/{study_id}/progress` for lightweight lesson and module completion refreshes.
+10. When `glossary_ready` or later, call `GET /studies/{study_id}/glossary`.
+11. When `practice_ready` or later, call `GET /studies/{study_id}/practice-questions` for the latest ready practice set, or use the practice question-set endpoints.
+12. When `exam_ready`, call `GET /studies/{study_id}/exam-questions` for the latest ready exam set, or use the exam question-set endpoints.
+13. If generation fails or gets stuck, call `POST /studies/{study_id}/generation/resume`.
+14. To remove a Study from the user's library, call `DELETE /studies/{study_id}` and remove it from local UI state after a successful response.
 
 Protected endpoints require the bearer token. The parser endpoints under `/api/*` are currently not protected.
 
@@ -410,6 +412,55 @@ Example failed state:
 }
 ```
 
+### `DELETE /studies/{study_id}`
+
+Protected. Permanently deletes a Study owned by the current user.
+
+This removes the Study container and its generated learning data, including research context, outline, material, modules, lessons, module practice, whole-study practice and exam question sets, attempts, progress, weak areas, and analytics data tied to that Study.
+
+Frontend fetch example:
+
+```js
+const response = await fetch(`${API_BASE_URL}/studies/${studyId}`, {
+  method: "DELETE",
+  headers: {
+    Authorization: `Bearer ${accessToken}`
+  }
+});
+
+const result = await response.json();
+```
+
+Success:
+
+- `200 OK`: delete succeeded.
+
+Response:
+
+```json
+{
+  "deleted": true,
+  "study_id": "study-id"
+}
+```
+
+Frontend behavior after success:
+
+- Treat `response.ok` plus `result.deleted === true` as success.
+- Remove the Study from the local Study list immediately.
+- If the user is currently inside the deleted Study workspace, navigate back to the Study library/dashboard.
+- Stop polling `GET /studies/{study_id}` for that Study.
+
+Errors:
+
+- `401`: access token expired.
+- `403`: bearer token is missing, invalid, or cannot be validated.
+- `404`: Study does not exist or is not owned by the current user.
+
+Deletion is permanent. The backend does not currently provide restore/archive behavior and does not cancel already-running background generation jobs. If a background worker later tries to save data for the deleted Study, the missing Study is ignored instead of recreating it.
+
+Implementation note for frontend API helpers: this endpoint returns JSON on success so generic helpers that call `response.json()` do not misclassify a successful delete as a failed request.
+
 ### `POST /studies/{study_id}/generation/resume`
 
 Protected. Resumes generation for an existing Study and continues down to `exam_ready`.
@@ -554,7 +605,7 @@ Example:
   "title": "Dynamics Learning Material",
   "outline": ["Forces And Free-Body Diagrams", "Newton's Laws"],
   "source_notes": "Built from the saved search-grounded research context.",
-  "content": "## Module 1: Forces And Free-Body Diagrams\n\n### Contact Forces\n\nLearning content...",
+  "content": "## Module 1: Forces And Free-Body Diagrams\n\n### Contact Forces\n\nLet's make contact forces easy to picture...\n\n### What you'll learn\n- What contact forces are\n- How to spot them\n\n🟢 Definition\nA contact force happens when two objects touch.\n\n🔵 Example\nA table pushes up on a book resting on it.\n\n### Simple illustration\nBook -> touches table -> table pushes back\n\n🟡 Remember\nIf the objects must touch, it is a contact force.\n\n🔴 Common mistake\nGravity is not a contact force because objects do not need to touch.\n\n### Quick recap\n- Contact forces require touch.\n- Normal force is a common contact force.",
   "modules": [
     {
       "id": "module-id",
@@ -574,7 +625,7 @@ Example:
           "id": "lesson-id",
           "lesson_number": 1,
           "title": "Contact Forces",
-          "content": "Focused lesson content...",
+          "content": "Let's make contact forces easy to picture...\n\n### What you'll learn\n- What contact forces are\n- How to spot them\n\n🟢 Definition\nA contact force happens when two objects touch.\n\n🔵 Example\nA table pushes up on a book resting on it.\n\n### Simple illustration\nBook -> touches table -> table pushes back\n\n🟡 Remember\nIf the objects must touch, it is a contact force.\n\n🔴 Common mistake\nGravity is not a contact force because objects do not need to touch.\n\n### Quick recap\n- Contact forces require touch.\n- Normal force is a common contact force.",
           "estimated_minutes": 7,
           "key_takeaways": ["Contact forces happen when objects touch."]
         }
@@ -605,8 +656,162 @@ Frontend rendering notes:
 - Render only modules with `status: "ready"` as studyable content.
 - If a module has `status: "failed"`, show a retry/resume affordance and call `POST /studies/{study_id}/generation/resume`.
 - Each lesson is designed for about 7 minutes of study.
+- Each lesson includes a `progress` object in material/detail responses.
+- Each module includes derived `progress` with completed lesson count, total lesson count, percent complete, and completion status.
+- `lesson.content` is markdown intended for direct lesson rendering. It uses short paragraphs, headings, bullets, and color-coded callout labels: `🟢 Definition`, `🔵 Example`, `🟡 Remember`, and `🔴 Common mistake`.
+- The color-coded callout labels are stable display hooks. The frontend can render them as plain markdown text immediately or map them to styled callout components.
+- Simple illustrations are text-based inside `lesson.content`, such as analogies, small flows, compact tables, or ASCII-style diagrams.
 - Module `practice_questions[]` are for immediate module-end reinforcement and include answers/explanations.
 - Whole-study practice and exam endpoints still exist separately and should be used for full-study assessment flows.
+
+## Lesson And Module Progress
+
+Lesson and module progress is backend-only in this API phase. The frontend can consume the fields and endpoints below when ready.
+
+Progress rules:
+
+- A lesson is fully completed after the learner clicks complete and submits the lesson practice answer.
+- The submitted answer does not need to be correct for the lesson to count as completed.
+- Wrong answers still return the correct answer and explanation so the frontend can show immediate feedback.
+- A module is complete when all lessons in that module are complete.
+- Whole-study practice and exam attempts are unchanged and remain separate from lesson practice.
+
+### `GET /studies/{study_id}/progress`
+
+Protected. Returns lightweight derived progress for the Study:
+
+```json
+{
+  "study_id": "study-id",
+  "completed_lessons": 1,
+  "total_lessons": 3,
+  "completed_modules": 0,
+  "total_modules": 1,
+  "percent_complete": 33.33,
+  "modules": [
+    {
+      "module_id": "module-id",
+      "completed_lessons": 1,
+      "total_lessons": 3,
+      "percent_complete": 33.33,
+      "completed": false,
+      "lessons": [
+        {
+          "lesson_id": "lesson-id",
+          "content_completed": true,
+          "practice_completed": true,
+          "completed": true,
+          "status": "completed",
+          "last_question_id": "module-question-id",
+          "last_answer": "selected answer",
+          "last_is_correct": false,
+          "last_weak_area": "concept area"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Lesson progress statuses:
+
+- `not_started`: user has not clicked complete for the lesson.
+- `practice_pending`: user clicked complete, but has not submitted the lesson practice answer.
+- `completed`: user submitted the lesson practice answer.
+
+### `POST /studies/{study_id}/lessons/{lesson_id}/complete`
+
+Protected. Marks lesson content as completed and returns the practice question for that lesson.
+
+Response:
+
+```json
+{
+  "lesson": {
+    "lesson_id": "lesson-id",
+    "content_completed": true,
+    "practice_completed": false,
+    "completed": false,
+    "status": "practice_pending"
+  },
+  "module": {
+    "module_id": "module-id",
+    "completed_lessons": 0,
+    "total_lessons": 3,
+    "percent_complete": 0,
+    "completed": false
+  },
+  "practice_question": {
+    "id": "module-question-id",
+    "lesson_id": "lesson-id",
+    "question": "Which option is correct?",
+    "options": ["A", "B", "C", "D"],
+    "correct_answer": "A",
+    "explanation": "A is correct because...",
+    "difficulty": "easy",
+    "weak_area": "concept area",
+    "source_lesson": "Lesson title"
+  }
+}
+```
+
+The endpoint returns `404` if the lesson is not owned by the current user through the Study, or if no lesson practice question can be matched. Existing generated studies can still match questions by `source_lesson` when `lesson_id` is missing.
+
+### `POST /studies/{study_id}/lessons/{lesson_id}/practice-attempt`
+
+Protected. Submits one answer for the lesson practice question, grades it, stores the latest result, and marks the lesson fully completed.
+
+Request:
+
+```json
+{
+  "question_id": "module-question-id",
+  "answer": "selected option text"
+}
+```
+
+Wrong-answer response:
+
+```json
+{
+  "feedback": {
+    "question_id": "module-question-id",
+    "question": "Which option is correct?",
+    "selected_answer": "B",
+    "correct_answer": "A",
+    "is_correct": false,
+    "explanation": "A is correct because...",
+    "difficulty": "easy",
+    "weak_area": "concept area"
+  },
+  "lesson": {
+    "lesson_id": "lesson-id",
+    "content_completed": true,
+    "practice_completed": true,
+    "completed": true,
+    "status": "completed",
+    "last_is_correct": false
+  },
+  "module": {
+    "module_id": "module-id",
+    "completed_lessons": 1,
+    "total_lessons": 3,
+    "percent_complete": 33.33,
+    "completed": false
+  },
+  "study_progress": {
+    "study_id": "study-id",
+    "completed_lessons": 1,
+    "total_lessons": 3,
+    "percent_complete": 33.33
+  }
+}
+```
+
+Errors:
+
+- `400`: submitted question does not belong to the lesson.
+- `404`: Study, lesson, or lesson practice question was not found for the current user.
 
 ### `POST /studies/{study_id}/material/generate`
 

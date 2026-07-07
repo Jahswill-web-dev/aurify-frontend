@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle } from "lucide-react";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import {
+  completeLesson,
   generateExamQuestionSet,
   generatePracticeQuestionSet,
   getExamQuestions,
@@ -13,6 +14,7 @@ import {
   getStudy,
   getStudyGlossary,
   getStudyMaterial,
+  getStudyProgress,
   getUserFacingError,
   hasAccessToken,
   isAuthError,
@@ -21,6 +23,7 @@ import {
   regenerateStudyGlossary,
   resumeStudyGeneration,
   submitExamAttempt,
+  submitLessonPracticeAttempt,
   submitPracticeAttempt,
 } from "@/app/lib/aurifyApi";
 import { AnalyticsTab } from "./_workspace/AnalyticsTab";
@@ -35,7 +38,17 @@ import {
 import { CoursePlayerWorkspace } from "./_workspace/CoursePlayerWorkspace";
 import { ExamTab } from "./_workspace/ExamTab";
 import { GlossaryTab } from "./_workspace/GlossaryTab";
-import { clampQuestionCount, getProgressValue, getReadySets, hasGeneratingSet, normalizeList } from "./_workspace/helpers";
+import {
+  buildLessonProgressFromMaterial,
+  clampQuestionCount,
+  getPracticeQuestionForLesson,
+  getProgressValue,
+  getReadySets,
+  hasGeneratingSet,
+  mergeLessonCompletionIntoMaterial,
+  mergeProgressIntoMaterial,
+  normalizeList,
+} from "./_workspace/helpers";
 import { PracticeTab } from "./_workspace/PracticeTab";
 import { ErrorState, GenerationNotice, LoadingState, WorkspaceHeader } from "./_workspace/WorkspaceShell";
 import {
@@ -55,6 +68,8 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [activeTab, setActiveTab] = useState("learn");
   const [study, setStudy] = useState(null);
   const [material, setMaterial] = useState(null);
+  const [lessonProgress, setLessonProgress] = useState(null);
+  const [lessonPracticeState, setLessonPracticeState] = useState({});
   const [glossary, setGlossary] = useState(null);
   const [glossaryLoading, setGlossaryLoading] = useState(false);
   const [glossaryError, setGlossaryError] = useState("");
@@ -96,11 +111,64 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [resumeLoading, setResumeLoading] = useState(false);
   const [glossaryRegenerating, setGlossaryRegenerating] = useState(false);
 
-  const progress = useMemo(() => getProgressValue(study?.progress), [study]);
+  const progress = useMemo(
+    () => getProgressValue(lessonProgress || study?.progress),
+    [lessonProgress, study]
+  );
   const shouldPoll = study ? pollingStatuses.has(study.status) : false;
   const shouldPollQuestionSets =
     !isDemo &&
     (hasGeneratingSet(practiceQuestionSets) || hasGeneratingSet(examQuestionSets));
+
+  const setMaterialAndLessonProgress = useCallback((nextMaterial, progressSnapshot) => {
+    if (!nextMaterial) {
+      setMaterial(null);
+      setLessonProgress(null);
+      return null;
+    }
+
+    const nextMaterialWithProgress = progressSnapshot
+      ? mergeProgressIntoMaterial(nextMaterial, progressSnapshot)
+      : nextMaterial;
+    const nextProgress =
+      progressSnapshot || buildLessonProgressFromMaterial(nextMaterialWithProgress);
+
+    setMaterial(nextMaterialWithProgress);
+    setLessonProgress(nextProgress);
+    return nextMaterialWithProgress;
+  }, []);
+
+  const refreshLessonProgress = useCallback(
+    async (baseMaterial) => {
+      if (!baseMaterial) {
+        setLessonProgress(null);
+        return null;
+      }
+
+      if (isDemo) {
+        const nextProgress = buildLessonProgressFromMaterial(baseMaterial);
+        setMaterialAndLessonProgress(baseMaterial, nextProgress);
+        return nextProgress;
+      }
+
+      try {
+        const nextProgress = await getStudyProgress(studyId);
+        setMaterialAndLessonProgress(baseMaterial, nextProgress);
+        return nextProgress;
+      } catch (err) {
+        if (isAuthError(err)) {
+          setAuthRequired(true);
+          return null;
+        }
+
+        console.error("Could not refresh lesson progress", err);
+        const fallbackProgress = buildLessonProgressFromMaterial(baseMaterial);
+        setMaterialAndLessonProgress(baseMaterial, fallbackProgress);
+        return fallbackProgress;
+      }
+    },
+    [isDemo, setMaterialAndLessonProgress, studyId]
+  );
 
   const loadGlossary = useCallback(async () => {
     if (isDemo) {
@@ -283,7 +351,7 @@ export default function StudyWorkspaceClient({ studyId }) {
 
       if (isDemo) {
         setStudy(demoStudy);
-        setMaterial(demoMaterial);
+        setMaterialAndLessonProgress(demoMaterial);
         setGlossary(demoGlossary);
         setPracticeQuestionSets(demoPracticeQuestionSets);
         setSelectedPracticeSetId((current) => current || demoPracticeQuestionSets[0]?.id || "");
@@ -298,6 +366,7 @@ export default function StudyWorkspaceClient({ studyId }) {
       if (!hasAccessToken()) {
         setStudy(null);
         setMaterial(null);
+        setLessonProgress(null);
         setGlossary(null);
         setPracticeQuestionSets([]);
         setPracticeQuestions([]);
@@ -315,13 +384,16 @@ export default function StudyWorkspaceClient({ studyId }) {
         if (materialReadyStatuses.has(nextStudy.status)) {
           try {
             const nextMaterial = await getStudyMaterial(studyId);
-            setMaterial(nextMaterial);
+            setMaterialAndLessonProgress(nextMaterial);
+            await refreshLessonProgress(nextMaterial);
           } catch (err) {
             if (err.status !== 404) throw err;
             setMaterial(null);
+            setLessonProgress(null);
           }
         } else {
           setMaterial(null);
+          setLessonProgress(null);
         }
 
         if (glossaryReadyStatuses.has(nextStudy.status)) {
@@ -347,6 +419,7 @@ export default function StudyWorkspaceClient({ studyId }) {
         if (isAuthError(err)) {
           setStudy(null);
           setMaterial(null);
+          setLessonProgress(null);
           setGlossary(null);
           setPracticeQuestionSets([]);
           setPracticeQuestions([]);
@@ -363,7 +436,15 @@ export default function StudyWorkspaceClient({ studyId }) {
         setLoading(false);
       }
     },
-    [isDemo, loadExamQuestions, loadGlossary, loadPracticeQuestions, studyId]
+    [
+      isDemo,
+      loadExamQuestions,
+      loadGlossary,
+      loadPracticeQuestions,
+      refreshLessonProgress,
+      setMaterialAndLessonProgress,
+      studyId,
+    ]
   );
 
   useEffect(() => {
@@ -447,7 +528,7 @@ export default function StudyWorkspaceClient({ studyId }) {
             practice_completed: true,
           },
         });
-        setMaterial({
+        setMaterialAndLessonProgress({
           ...demoMaterial,
           modules: demoMaterial.modules.map((module) =>
             module.status === "failed"
@@ -455,6 +536,13 @@ export default function StudyWorkspaceClient({ studyId }) {
                   ...module,
                   status: "ready",
                   generation_error: null,
+                  progress: {
+                    module_id: "demo-module-3",
+                    completed_lessons: 0,
+                    total_lessons: 1,
+                    percent_complete: 0,
+                    completed: false,
+                  },
                   lessons: [
                     {
                       id: "demo-lesson-5",
@@ -468,11 +556,19 @@ export default function StudyWorkspaceClient({ studyId }) {
                         "Right-hand limits approach from larger x-values.",
                         "The two-sided limit needs both sides to agree.",
                       ],
+                      progress: {
+                        lesson_id: "demo-lesson-5",
+                        content_completed: false,
+                        practice_completed: false,
+                        completed: false,
+                        status: "not_started",
+                      },
                     },
                   ],
                   practice_questions: [
                     {
                       id: "demo-module-question-3",
+                      lesson_id: "demo-lesson-5",
                       question: "When does a two-sided limit exist?",
                       options: [
                         "When both one-sided limits match",
@@ -545,6 +641,202 @@ export default function StudyWorkspaceClient({ studyId }) {
       }
     } finally {
       setGlossaryRegenerating(false);
+    }
+  };
+
+  const findLessonContext = useCallback(
+    (lessonId) => {
+      const modules = Array.isArray(material?.modules) ? material.modules : [];
+
+      for (const studyModule of modules) {
+        const lesson = (studyModule.lessons || []).find(
+          (item) => item.id === lessonId
+        );
+        if (lesson) return { module: studyModule, lesson };
+      }
+
+      return null;
+    },
+    [material]
+  );
+
+  const patchLessonPracticeState = (lessonId, patch) => {
+    setLessonPracticeState((current) => ({
+      ...current,
+      [lessonId]: {
+        ...(current[lessonId] || {}),
+        ...patch,
+      },
+    }));
+  };
+
+  const handleCompleteLesson = async (lessonId) => {
+    const context = findLessonContext(lessonId);
+    if (!context) return;
+
+    patchLessonPracticeState(lessonId, {
+      completing: true,
+      error: "",
+      feedback: null,
+    });
+
+    try {
+      let result;
+
+      if (isDemo) {
+        const question = getPracticeQuestionForLesson(context.module, context.lesson);
+        const totalLessons = context.module.lessons?.length || 0;
+        const completedLessons = (context.module.lessons || []).filter(
+          (lesson) => lesson.id !== lessonId && lesson.progress?.completed
+        ).length;
+
+        result = {
+          lesson: {
+            lesson_id: lessonId,
+            content_completed: true,
+            practice_completed: false,
+            completed: false,
+            status: "practice_pending",
+          },
+          module: {
+            module_id: context.module.id,
+            completed_lessons: completedLessons,
+            total_lessons: totalLessons,
+            percent_complete: totalLessons
+              ? (completedLessons / totalLessons) * 100
+              : 0,
+            completed: false,
+          },
+          practice_question: question
+            ? { ...question, lesson_id: question.lesson_id || lessonId }
+            : null,
+        };
+      } else {
+        result = await completeLesson(studyId, lessonId);
+      }
+
+      const nextMaterial = mergeLessonCompletionIntoMaterial(material, result);
+      setMaterialAndLessonProgress(nextMaterial);
+      patchLessonPracticeState(lessonId, {
+        completing: false,
+        question: result.practice_question || null,
+        selectedAnswer: "",
+        feedback: null,
+        error: "",
+      });
+    } catch (err) {
+      if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        console.error("Could not complete lesson", err);
+        patchLessonPracticeState(lessonId, {
+          completing: false,
+          error: getUserFacingError(
+            err,
+            "Could not complete this lesson. Please try again."
+          ),
+        });
+      }
+    }
+  };
+
+  const handleSelectLessonPracticeAnswer = (lessonId, answer) => {
+    patchLessonPracticeState(lessonId, {
+      selectedAnswer: answer,
+      error: "",
+    });
+  };
+
+  const handleSubmitLessonPracticeAnswer = async (lessonId) => {
+    const context = findLessonContext(lessonId);
+    const state = lessonPracticeState[lessonId] || {};
+    const question =
+      state.question || getPracticeQuestionForLesson(context?.module, context?.lesson);
+    const selectedAnswer = state.selectedAnswer;
+
+    if (!context || !question?.id || !selectedAnswer) return;
+
+    patchLessonPracticeState(lessonId, {
+      submitting: true,
+      error: "",
+    });
+
+    try {
+      let result;
+
+      if (isDemo) {
+        const isCorrect = selectedAnswer === question.correct_answer;
+        const lessons = context.module.lessons || [];
+        const completedLessons = lessons.filter(
+          (lesson) => lesson.id === lessonId || lesson.progress?.completed
+        ).length;
+        const totalLessons = lessons.length;
+        const moduleCompleted = totalLessons > 0 && completedLessons === totalLessons;
+
+        result = {
+          feedback: {
+            question_id: question.id,
+            question: question.question,
+            selected_answer: selectedAnswer,
+            correct_answer: question.correct_answer,
+            is_correct: isCorrect,
+            explanation: question.explanation,
+            difficulty: question.difficulty,
+            weak_area: question.weak_area,
+          },
+          lesson: {
+            lesson_id: lessonId,
+            content_completed: true,
+            practice_completed: true,
+            completed: true,
+            status: "completed",
+            last_question_id: question.id,
+            last_answer: selectedAnswer,
+            last_is_correct: isCorrect,
+            last_weak_area: question.weak_area,
+          },
+          module: {
+            module_id: context.module.id,
+            completed_lessons: completedLessons,
+            total_lessons: totalLessons,
+            percent_complete: totalLessons
+              ? (completedLessons / totalLessons) * 100
+              : 0,
+            completed: moduleCompleted,
+          },
+        };
+      } else {
+        result = await submitLessonPracticeAttempt(studyId, lessonId, {
+          question_id: question.id,
+          answer: selectedAnswer,
+        });
+      }
+
+      const nextMaterial = mergeLessonCompletionIntoMaterial(material, result);
+      setMaterialAndLessonProgress(nextMaterial);
+      patchLessonPracticeState(lessonId, {
+        submitting: false,
+        question,
+        feedback: result.feedback || null,
+        error: "",
+      });
+
+      if (!isDemo) {
+        await refreshLessonProgress(nextMaterial);
+      }
+    } catch (err) {
+      if (isAuthError(err)) {
+        setAuthRequired(true);
+      } else {
+        console.error("Could not submit lesson practice answer", err);
+        patchLessonPracticeState(lessonId, {
+          submitting: false,
+          error: getUserFacingError(
+            err,
+            "Could not submit this lesson practice answer. Please try again."
+          ),
+        });
+      }
     }
   };
 
@@ -1112,8 +1404,13 @@ export default function StudyWorkspaceClient({ studyId }) {
         study={study}
         material={material}
         progress={progress}
+        lessonProgress={lessonProgress}
+        lessonPracticeState={lessonPracticeState}
         onResume={handleResume}
         resumeLoading={resumeLoading}
+        onCompleteLesson={handleCompleteLesson}
+        onSelectLessonPracticeAnswer={handleSelectLessonPracticeAnswer}
+        onSubmitLessonPracticeAnswer={handleSubmitLessonPracticeAnswer}
         renderTool={renderTool}
         notice={
           <>
