@@ -171,24 +171,6 @@ const progressLessonMatches = (lesson, progressLesson) =>
       (progressLesson.lesson_id === lesson?.id || progressLesson.id === lesson?.id)
   );
 
-export const getPracticeQuestionForLesson = (module, lesson) => {
-  const questions = Array.isArray(module?.practice_questions)
-    ? module.practice_questions
-    : [];
-
-  return (
-    questions.find((question) => question.lesson_id && question.lesson_id === lesson?.id) ||
-    questions.find(
-      (question) =>
-        question.source_lesson &&
-        lesson?.title &&
-        question.source_lesson.toLowerCase() === lesson.title.toLowerCase()
-    ) ||
-    questions[0] ||
-    null
-  );
-};
-
 export const buildLessonProgressFromMaterial = (material) => {
   const modules = Array.isArray(material?.modules) ? material.modules : [];
   const progressModules = modules.map((module) => {
@@ -264,65 +246,6 @@ export const mergeProgressIntoMaterial = (material, progressSnapshot) => {
               };
             })
           : module.lessons,
-      };
-    }),
-  };
-};
-
-export const mergeLessonCompletionIntoMaterial = (material, update) => {
-  const lessonProgress = update?.lesson;
-  const moduleProgress = update?.module;
-  const practiceQuestion = update?.practice_question;
-
-  if (!material || !lessonProgress?.lesson_id) return material;
-
-  return {
-    ...material,
-    modules: (material.modules || []).map((module) => {
-      const ownsLesson = (module.lessons || []).some(
-        (lesson) => lesson.id === lessonProgress.lesson_id
-      );
-      const isProgressModule = moduleProgress && progressModuleMatches(module, moduleProgress);
-
-      if (!ownsLesson && !isProgressModule) return module;
-
-      const nextQuestions = practiceQuestion
-        ? [
-            ...(module.practice_questions || []).filter(
-              (question) => question.id !== practiceQuestion.id
-            ),
-            practiceQuestion,
-          ]
-        : module.practice_questions;
-
-      return {
-        ...module,
-        progress: isProgressModule
-          ? {
-              ...getModuleProgress(module),
-              module_id: moduleProgress.module_id || module.id,
-              completed_lessons: moduleProgress.completed_lessons || 0,
-              total_lessons:
-                moduleProgress.total_lessons ||
-                (Array.isArray(module.lessons) ? module.lessons.length : 0),
-              percent_complete: moduleProgress.percent_complete || 0,
-              completed: Boolean(moduleProgress.completed),
-            }
-          : module.progress,
-        practice_questions: nextQuestions,
-        lessons: (module.lessons || []).map((lesson) =>
-          lesson.id === lessonProgress.lesson_id
-            ? {
-                ...lesson,
-                progress: {
-                  ...lessonFallbackProgress,
-                  ...lesson.progress,
-                  ...lessonProgress,
-                  lesson_id: lessonProgress.lesson_id,
-                },
-              }
-            : lesson
-        ),
       };
     }),
   };

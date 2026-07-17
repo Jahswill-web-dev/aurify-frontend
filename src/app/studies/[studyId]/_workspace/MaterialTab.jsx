@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock,
   FileText,
+  Loader2,
   RefreshCw,
 } from "lucide-react";
 import { Badge, Button, Card } from "@/components/ui";
@@ -239,6 +240,46 @@ function ReadyModuleCard({ module }) {
   );
 }
 
+function UnfinishedModuleCard({ module }) {
+  const isGenerating = module.status === "generating";
+
+  return (
+    <Card variant="default" className="p-5 sm:p-6" aria-live="polite">
+      <div className="flex items-start gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-primary/25 bg-accent-25 text-primary dark:border-primary-25/30 dark:bg-dark-surface-soft dark:text-primary-25">
+          {isGenerating ? (
+            <Loader2 className="h-5 w-5 aurify-loader-spin" aria-hidden="true" />
+          ) : (
+            <Clock className="h-5 w-5" aria-hidden="true" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-h6 font-semibold uppercase text-primary poppins-font dark:text-primary-25">
+              Module {module.module_number || "-"}
+            </p>
+            <Badge variant={isGenerating ? "accent" : "neutral"}>
+              {isGenerating ? "Generating" : "Queued"}
+            </Badge>
+          </div>
+          <h2 className="mt-1 break-words text-h3 font-semibold text-grey-200 poppins-font dark:text-dark-text">
+            {module.title || "Preparing module"}
+          </h2>
+          <p className="mt-2 text-h5 leading-7 text-p-text-darker inter-font dark:text-dark-muted">
+            {isGenerating
+              ? "Aurify is creating this module now. It will become readable as soon as this task finishes."
+              : "This module is waiting for an available generation slot."}
+          </p>
+          <div className="mt-4 grid gap-2" aria-hidden="true">
+            <div className="h-3 w-4/5 rounded-full bg-grey-25 aurify-skeleton dark:bg-dark-border" />
+            <div className="h-3 w-3/5 rounded-full bg-grey-25 aurify-skeleton dark:bg-dark-border" />
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function FailedModulesNotice({ modules, study, onResume, resumeLoading }) {
   if (!modules.length && study?.status !== "modules_failed") return null;
 
@@ -300,6 +341,14 @@ function ModuleMaterial({ material, study, onResume, resumeLoading }) {
   const modules = getSortedModules(material?.modules);
   const readyModules = modules.filter((module) => module.status === "ready");
   const failedModules = modules.filter((module) => module.status === "failed");
+  const unfinishedModules = modules.filter(
+    (module) => module.status === "pending" || module.status === "generating"
+  );
+  const visibleModules = modules.filter((module) => module.status !== "failed");
+  const generatingCount = unfinishedModules.filter(
+    (module) => module.status === "generating"
+  ).length;
+  const pendingCount = unfinishedModules.length - generatingCount;
 
   return (
     <div className="mx-auto grid max-w-[1180px] gap-5">
@@ -320,6 +369,12 @@ function ModuleMaterial({ material, study, onResume, resumeLoading }) {
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
             <Badge variant="primary">{readyModules.length} ready</Badge>
+            {generatingCount ? (
+              <Badge variant="accent">{generatingCount} generating</Badge>
+            ) : null}
+            {pendingCount ? (
+              <Badge variant="neutral">{pendingCount} queued</Badge>
+            ) : null}
             {failedModules.length ? (
               <Badge variant="error">{failedModules.length} failed</Badge>
             ) : null}
@@ -349,11 +404,21 @@ function ModuleMaterial({ material, study, onResume, resumeLoading }) {
         resumeLoading={resumeLoading}
       />
 
-      {readyModules.length ? (
+      {visibleModules.length ? (
         <div className="grid gap-5">
-          {readyModules.map((module) => (
-            <ReadyModuleCard key={module.id || module.module_number} module={module} />
-          ))}
+          {visibleModules.map((module) =>
+            module.status === "ready" ? (
+              <ReadyModuleCard
+                key={module.id || module.module_number}
+                module={module}
+              />
+            ) : (
+              <UnfinishedModuleCard
+                key={module.id || module.module_number}
+                module={module}
+              />
+            )
+          )}
         </div>
       ) : (
         <Card variant="default" className="mx-auto max-w-[720px] p-6 text-center">

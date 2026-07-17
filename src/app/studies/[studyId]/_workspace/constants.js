@@ -9,15 +9,21 @@ export const workspaceTabs = [
 export const pollingStatuses = new Set([
   "queued",
   "generating_research",
+  "research_ready",
   "generating_outline",
+  "outline_ready",
   "modules_pending",
   "generating_material",
+  "material_ready",
   "generating_glossary",
+  "glossary_ready",
   "generating_practice_questions",
+  "practice_ready",
   "generating_exam_questions",
 ]);
 
-export const materialReadyStatuses = new Set([
+export const materialAvailableStatuses = new Set([
+  "generating_material",
   "module_partial_ready",
   "material_ready",
   "generating_glossary",

@@ -15,7 +15,7 @@ Current generation flow:
 3. Worker generates and saves `research_context`.
 4. Worker generates and saves a module roadmap in `outline.sections`.
 5. Worker creates pending module records from the roadmap.
-6. Worker generates module content in batches of 2 modules per AI call.
+6. Worker generates one module per Celery task, with up to 4 module tasks running concurrently.
 7. Each generated module contains short lessons targeting about 7 minutes each and adaptive module-end practice questions.
 8. Backend assembles ready modules into backward-compatible `material.content` markdown.
 9. Study status becomes `material_ready` when all modules are ready, or `module_partial_ready` when at least one module is ready but another module failed.
@@ -36,8 +36,8 @@ Recommended frontend flow:
 4. Call `POST /api/parse-input` with the user's raw learning request.
 5. If the parser emits `clarification`, ask the user to choose an option and call `POST /api/parse-input` again with the clarification.
 6. If the parser emits `ready`, send that payload directly to `POST /studies`.
-7. Poll `GET /studies/{study_id}` until `status` becomes `exam_ready`, `module_partial_ready`, `modules_failed`, or `failed`.
-8. When `module_partial_ready`, `material_ready`, or later, call `GET /studies/{study_id}/material` and render any `material.modules[]` entries with `status: "ready"`.
+7. Poll `GET /studies/{study_id}` about every 2 seconds until `status` becomes `exam_ready`, `module_partial_ready`, `modules_failed`, or `failed`.
+8. While `status` is `generating_material`, render ready entries from `material.modules[]` immediately and keep loading placeholders for pending or generating entries.
 9. Use `GET /studies/{study_id}/progress` for lightweight lesson and module completion refreshes.
 10. When `glossary_ready` or later, call `GET /studies/{study_id}/glossary`.
 11. When `practice_ready` or later, call `GET /studies/{study_id}/practice-questions` for the latest ready practice set, or use the practice question-set endpoints.
@@ -302,7 +302,7 @@ Generation statuses:
 - `exam_ready`
 - `failed`
 
-If generation fails before module generation, `generation_error` stores the failure message. If one or more module batches fail after earlier modules succeed, the Study can become `module_partial_ready`; failed module rows expose their own `generation_error` inside `material.modules[]`.
+If generation fails before module generation, `generation_error` stores the failure message. If one or more module tasks fail after earlier modules succeed, the Study can become `module_partial_ready`; failed module rows expose their own `generation_error` inside `material.modules[]`.
 
 Example frontend request after parsing:
 
@@ -390,8 +390,8 @@ Important polling statuses:
 - `generating_outline`: module roadmap is being generated from research context.
 - `outline_ready`: outline is saved.
 - `modules_pending`: module roadmap has been saved and pending module records were created.
-- `generating_material`: module lessons and module-end practice are being generated in 2-module batches.
-- `module_partial_ready`: at least one module is ready, but one or more module batches failed. Render ready modules and offer resume.
+- `generating_material`: module lessons and module-end practice are being generated in parallel, with at most 4 one-module tasks active in a wave. `material.modules[]` may already contain ready modules that can be displayed.
+- `module_partial_ready`: at least one module is ready, but one or more module tasks failed. Render ready modules and offer resume.
 - `modules_failed`: no module content could be generated. Offer resume.
 - `material_ready`: all module content is saved and ready to display.
 - `generating_glossary`: glossary terms are being generated from saved Study assets.
@@ -661,7 +661,9 @@ Frontend rendering notes:
 - `lesson.content` is markdown intended for direct lesson rendering. It uses short paragraphs, headings, bullets, and color-coded callout labels: `🟢 Definition`, `🔵 Example`, `🟡 Remember`, and `🔴 Common mistake`.
 - The color-coded callout labels are stable display hooks. The frontend can render them as plain markdown text immediately or map them to styled callout components.
 - Simple illustrations are text-based inside `lesson.content`, such as analogies, small flows, compact tables, or ASCII-style diagrams.
-- Module `practice_questions[]` are for immediate module-end reinforcement and include answers/explanations.
+- Every newly generated lesson receives 5 to 10 `practice_questions`, chosen by the AI based on lesson depth.
+- Module `practice_questions[]` are ordered by `question_number`, linked by `lesson_id`, and include answers/explanations for immediate lesson reinforcement.
+- Existing Studies keep their saved question count until their material is regenerated.
 - Whole-study practice and exam endpoints still exist separately and should be used for full-study assessment flows.
 
 ## Lesson And Module Progress
@@ -670,9 +672,10 @@ Lesson and module progress is backend-only in this API phase. The frontend can c
 
 Progress rules:
 
-- A lesson is fully completed after the learner clicks complete and submits the lesson practice answer.
-- The submitted answer does not need to be correct for the lesson to count as completed.
+- A lesson is fully completed after the learner clicks complete and submits an answer for every assigned lesson practice question.
+- Submitted answers do not need to be correct for the lesson to count as completed.
 - Wrong answers still return the correct answer and explanation so the frontend can show immediate feedback.
+- Re-answering the same question stores another attempt but does not increase the distinct answered count.
 - A module is complete when all lessons in that module are complete.
 - Whole-study practice and exam attempts are unchanged and remain separate from lesson practice.
 
@@ -716,12 +719,12 @@ Protected. Returns lightweight derived progress for the Study:
 Lesson progress statuses:
 
 - `not_started`: user has not clicked complete for the lesson.
-- `practice_pending`: user clicked complete, but has not submitted the lesson practice answer.
-- `completed`: user submitted the lesson practice answer.
+- `practice_pending`: user clicked complete, but has not answered all lesson practice questions.
+- `completed`: user answered every lesson practice question.
 
 ### `POST /studies/{study_id}/lessons/{lesson_id}/complete`
 
-Protected. Marks lesson content as completed and returns the practice question for that lesson.
+Protected. Marks lesson content as completed and returns all practice questions for that lesson in question-number order.
 
 Response:
 
@@ -732,7 +735,9 @@ Response:
     "content_completed": true,
     "practice_completed": false,
     "completed": false,
-    "status": "practice_pending"
+    "status": "practice_pending",
+    "practice_score": null,
+    "practice_score_label": null
   },
   "module": {
     "module_id": "module-id",
@@ -741,8 +746,21 @@ Response:
     "percent_complete": 0,
     "completed": false
   },
+  "practice_questions": [
+    {
+      "id": "module-question-id-1",
+      "lesson_id": "lesson-id",
+      "question": "Which option is correct?",
+      "options": ["A", "B", "C", "D"],
+      "correct_answer": "A",
+      "explanation": "A is correct because...",
+      "difficulty": "easy",
+      "weak_area": "concept area",
+      "source_lesson": "Lesson title"
+    }
+  ],
   "practice_question": {
-    "id": "module-question-id",
+    "id": "module-question-id-1",
     "lesson_id": "lesson-id",
     "question": "Which option is correct?",
     "options": ["A", "B", "C", "D"],
@@ -751,15 +769,26 @@ Response:
     "difficulty": "easy",
     "weak_area": "concept area",
     "source_lesson": "Lesson title"
+  },
+  "practice_progress": {
+    "answered_count": 0,
+    "correct_count": 0,
+    "total_questions": 5,
+    "remaining_count": 5,
+    "score": 0.0,
+    "score_label": "Very weak",
+    "completed": false
   }
 }
 ```
 
-The endpoint returns `404` if the lesson is not owned by the current user through the Study, or if no lesson practice question can be matched. Existing generated studies can still match questions by `source_lesson` when `lesson_id` is missing.
+`practice_question` remains temporarily available as a compatibility alias containing the same first question as `practice_questions[0]`. New frontend code should use `practice_questions`.
+
+The endpoint returns `404` if the lesson is not owned by the current user through the Study, or if no lesson practice questions can be matched. Existing generated studies can still match questions by `source_lesson` when `lesson_id` is missing.
 
 ### `POST /studies/{study_id}/lessons/{lesson_id}/practice-attempt`
 
-Protected. Submits one answer for the lesson practice question, grades it, stores the latest result, and marks the lesson fully completed.
+Protected. Submits one answer, stores a per-question attempt, returns immediate feedback, and identifies the next unanswered question. The lesson becomes complete only after every distinct lesson question has been answered.
 
 Request:
 
@@ -787,37 +816,159 @@ Wrong-answer response:
   "lesson": {
     "lesson_id": "lesson-id",
     "content_completed": true,
-    "practice_completed": true,
-    "completed": true,
-    "status": "completed",
-    "last_is_correct": false
+    "practice_completed": false,
+    "completed": false,
+    "status": "practice_pending",
+    "last_is_correct": false,
+    "practice_score": null,
+    "practice_score_label": null
   },
   "module": {
     "module_id": "module-id",
-    "completed_lessons": 1,
+    "completed_lessons": 0,
     "total_lessons": 3,
-    "percent_complete": 33.33,
+    "percent_complete": 0,
     "completed": false
   },
   "study_progress": {
     "study_id": "study-id",
-    "completed_lessons": 1,
+    "completed_lessons": 0,
     "total_lessons": 3,
-    "percent_complete": 33.33
+    "percent_complete": 0
+  },
+  "practice_progress": {
+    "answered_count": 1,
+    "correct_count": 0,
+    "total_questions": 5,
+    "remaining_count": 4,
+    "score": 0.0,
+    "score_label": "Very weak",
+    "completed": false
+  },
+  "next_question": {
+    "id": "module-question-id-2",
+    "lesson_id": "lesson-id",
+    "question": "What should the learner identify next?",
+    "options": ["A", "B", "C", "D"]
   }
 }
 ```
+
+`next_question` is `null` after the final distinct question is answered. `score` is the percentage of total lesson questions currently correct, so unanswered questions count against the live score. Submitting the same question again updates its contribution without increasing `answered_count`.
+
+When the final distinct question is answered, the backend stores `practice_score` and `practice_score_label` on lesson progress as a first-completion snapshot. Later retries are still stored in `study_lesson_question_attempts`, but they do not change the stored lesson score/tag.
+
+If the learner completes a lesson with one or more latest answers incorrect, the backend creates a lesson revision practice set and queues targeted AI question generation. These revision questions are separate from original lesson-completion questions and do not change the frozen lesson score/tag.
+
+Lesson practice score labels are:
+
+- `0-39`: `Very weak`
+- `40-59`: `Weak`
+- `60-74`: `Developing`
+- `75-89`: `Good`
+- `90-100`: `Strong`
+
+Older completed lessons may have `null` stored score/tag values if they were completed before this field existed and have no usable per-question attempt history.
 
 Errors:
 
 - `400`: submitted question does not belong to the lesson.
 - `404`: Study, lesson, or lesson practice question was not found for the current user.
 
+### `GET /studies/{study_id}/lessons/{lesson_id}/revision-practice`
+
+Protected. Returns the current weak-area revision question set for a lesson. Revision practice is generated from lesson mistakes: the lesson content, the question the learner answered incorrectly, their selected answer, the correct answer, the original explanation, and weak area.
+
+Response:
+
+```json
+{
+  "id": "revision-set-id",
+  "study_id": "study-id",
+  "module_id": "module-id",
+  "lesson_id": "lesson-id",
+  "status": "ready",
+  "source_attempt_count": 5,
+  "source_incorrect_question_count": 2,
+  "generated_question_count": 6,
+  "generation_error": null,
+  "questions": [
+    {
+      "id": "revision-question-id",
+      "lesson_id": "lesson-id",
+      "original_question_id": "module-question-id",
+      "weak_area": "classes",
+      "question": "Which option best describes how a class relates to objects?",
+      "options": ["Blueprint", "Loop", "Comment", "Package"],
+      "correct_answer": "Blueprint",
+      "explanation": "A class is like a blueprint because objects are created from it.",
+      "difficulty": "easy",
+      "question_number": 1
+    }
+  ],
+  "revision_progress": {
+    "answered_count": 0,
+    "correct_count": 0,
+    "total_questions": 6,
+    "remaining_count": 6,
+    "score": 0.0,
+    "completed": false
+  }
+}
+```
+
+`status` can be `not_started`, `queued`, `generating`, `ready`, or `failed`. A lesson can have no revision set when it was completed with all answers correct, has not completed practice yet, or belongs to an older Study.
+
+### `POST /studies/{study_id}/lessons/{lesson_id}/revision-practice/generate`
+
+Protected. Manually queues weak-area revision generation for a lesson. This is mainly a recovery endpoint when automatic generation failed or was skipped. If the latest completed lesson attempts have no incorrect answers, the response is `not_started` with no questions.
+
+### `POST /studies/{study_id}/lessons/{lesson_id}/revision-practice-attempt`
+
+Protected. Submits one answer to a generated revision question and returns immediate feedback plus updated revision progress.
+
+Request:
+
+```json
+{
+  "question_id": "revision-question-id",
+  "answer": "selected option text"
+}
+```
+
+Response:
+
+```json
+{
+  "feedback": {
+    "question_id": "revision-question-id",
+    "question": "Which option best describes how a class relates to objects?",
+    "selected_answer": "Loop",
+    "correct_answer": "Blueprint",
+    "is_correct": false,
+    "explanation": "A class is like a blueprint because objects are created from it.",
+    "difficulty": "easy",
+    "weak_area": "classes",
+    "original_question_id": "module-question-id"
+  },
+  "revision_progress": {
+    "answered_count": 1,
+    "correct_count": 0,
+    "total_questions": 6,
+    "remaining_count": 5,
+    "score": 0.0,
+    "completed": false
+  }
+}
+```
+
+Revision attempts are stored separately from lesson-completion attempts. They are remediation history and do not update `practice_score`, `practice_score_label`, `practice_completed_at`, or `completed_at`.
+
 ### `POST /studies/{study_id}/material/generate`
 
 Protected. Queues material generation for an existing Study using its saved `research_context` and `outline`.
 
-Material generation does not use live search. The worker creates pending module records from the saved roadmap, generates module lesson/practice content in batches of 2 modules per AI call, saves each generated module separately, then rebuilds `StudyMaterial.content` from the ready modules.
+Material generation does not use live search. The worker creates the material shell and pending module records from the saved roadmap, then generates one module per Celery task in waves of at most 4 concurrent tasks. Each completed module is committed separately and becomes visible in `material.modules[]` while the remaining modules continue. The worker rebuilds backward-compatible `StudyMaterial.content` after each wave.
 
 Response status is immediately set to `generating_material`; after material is saved, the worker continues into glossary, practice question set, and exam question set generation and finishes at `exam_ready`.
 

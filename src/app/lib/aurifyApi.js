@@ -170,6 +170,25 @@ export const submitLessonPracticeAttempt = (studyId, lessonId, payload) =>
     method: "POST",
     body: JSON.stringify(payload),
   });
+export const getLessonRevisionPractice = (studyId, lessonId) =>
+  apiRequest(`/studies/${studyId}/lessons/${lessonId}/revision-practice`);
+export const generateLessonRevisionPractice = (studyId, lessonId) =>
+  apiRequest(
+    `/studies/${studyId}/lessons/${lessonId}/revision-practice/generate`,
+    { method: "POST" }
+  );
+export const submitLessonRevisionPracticeAttempt = (
+  studyId,
+  lessonId,
+  payload
+) =>
+  apiRequest(
+    `/studies/${studyId}/lessons/${lessonId}/revision-practice-attempt`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
 export const getStudyGlossary = (studyId) =>
   apiRequest(`/studies/${studyId}/glossary`);
 export const getPracticeQuestions = (studyId) =>

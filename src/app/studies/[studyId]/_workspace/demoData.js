@@ -108,6 +108,7 @@ export const demoMaterial = {
         {
           id: "demo-module-question-1",
           lesson_id: "demo-lesson-1",
+          question_number: 1,
           question: "What does a limit mainly describe?",
           options: [
             "The value a function approaches",
@@ -123,8 +124,57 @@ export const demoMaterial = {
           source_lesson: "The Big Idea",
         },
         {
+          id: "demo-module-question-1-2",
+          lesson_id: "demo-lesson-1",
+          question_number: 2,
+          question: "A function approaches 6 near x = 3, but f(3) = 10. What is the limit?",
+          options: ["6", "10", "3", "It must be undefined"],
+          correct_answer: "6",
+          explanation: "The limit follows the value the function approaches, not necessarily its value at the target.",
+          difficulty: "medium",
+          weak_area: "function value versus limit",
+          source_lesson: "The Big Idea",
+        },
+        {
+          id: "demo-module-question-1-3",
+          lesson_id: "demo-lesson-1",
+          question_number: 3,
+          question: "Which observation is most useful when estimating a limit from a graph?",
+          options: ["Where the graph approaches from nearby points", "The graph colour", "Only the point at x = a", "The title of the axis"],
+          correct_answer: "Where the graph approaches from nearby points",
+          explanation: "Nearby behavior on both sides reveals the approached output.",
+          difficulty: "medium",
+          weak_area: "graph interpretation",
+          source_lesson: "The Big Idea",
+        },
+        {
+          id: "demo-module-question-1-4",
+          lesson_id: "demo-lesson-1",
+          question_number: 4,
+          question: "What misconception can cause someone to misread a limit?",
+          options: ["Assuming the limit must equal f(a)", "Checking nearby inputs", "Comparing both sides", "Reading the axes"],
+          correct_answer: "Assuming the limit must equal f(a)",
+          explanation: "A limit concerns approaching behavior and can differ from the defined function value.",
+          difficulty: "medium",
+          weak_area: "limit definition",
+          source_lesson: "The Big Idea",
+        },
+        {
+          id: "demo-module-question-1-5",
+          lesson_id: "demo-lesson-1",
+          question_number: 5,
+          question: "If values from both sides approach different outputs, what follows?",
+          options: ["The two-sided limit does not exist", "Use the larger output", "Use f(a)", "Average both outputs"],
+          correct_answer: "The two-sided limit does not exist",
+          explanation: "A two-sided limit requires the left and right approaches to agree.",
+          difficulty: "medium",
+          weak_area: "two-sided behavior",
+          source_lesson: "The Big Idea",
+        },
+        {
           id: "demo-module-question-1b",
           lesson_id: "demo-lesson-2",
+          question_number: 1,
           question: "What does the arrow in limit notation tell you?",
           options: [
             "Where x is moving",
@@ -257,7 +307,7 @@ export const demoMaterial = {
       status: "failed",
       estimated_minutes: 21,
       generation_error:
-        "Demo failure: the worker timed out while generating this module batch.",
+        "Demo failure: the worker timed out while generating this module task.",
       key_concepts: ["left-hand limit", "right-hand limit", "vertical asymptote"],
       dependencies: ["What Limits Measure", "Evaluating Limits"],
       coverage_notes:
@@ -442,6 +492,64 @@ export const demoExamQuestions = [
     source_section: "One-Sided And Infinite Limits",
   },
 ];
+
+export const demoRevisionSetsByLesson = {
+  "demo-lesson-1": {
+    id: "demo-revision-set-1",
+    study_id: "demo",
+    module_id: "demo-module-1",
+    lesson_id: "demo-lesson-1",
+    status: "ready",
+    source_attempt_count: 5,
+    source_incorrect_question_count: 1,
+    generated_question_count: 2,
+    generation_error: null,
+    questions: [
+      {
+        id: "demo-revision-question-1",
+        lesson_id: "demo-lesson-1",
+        original_question_id: "demo-module-question-1-2",
+        weak_area: "function value versus limit",
+        question: "A graph approaches 4 near x = 1 while f(1) = 9. Which value describes the limit?",
+        options: ["4", "9", "1", "The average of 4 and 9"],
+        correct_answer: "4",
+        explanation: "The approached value is 4 even though the function is defined as 9 at the target.",
+        difficulty: "medium",
+        question_number: 1,
+      },
+      {
+        id: "demo-revision-question-2",
+        lesson_id: "demo-lesson-1",
+        original_question_id: "demo-module-question-1-2",
+        weak_area: "function value versus limit",
+        question: "Which evidence should take priority when reading a limit from a graph?",
+        options: ["Nearby approaching behavior", "The filled point only", "The axis colour", "The graph title"],
+        correct_answer: "Nearby approaching behavior",
+        explanation: "Limits are determined by nearby behavior rather than only the filled point.",
+        difficulty: "medium",
+        question_number: 2,
+      },
+    ],
+    revision_progress: {
+      answered_count: 0,
+      correct_count: 0,
+      total_questions: 2,
+      remaining_count: 2,
+      score: 0,
+      completed: false,
+    },
+  },
+};
+
+export const demoRevisionStateFixtures = {
+  queued: { status: "queued", questions: [] },
+  generating: { status: "generating", questions: [] },
+  failed: { status: "failed", generation_error: "Demo revision generation failure", questions: [] },
+  empty: { status: "not_started", questions: [] },
+  legacySingleQuestion: {
+    practice_question: demoMaterial.modules[0].practice_questions[0],
+  },
+};
 
 export const createDemoQuestionSet = (mode, index, count) => ({
   id: `demo-${mode}-set-${Date.now()}`,

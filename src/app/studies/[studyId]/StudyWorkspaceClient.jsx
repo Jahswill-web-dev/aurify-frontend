@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle } from "lucide-react";
 import AuthRequiredState from "@/components/auth/AuthRequiredState";
 import {
-  completeLesson,
   generateExamQuestionSet,
   generatePracticeQuestionSet,
   getExamQuestions,
@@ -23,14 +22,13 @@ import {
   regenerateStudyGlossary,
   resumeStudyGeneration,
   submitExamAttempt,
-  submitLessonPracticeAttempt,
   submitPracticeAttempt,
 } from "@/app/lib/aurifyApi";
 import { AnalyticsTab } from "./_workspace/AnalyticsTab";
 import {
   glossaryReadyStatuses,
   latestSetId,
-  materialReadyStatuses,
+  materialAvailableStatuses,
   pollingStatuses,
   practiceReadyStatuses,
   workspaceTabs,
@@ -41,11 +39,9 @@ import { GlossaryTab } from "./_workspace/GlossaryTab";
 import {
   buildLessonProgressFromMaterial,
   clampQuestionCount,
-  getPracticeQuestionForLesson,
   getProgressValue,
   getReadySets,
   hasGeneratingSet,
-  mergeLessonCompletionIntoMaterial,
   mergeProgressIntoMaterial,
   normalizeList,
 } from "./_workspace/helpers";
@@ -62,6 +58,8 @@ import {
   demoStudy,
   isDemoStudyId,
 } from "./_workspace/demoData";
+import { useLessonPractice } from "./_workspace/practice/useLessonPractice";
+import { useRevisionCheckpoints } from "./_workspace/practice/useRevisionCheckpoints";
 
 export default function StudyWorkspaceClient({ studyId }) {
   const isDemo = isDemoStudyId(studyId);
@@ -69,7 +67,6 @@ export default function StudyWorkspaceClient({ studyId }) {
   const [study, setStudy] = useState(null);
   const [material, setMaterial] = useState(null);
   const [lessonProgress, setLessonProgress] = useState(null);
-  const [lessonPracticeState, setLessonPracticeState] = useState({});
   const [glossary, setGlossary] = useState(null);
   const [glossaryLoading, setGlossaryLoading] = useState(false);
   const [glossaryError, setGlossaryError] = useState("");
@@ -169,6 +166,36 @@ export default function StudyWorkspaceClient({ studyId }) {
     },
     [isDemo, setMaterialAndLessonProgress, studyId]
   );
+
+  const {
+    lessonPracticeState,
+    completeLesson: handleCompleteLesson,
+    selectAnswer: handleSelectLessonPracticeAnswer,
+    submitAnswer: handleSubmitLessonPracticeAnswer,
+    advanceQuestion: handleAdvanceLessonPracticeQuestion,
+  } = useLessonPractice({
+    studyId,
+    material,
+    isDemo,
+    setMaterialAndLessonProgress,
+    refreshLessonProgress,
+    onAuthRequired: () => setAuthRequired(true),
+  });
+
+  const {
+    revisionCheckpoints,
+    isModuleLocked,
+    selectRevisionAnswer,
+    submitRevisionAnswer,
+    advanceRevisionQuestion,
+    retryCheckpoint,
+    skipCheckpoint,
+  } = useRevisionCheckpoints({
+    studyId,
+    modules: material?.modules || [],
+    isDemo,
+    onAuthRequired: () => setAuthRequired(true),
+  });
 
   const loadGlossary = useCallback(async () => {
     if (isDemo) {
@@ -381,15 +408,16 @@ export default function StudyWorkspaceClient({ studyId }) {
         const nextStudy = await getStudy(studyId);
         setStudy(nextStudy);
 
-        if (materialReadyStatuses.has(nextStudy.status)) {
+        if (materialAvailableStatuses.has(nextStudy.status)) {
           try {
             const nextMaterial = await getStudyMaterial(studyId);
             setMaterialAndLessonProgress(nextMaterial);
             await refreshLessonProgress(nextMaterial);
           } catch (err) {
             if (err.status !== 404) throw err;
-            setMaterial(null);
-            setLessonProgress(null);
+            // The material shell and module rows can briefly lag behind the
+            // Study status. Preserve anything already rendered until the next
+            // poll instead of flashing completed modules away.
           }
         } else {
           setMaterial(null);
@@ -454,11 +482,23 @@ export default function StudyWorkspaceClient({ studyId }) {
   useEffect(() => {
     if (!shouldPoll) return undefined;
 
-    const interval = window.setInterval(() => {
-      loadStudy();
-    }, 4000);
+    let cancelled = false;
+    let timeoutId;
 
-    return () => window.clearInterval(interval);
+    const poll = async () => {
+      await loadStudy();
+
+      if (!cancelled) {
+        timeoutId = window.setTimeout(poll, 2000);
+      }
+    };
+
+    timeoutId = window.setTimeout(poll, 2000);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
   }, [loadStudy, shouldPoll]);
 
   useEffect(() => {
@@ -641,202 +681,6 @@ export default function StudyWorkspaceClient({ studyId }) {
       }
     } finally {
       setGlossaryRegenerating(false);
-    }
-  };
-
-  const findLessonContext = useCallback(
-    (lessonId) => {
-      const modules = Array.isArray(material?.modules) ? material.modules : [];
-
-      for (const studyModule of modules) {
-        const lesson = (studyModule.lessons || []).find(
-          (item) => item.id === lessonId
-        );
-        if (lesson) return { module: studyModule, lesson };
-      }
-
-      return null;
-    },
-    [material]
-  );
-
-  const patchLessonPracticeState = (lessonId, patch) => {
-    setLessonPracticeState((current) => ({
-      ...current,
-      [lessonId]: {
-        ...(current[lessonId] || {}),
-        ...patch,
-      },
-    }));
-  };
-
-  const handleCompleteLesson = async (lessonId) => {
-    const context = findLessonContext(lessonId);
-    if (!context) return;
-
-    patchLessonPracticeState(lessonId, {
-      completing: true,
-      error: "",
-      feedback: null,
-    });
-
-    try {
-      let result;
-
-      if (isDemo) {
-        const question = getPracticeQuestionForLesson(context.module, context.lesson);
-        const totalLessons = context.module.lessons?.length || 0;
-        const completedLessons = (context.module.lessons || []).filter(
-          (lesson) => lesson.id !== lessonId && lesson.progress?.completed
-        ).length;
-
-        result = {
-          lesson: {
-            lesson_id: lessonId,
-            content_completed: true,
-            practice_completed: false,
-            completed: false,
-            status: "practice_pending",
-          },
-          module: {
-            module_id: context.module.id,
-            completed_lessons: completedLessons,
-            total_lessons: totalLessons,
-            percent_complete: totalLessons
-              ? (completedLessons / totalLessons) * 100
-              : 0,
-            completed: false,
-          },
-          practice_question: question
-            ? { ...question, lesson_id: question.lesson_id || lessonId }
-            : null,
-        };
-      } else {
-        result = await completeLesson(studyId, lessonId);
-      }
-
-      const nextMaterial = mergeLessonCompletionIntoMaterial(material, result);
-      setMaterialAndLessonProgress(nextMaterial);
-      patchLessonPracticeState(lessonId, {
-        completing: false,
-        question: result.practice_question || null,
-        selectedAnswer: "",
-        feedback: null,
-        error: "",
-      });
-    } catch (err) {
-      if (isAuthError(err)) {
-        setAuthRequired(true);
-      } else {
-        console.error("Could not complete lesson", err);
-        patchLessonPracticeState(lessonId, {
-          completing: false,
-          error: getUserFacingError(
-            err,
-            "Could not complete this lesson. Please try again."
-          ),
-        });
-      }
-    }
-  };
-
-  const handleSelectLessonPracticeAnswer = (lessonId, answer) => {
-    patchLessonPracticeState(lessonId, {
-      selectedAnswer: answer,
-      error: "",
-    });
-  };
-
-  const handleSubmitLessonPracticeAnswer = async (lessonId) => {
-    const context = findLessonContext(lessonId);
-    const state = lessonPracticeState[lessonId] || {};
-    const question =
-      state.question || getPracticeQuestionForLesson(context?.module, context?.lesson);
-    const selectedAnswer = state.selectedAnswer;
-
-    if (!context || !question?.id || !selectedAnswer) return;
-
-    patchLessonPracticeState(lessonId, {
-      submitting: true,
-      error: "",
-    });
-
-    try {
-      let result;
-
-      if (isDemo) {
-        const isCorrect = selectedAnswer === question.correct_answer;
-        const lessons = context.module.lessons || [];
-        const completedLessons = lessons.filter(
-          (lesson) => lesson.id === lessonId || lesson.progress?.completed
-        ).length;
-        const totalLessons = lessons.length;
-        const moduleCompleted = totalLessons > 0 && completedLessons === totalLessons;
-
-        result = {
-          feedback: {
-            question_id: question.id,
-            question: question.question,
-            selected_answer: selectedAnswer,
-            correct_answer: question.correct_answer,
-            is_correct: isCorrect,
-            explanation: question.explanation,
-            difficulty: question.difficulty,
-            weak_area: question.weak_area,
-          },
-          lesson: {
-            lesson_id: lessonId,
-            content_completed: true,
-            practice_completed: true,
-            completed: true,
-            status: "completed",
-            last_question_id: question.id,
-            last_answer: selectedAnswer,
-            last_is_correct: isCorrect,
-            last_weak_area: question.weak_area,
-          },
-          module: {
-            module_id: context.module.id,
-            completed_lessons: completedLessons,
-            total_lessons: totalLessons,
-            percent_complete: totalLessons
-              ? (completedLessons / totalLessons) * 100
-              : 0,
-            completed: moduleCompleted,
-          },
-        };
-      } else {
-        result = await submitLessonPracticeAttempt(studyId, lessonId, {
-          question_id: question.id,
-          answer: selectedAnswer,
-        });
-      }
-
-      const nextMaterial = mergeLessonCompletionIntoMaterial(material, result);
-      setMaterialAndLessonProgress(nextMaterial);
-      patchLessonPracticeState(lessonId, {
-        submitting: false,
-        question,
-        feedback: result.feedback || null,
-        error: "",
-      });
-
-      if (!isDemo) {
-        await refreshLessonProgress(nextMaterial);
-      }
-    } catch (err) {
-      if (isAuthError(err)) {
-        setAuthRequired(true);
-      } else {
-        console.error("Could not submit lesson practice answer", err);
-        patchLessonPracticeState(lessonId, {
-          submitting: false,
-          error: getUserFacingError(
-            err,
-            "Could not submit this lesson practice answer. Please try again."
-          ),
-        });
-      }
     }
   };
 
@@ -1406,11 +1250,19 @@ export default function StudyWorkspaceClient({ studyId }) {
         progress={progress}
         lessonProgress={lessonProgress}
         lessonPracticeState={lessonPracticeState}
+        revisionCheckpoints={revisionCheckpoints}
+        isModuleLocked={isModuleLocked}
         onResume={handleResume}
         resumeLoading={resumeLoading}
         onCompleteLesson={handleCompleteLesson}
         onSelectLessonPracticeAnswer={handleSelectLessonPracticeAnswer}
         onSubmitLessonPracticeAnswer={handleSubmitLessonPracticeAnswer}
+        onAdvanceLessonPracticeQuestion={handleAdvanceLessonPracticeQuestion}
+        onSelectRevisionAnswer={selectRevisionAnswer}
+        onSubmitRevisionAnswer={submitRevisionAnswer}
+        onAdvanceRevisionQuestion={advanceRevisionQuestion}
+        onRetryRevisionCheckpoint={retryCheckpoint}
+        onSkipRevisionCheckpoint={skipCheckpoint}
         renderTool={renderTool}
         notice={
           <>

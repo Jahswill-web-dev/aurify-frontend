@@ -115,7 +115,7 @@ export function GenerationNotice({ study, polling, onResume, resumeLoading }) {
       ? "Some modules need attention"
       : "Generation stopped";
     const message = isPartial
-      ? "Aurify saved the modules that finished successfully. Resume generation to retry the unfinished module batch."
+      ? "Aurify saved the modules that finished successfully. Resume generation to retry the unfinished module tasks."
       : study.generation_error || getGenerationFailureMessage(study);
 
     return (
