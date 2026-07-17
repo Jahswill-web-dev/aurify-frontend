@@ -923,6 +923,14 @@ Response:
 
 Protected. Manually queues weak-area revision generation for a lesson. This is mainly a recovery endpoint when automatic generation failed or was skipped. If the latest completed lesson attempts have no incorrect answers, the response is `not_started` with no questions.
 
+### `POST /studies/{study_id}/lessons/{lesson_id}/revision-practice/retry`
+
+Protected. Retries failed lesson revision generation. A `queued` or `generating` set can be retried after it has been unchanged for five minutes; the stale set is marked `failed` and a new set is queued. A recent active set returns `409`, and an already-ready set is returned unchanged.
+
+Revision question-set responses include `retry_count`. Celery Beat checks revision sets every minute. Sets that remain `queued`, `generating`, or retryable `failed` for five minutes are replaced automatically, up to three automatic retries. After the third automatic retry becomes stale or fails, the latest set remains `failed` so the frontend can offer the dedicated manual retry action.
+
+Revision generation and watchdog tasks use the dedicated `revision` Celery queue. A worker intended to process revisions must listen to both queues, for example `-Q celery,revision`.
+
 ### `POST /studies/{study_id}/lessons/{lesson_id}/revision-practice-attempt`
 
 Protected. Submits one answer to a generated revision question and returns immediate feedback plus updated revision progress.

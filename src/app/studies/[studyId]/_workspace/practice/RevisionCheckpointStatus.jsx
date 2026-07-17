@@ -37,8 +37,15 @@ export function RevisionCheckpointStatus({ checkpoint, onRetry, onSkip }) {
           <div>
             <p className="text-h4 font-semibold poppins-font">Revision generation stopped</p>
             <p className="mt-1 text-h5 leading-7 inter-font">
-              Retry the failed lesson revision before continuing.
+              {checkpoint.automaticRetriesExhausted
+                ? "Automatic recovery reached its limit. Retry this lesson revision manually before continuing."
+                : "Retry the failed lesson revision before continuing."}
             </p>
+            {checkpoint.retryCount ? (
+              <p className="mt-2 text-h6 leading-5 inter-font">
+                Automatic retries: {Math.min(checkpoint.retryCount, 3)} of 3
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">

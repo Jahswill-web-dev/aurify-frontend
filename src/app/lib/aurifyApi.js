@@ -177,6 +177,11 @@ export const generateLessonRevisionPractice = (studyId, lessonId) =>
     `/studies/${studyId}/lessons/${lessonId}/revision-practice/generate`,
     { method: "POST" }
   );
+export const retryLessonRevisionPractice = (studyId, lessonId) =>
+  apiRequest(
+    `/studies/${studyId}/lessons/${lessonId}/revision-practice/retry`,
+    { method: "POST" }
+  );
 export const submitLessonRevisionPracticeAttempt = (
   studyId,
   lessonId,

@@ -503,6 +503,7 @@ export const demoRevisionSetsByLesson = {
     source_attempt_count: 5,
     source_incorrect_question_count: 1,
     generated_question_count: 2,
+    retry_count: 0,
     generation_error: null,
     questions: [
       {
@@ -542,10 +543,10 @@ export const demoRevisionSetsByLesson = {
 };
 
 export const demoRevisionStateFixtures = {
-  queued: { status: "queued", questions: [] },
-  generating: { status: "generating", questions: [] },
-  failed: { status: "failed", generation_error: "Demo revision generation failure", questions: [] },
-  empty: { status: "not_started", questions: [] },
+  queued: { status: "queued", retry_count: 0, questions: [] },
+  generating: { status: "generating", retry_count: 1, questions: [] },
+  failed: { status: "failed", retry_count: 3, generation_error: "Demo revision generation failure", questions: [] },
+  empty: { status: "not_started", retry_count: 0, questions: [] },
   legacySingleQuestion: {
     practice_question: demoMaterial.modules[0].practice_questions[0],
   },

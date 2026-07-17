@@ -60,6 +60,13 @@ export const combineRevisionSets = (checkpoint, setsByLesson = {}) => {
   const isGenerating = entries.some(({ set }) =>
     ["queued", "generating"].includes(set?.status)
   );
+  const retryCount = entries.reduce(
+    (highest, { set }) => Math.max(highest, Number(set?.retry_count || 0)),
+    0
+  );
+  const automaticRetriesExhausted = entries.some(
+    ({ set }) => set?.status === "failed" && Number(set?.retry_count || 0) >= 3
+  );
   const completed =
     loaded &&
     !hasFailed &&
@@ -74,6 +81,8 @@ export const combineRevisionSets = (checkpoint, setsByLesson = {}) => {
     questions,
     hasFailed,
     isGenerating,
+    retryCount,
+    automaticRetriesExhausted,
     empty: loaded && !hasFailed && !isGenerating && questions.length === 0,
     completed,
     answeredCount: entries.reduce(

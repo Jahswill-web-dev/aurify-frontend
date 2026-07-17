@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  generateLessonRevisionPractice,
   getLessonRevisionPractice,
   getUserFacingError,
   isAuthError,
+  retryLessonRevisionPractice,
   submitLessonRevisionPracticeAttempt,
 } from "@/app/lib/aurifyApi";
 import { demoRevisionSetsByLesson } from "../demoData";
@@ -23,6 +23,7 @@ const emptyRevisionSet = (lessonId) => ({
   id: `empty-${lessonId}`,
   lesson_id: lessonId,
   status: "not_started",
+  retry_count: 0,
   questions: [],
   revision_progress: {
     answered_count: 0,
@@ -94,21 +95,40 @@ export function useRevisionCheckpoints({
           })
         );
         const setsByLesson = Object.fromEntries(entries);
-        setCheckpointStates((current) => ({
-          ...current,
-          [checkpoint.id]: {
-            ...(current[checkpoint.id] || {}),
-            loading: false,
-            retrying: false,
-            hasLoaded: true,
-            setsByLesson,
-            answeredQuestionIds: getInitiallyAnsweredIds(checkpoint, setsByLesson),
-            currentQuestionId: "",
-            selectedAnswer: "",
-            feedback: null,
-            error: "",
-          },
-        }));
+        const refreshedQuestionIds = new Set(
+          entries.flatMap(([, set]) => (set?.questions || []).map((question) => question.id))
+        );
+        setCheckpointStates((current) => {
+          const currentState = current[checkpoint.id] || {};
+          const initialAnsweredIds = getInitiallyAnsweredIds(checkpoint, setsByLesson);
+          const preservedAnsweredIds = (currentState.answeredQuestionIds || []).filter(
+            (questionId) => refreshedQuestionIds.has(questionId)
+          );
+          const answeredQuestionIds = Array.from(
+            new Set([...initialAnsweredIds, ...preservedAnsweredIds])
+          );
+          const currentQuestionId = refreshedQuestionIds.has(
+            currentState.currentQuestionId
+          )
+            ? currentState.currentQuestionId
+            : "";
+
+          return {
+            ...current,
+            [checkpoint.id]: {
+              ...currentState,
+              loading: false,
+              retrying: false,
+              hasLoaded: true,
+              setsByLesson,
+              answeredQuestionIds,
+              currentQuestionId,
+              selectedAnswer: currentQuestionId ? currentState.selectedAnswer || "" : "",
+              feedback: currentQuestionId ? currentState.feedback || null : null,
+              error: "",
+            },
+          };
+        });
       } catch (error) {
         if (isAuthError(error)) onAuthRequired?.();
         setCheckpointStates((current) => ({
@@ -332,13 +352,28 @@ export function useRevisionCheckpoints({
         if (!isDemo) {
           await Promise.all(
             failedLessonIds.map((lessonId) =>
-              generateLessonRevisionPractice(studyId, lessonId)
+              retryLessonRevisionPractice(studyId, lessonId)
             )
           );
         }
         await loadCheckpoint(checkpoint, { force: true });
       } catch (error) {
         if (isAuthError(error)) onAuthRequired?.();
+
+        if (error?.status === 409) {
+          setCheckpointStates((current) => ({
+            ...current,
+            [checkpointId]: {
+              ...(current[checkpointId] || {}),
+              retrying: false,
+              retryAttempted: false,
+              error: "",
+            },
+          }));
+          await loadCheckpoint(checkpoint, { force: true });
+          return;
+        }
+
         setCheckpointStates((current) => ({
           ...current,
           [checkpointId]: {
